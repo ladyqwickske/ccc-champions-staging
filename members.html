@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cCc Champions - Members</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
+  <script src="config.js"></script>
+  <script src="portal-shim.js"></script>
+  <script src="portal-auth.js"></script>
+  <script>
+  // Helper: Parse date string as UTC with proper timezone handling
+  function parseDateUTC(str) {
+    if (!str) return null;
+    if (str instanceof Date) return str;
+    const strTrim = String(str).trim();
+    if (!strTrim) return null;
+    // ISO 8601 with Z (with or without milliseconds)
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(strTrim)) {
+      const d = new Date(strTrim);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    // YYYY-MM-DD (treat as UTC start of day)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(strTrim)) {
+      const d = new Date(strTrim + 'T00:00:00Z');
+      return isNaN(d.getTime()) ? null : d;
+    }
+    // M/D/YYYY or MM/DD/YYYY (treat as UTC)
+    const mdy = strTrim.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (mdy) {
+      const month = parseInt(mdy[1], 10) - 1;
+      const day = parseInt(mdy[2], 10);
+      const year = parseInt(mdy[3], 10);
+      const d = new Date(Date.UTC(year, month, day, 0, 0, 0));
+      return isNaN(d.getTime()) ? null : d;
+    }
+    // Fallback: try direct parsing (append Z only if not already present)
+    const fallback = strTrim.endsWith('Z') ? strTrim : strTrim + 'Z';
+    const d = new Date(fallback);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Helper: Get today's date at midnight UTC (YYYY-MM-DD format)
+  function getTodayUTCString() {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      color: #f3f3f3;
+      text-align: center;
+      padding: 32px 16px 60px 16px;
+      min-height: 100vh;
+      background-attachment: fixed;
+    }
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    .goog-te-balloon-frame { display: none !important; }
+    html, body { margin-top: 0 !important; top: 0 !important; }
+    body.translated-ltr, body.translated-rtl { margin-top: 0 !important; top: 0 !important; }
+    .goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; height: 0 !important; }
+    #goog-gt-tt, .goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
+    .goog-text-highlight { background: transparent !important; box-shadow: none !important; }
+    #google_translate_element, #translateToggleBtn { top: auto !important; right: 8px !important; bottom: 8px !important; }
+
+    /* Top Tabs */
+    .tab-nav {
+      background: rgba(30, 34, 40, 0.95);
+      border-bottom: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      position: sticky; top: 0; z-index: 1000;
+    }
+    .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand img { height: 32px; width: auto; }
+    .tab-buttons {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-items: center;
+      height: 100px;
+    }
+    .tab-btn { 
+      padding: 12px 16px; 
+      background: none; 
+      border: none; 
+      color: #e0e0e0; 
+      font-size: 28px; 
+      font-weight: 500; 
+      border-bottom: 3px solid transparent; 
+      transition: all 0.2s; 
+      white-space: nowrap; 
+      text-decoration: none;
+      display: block;
+      cursor: pointer; 
+      position: relative; 
+    }
+    .tab-btn:hover { color: #ffb300; background: #232526; }
+    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab-btn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #232526;
+      color: #ffb300;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1001;
+      border: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .tab-btn .tab-icon {
+      display: block;
+      margin: 0 auto;
+      height: 40px;
+      width: auto;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 500;
+      white-space: nowrap;
+      filter: drop-shadow(0 2px 8px #000a);
+    }
+      
+
+    /* Tab Content */
+    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+    .tab-content.active { display: block; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; }
+    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
+    h3 { color: #ffb300; }
+    .loading { text-align: center; padding: 32px; color: #e0e0e0; }
+    .spinner { border: 4px solid #444; border-top: 4px solid #ffb300; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .note { font-size: 12px; color: #b0b0b0; margin-top: 4px; }
+    
+    /* Tabs within content */
+    .tabs-container { margin-top: 12px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 2px solid #444; flex-wrap: wrap; padding-bottom: 12px; }
+    .tab { 
+      padding: 8px 12px; 
+      background: none; 
+      border: none; 
+      color: #e0e0e0; 
+      font-size: 14px; 
+      font-weight: 500; 
+      border-bottom: 2px solid transparent;
+      cursor: pointer; 
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #ffb300; }
+    .tab.active { color: #ffb300; border-bottom-color: #ffb300; }
+    
+    .tab-content { display: none; margin-top: 12px; }
+    .tab-content.active { display: block; }
+
+    /* Stats Cards */
+    .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 16px 0; }
+    .stat-card { background: #232526; border-radius: 8px; padding: 16px; box-shadow: 0 1px 6px rgba(0,0,0,0.25); border: 1px solid #444; text-align: center; }
+    .stat-card h3 { font-size: 13px; color: #ffb300; margin-bottom: 8px; }
+    .stat-card .value { font-size: 28px; font-weight: 700; color: #ffb300; }
+
+    /* Controls */
+    .controls { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .search-box { flex: 1; min-width: 200px; }
+    .search-box input { width: 100%; }
+
+    /* Forms */
+    .form-group { margin-bottom: 16px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .form-grid > div { min-width: 0; overflow: hidden; }
+    .might-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .add-member-form-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #ffb300; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    input, select, textarea { 
+      width: 100%; 
+      padding: 10px 12px; 
+      border: 1px solid #444; 
+      border-radius: 6px; 
+      font-size: 14px; 
+      background: #232526; 
+      color: #e0e0e0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus { 
+      outline: none; 
+      border-color: #ffb300; 
+      box-shadow: 0 0 0 3px rgba(255,179,0,0.15);
+    }
+
+    /* Date inputs - narrower for compact layout */
+    input[type="date"] {
+      max-width: 140px;
+    }
+
+    @media (max-width: 980px) {
+      .might-form-grid,
+      .add-member-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      .form-grid,
+      .might-form-grid,
+      .add-member-form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      /* Prevent narrow date fields from squeezing neighboring controls on phones */
+      input[type="date"] {
+        max-width: none;
+      }
+    }
+    
+    /* Buttons */
+    .btn { 
+      padding: 10px 16px; 
+      background: #ffb300; 
+      color: #232526; 
+      border: none; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      font-weight: 600; 
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #ffc933; }
+    .btn-secondary { background: #444; color: #ffb300; border: 1px solid #444; }
+    .btn-secondary:hover { background: #555; }
+
+    /* Table */
+    .table-container { margin-top: 12px; margin-bottom: 12px; overflow: auto; max-height: 70vh; position: relative; border-radius: 8px; border: 1px solid #444; }
+    table { width: 100%; border-collapse: collapse; background: #232526; }
+    thead { background: #1a1b1c; }
+    th { 
+      padding: 12px 8px; 
+      font-weight: 600; 
+      font-size: 11px; 
+      color: #ffb300; 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #444;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      background: #1a1b1c;
+      z-index: 10;
+    }
+    th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 11;
+      background: #1a1b1c;
+    }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: #ffc933; }
+    th.sorted-asc::after { content: ' ↑'; }
+    th.sorted-desc::after { content: ' ↓'; }
+    td { 
+      padding: 12px 8px; 
+      border-bottom: 1px solid #444; 
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+    td:first-child {
+      position: sticky;
+      left: 0;
+      background: #232526;
+      z-index: 9;
+      font-weight: 500;
+    }
+    tr:hover { background: #2a2b2c; }
+    tr:hover td:first-child { background: #2a2b2c; }
+    .member-name { font-weight: 500; }
+    .member-name.missed-all-goals { color: #ff9a92; font-weight: 700; }
+    .might-value { text-align: right; }
+    .date-value { text-align: center; }
+
+    .points-meta { margin: 10px 0; font-size: 12px; color: #b0b0b0; text-align: left; }
+    .points-cell { text-align: center; font-weight: 700; border-radius: 4px; padding: 6px 8px; }
+    .points-green { background: rgba(76, 175, 80, 0.22); color: #9be7a1; }
+    .points-orange { background: rgba(255, 152, 0, 0.22); color: #ffca7a; }
+    .points-red { background: rgba(244, 67, 54, 0.22); color: #ff9a92; }
+    .points-na { background: rgba(176, 176, 176, 0.12); color: #b0b0b0; }
+
+    /* Troop Badges — color by LEVEL, consistent across all types */
+    /* G/M/S/E: 1-5 red, 6 orange, 7 yellow, 8 green, 9 purple, 10+ pink */
+    /* C (crypt): 1-15 red, 16-20 orange, 21-25 yellow, 26-30 green, 31-35 purple, 36+ pink */
+    .troop-badge { display: inline-block; padding: 1px 4px; border-radius: 8px; font-size: 0.72em; font-weight: 700; min-width: 16px; text-align: center; line-height: 1.4; }
+    .troop-badge.lvl-red    { background: rgba(244, 67, 54, 0.18); color: #ef9a9a; }
+    .troop-badge.lvl-orange { background: rgba(255, 152, 0, 0.18); color: #ffb74d; }
+    .troop-badge.lvl-yellow { background: rgba(255, 235, 59, 0.18); color: #fff176; }
+    .troop-badge.lvl-green  { background: rgba(76, 175, 80, 0.18); color: #81c784; }
+    .troop-badge.lvl-purple { background: rgba(156, 39, 176, 0.18); color: #ce93d8; }
+    .troop-badge.lvl-pink   { background: rgba(233, 30, 99, 0.18); color: #f48fb1; }
+    .troop-category { display: inline-block; padding: 1px 5px; border-radius: 8px; font-size: 0.7em; font-weight: 700; text-align: center; min-width: 20px; }
+    .troop-form-grid { grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    @media (max-width: 700px) { .troop-form-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    /* Active Period History (Management) */
+    .history-section {
+      margin: 16px 0;
+      padding: 12px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #232526;
+      text-align: left;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .history-controls {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .history-status {
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #b0b0b0;
+    }
+    .history-subtitle {
+      margin: 10px 0 6px;
+      color: #ffb300;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Status Messages */
+    .status { padding: 12px 14px; border-radius: 6px; margin: 8px 0; font-size: 13px; }
+    .status.ok { background: #1b5e20; color: #81c784; border: 1px solid #2e7d32; }
+    .status.err { background: #b71c1c; color: #ef5350; border: 1px solid #d32f2f; }
+
+    /* Header Paragraph */
+    .header { margin-bottom: 16px; }
+    .header p { color: #b0b0b0; font-size: 14px; margin-top: 8px; }
+
+    /* Error */
+    .error { color: #ff5252; padding: 12px; background: #1a0000; border-radius: 6px; }
+
+    /* Login Bar */
+    .login-bar {
+      display: flex; align-items: center; gap: 8px;
+      margin-left: auto; padding: 4px 0;
+    }
+    .login-bar .user-email { font-size: 0.8em; color: #ffb300; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .login-bar button {
+      padding: 6px 14px; border: 1px solid #444; border-radius: 4px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+    }
+    #loginBtn { background: #1a1b1c; color: #ffb300; }
+    #loginBtn:hover { background: #2a2b2c; }
+    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
+    #logoutBtn:hover { background: #e53935; }
+
+    /* Hamburger menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: #ffb300;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    /* Responsive navigation: show icons on desktop, plain text on mobile */
+    .tab-label.mobile-only { display: none; }
+    .tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
+
+    @media (max-width: 800px) {
+      .tab-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 9999;
+      }
+      .tab-nav-container {
+        flex-wrap: wrap;
+        padding: 8px;
+      }
+      .nav-brand {
+        flex: 1;
+        margin-right: 8px;
+        font-size: 16px;
+        padding: 8px 0;
+      }
+      .nav-brand img {
+        height: 24px;
+        width: 24px;
+      }
+      .hamburger { 
+        display: flex;
+        order: 2;
+      }
+      .tab-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        max-height: 60vh;
+        overflow-y: auto;
+        background: #232526;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 10000;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        display: none;
+        order: 10;
+      }
+      .tab-buttons.open {
+        display: flex;
+      }
+      .tab-btn {
+        font-size: 18px;
+        padding: 18px 24px;
+        border-bottom: 1px solid #444;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        background: none;
+        height: auto;
+      }
+      .tab-btn:last-child { border-bottom: none; }
+      .tab-label.mobile-only { display: inline; }
+      .tab-icon.desktop-only { display: none; }
+      .login-bar {
+        order: 2;
+        margin-left: auto;
+        gap: 6px;
+      }
+      .login-bar .user-email { font-size: 0.7em; }
+      .login-bar button { font-size: 0.75em; padding: 5px 10px; }
+      body {
+        padding-top: 100px;
+      }
+    }
+
+    @media (min-width: 801px) {
+      .tab-label.mobile-only { display: none; }
+      .tab-icon.desktop-only { display: block; }
+      .tab-buttons {
+        flex-direction: row;
+        align-items: center;
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        display: flex !important;
+      }
+      .tab-btn {
+        font-size: 28px;
+        padding: 12px 16px;
+        border-bottom: 3px solid transparent;
+        display: block;
+        justify-content: center;
+      }
+      .hamburger { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Translate Widget -->
+  <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
+  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+  <style>
+    @media (max-width: 800px) {
+      #google_translate_element {
+        max-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-width 0.2s ease, opacity 0.2s ease;
+      }
+      body.translate-open #google_translate_element {
+        max-width: 260px;
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #translateToggleBtn { display: inline-flex !important; }
+    }
+    @media (min-width: 801px) {
+      #translateToggleBtn { display: none !important; }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const translateToggleBtn = document.getElementById('translateToggleBtn');
+      const translateWidget = document.getElementById('google_translate_element');
+      if (!translateToggleBtn || !translateWidget) return;
+      translateToggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.body.classList.toggle('translate-open');
+      });
+      document.addEventListener('click', function (e) {
+        if (!document.body.classList.contains('translate-open')) return;
+        if (translateWidget.contains(e.target) || translateToggleBtn.contains(e.target)) return;
+        document.body.classList.remove('translate-open');
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <script>
+    // --- Auth (SK6-style) ---
+    const AUTH_KEY = 'ccc_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+    let isLoggedIn = false;
+    let currentUser = null;
+
+    function checkLoginState() {
+      try {
+        const authed = localStorage.getItem(AUTH_KEY) === '1';
+        const email = localStorage.getItem(AUTH_EMAIL_KEY);
+        if (authed && email) { isLoggedIn = true; currentUser = { email }; }
+      } catch (e) {}
+      updateLoginUI();
+    }
+
+    function handleLogin() {
+      if (!document.getElementById('gsi-script')) {
+        const s = document.createElement('script'); s.id = 'gsi-script';
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.onload = () => initGoogleLogin(); document.head.appendChild(s);
+      } else { initGoogleLogin(); }
+    }
+
+    function initGoogleLogin() {
+      google.accounts.id.initialize({ client_id: SITE_CONFIG.googleClientId, callback: handleGoogleCallback });
+      google.accounts.id.prompt();
+    }
+
+    async function handleGoogleCallback(response) {
+      try {
+        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
+        const tokenRes = await fetch(cfWorkerUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: response.credential }) });
+        const tokenData = await tokenRes.json();
+        if (!tokenData.success || !tokenData.email) { showToast('Login failed', 'error'); return; }
+        const email = tokenData.email;
+        const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const data = await res.json();
+        if (data.success && data.allowed) {
+          isLoggedIn = true; currentUser = { email };
+          localStorage.setItem(AUTH_KEY, '1'); localStorage.setItem(AUTH_EMAIL_KEY, email);
+          updateLoginUI(); showToast('Logged in as ' + email, 'success');
+        } else { showToast('Access denied for ' + email, 'error'); }
+      } catch (err) { showToast('Login error: ' + err.message, 'error'); }
+    }
+
+    function handleLogout() {
+      isLoggedIn = false; currentUser = null;
+      try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+      try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+      updateLoginUI(); showToast('Logged out', 'success');
+    }
+
+    function updateLoginUI() {
+      const emailEl = document.getElementById('userEmail');
+      const loginBtn = document.getElementById('loginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (isLoggedIn && currentUser) {
+        emailEl.textContent = currentUser.email; emailEl.style.display = 'inline';
+        loginBtn.style.display = 'none'; logoutBtn.style.display = 'inline';
+      } else {
+        emailEl.style.display = 'none'; loginBtn.style.display = 'inline'; logoutBtn.style.display = 'none';
+      }
+      const restricted = ['events.html', 'members.html', 'warnings.html', 'profiling.html', 'resources.html'];
+      restricted.forEach(href => {
+        document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => { el.style.display = isLoggedIn ? '' : 'none'; });
+      });
+      const bankBtn = document.getElementById('bankTabBtn');
+      if (bankBtn) bankBtn.style.display = isLoggedIn ? 'flex' : 'none';
+    }
+
+    function isUserLoggedIn() { return isLoggedIn; }
+
+    function showToast(msg, type) {
+      let t = document.getElementById('toast');
+      if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:3000;background:#232526;color:#f3f3f3;padding:12px 20px;border-radius:8px;font-size:0.9em;display:none;box-shadow:0 2px 12px rgba(0,0,0,0.3);'; document.body.appendChild(t); }
+      t.textContent = msg;
+      t.style.borderLeft = type === 'success' ? '4px solid #27ae60' : type === 'error' ? '4px solid #c62828' : '4px solid #ffb300';
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => checkLoginState());
+  </script>
+
+  <nav class="tab-nav">
+    <div class="tab-nav-container">
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
+      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="tab-buttons" id="navTabs">
+        <a href="dashboard.html" class="tab-btn" title="Dashboard">
+          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Dashboard</span>
+        </a>
+        <a href="events.html" class="tab-btn" title="Events">
+          <img src="events.png" alt="Events" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Events</span>
+        </a>
+        <a href="members.html" class="tab-btn active" title="Members">
+          <img src="members.png" alt="Members" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Members</span>
+        </a>
+        <a href="profiling.html" class="tab-btn" title="Profiling">
+          <img src="profiling.png" alt="Profiling" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Profiling</span>
+        </a>
+        <a href="warnings.html" class="tab-btn" title="Warnings">
+          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Warnings</span>
+        </a>
+        <a href="resources.html" class="tab-btn" title="Resources">
+          <img src="resources.png" alt="Resources" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Resources</span>
+        </a>
+        <a href="competition.html" class="tab-btn" title="Competition">
+          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Competition</span>
+        </a>
+        <a href="calendar.html" class="tab-btn" title="Calendar">
+          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Calendar</span>
+        </a>
+        <a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;">
+          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Bank</span>
+        </a>
+      </div>
+      <div class="login-bar">
+        <span class="user-email" id="userEmail" style="display:none"></span>
+        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
+        <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div id="members" class="tab-content active">
+    <div class="header"><h1><img src="members.png" alt="Members" class="tab-icon" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Member Management</h1><p>View and manage clan members</p></div>
+    <div class="stats-cards" id="memberStatsCards">
+      <div class="stat-card"><h3>Total Members</h3><div class="value" id="memberTotal">-</div></div>
+      <div class="stat-card"><h3>T9</h3><div class="value" id="statT9" style="color:#6a1b9a">-</div></div>
+      <div class="stat-card"><h3>G9</h3><div class="value" id="statG9" style="color:#ab47bc">-</div></div>
+      <div class="stat-card"><h3>T8</h3><div class="value" id="statT8" style="color:#1565c0">-</div></div>
+      <div class="stat-card"><h3>G8</h3><div class="value" id="statG8" style="color:#00838f">-</div></div>
+      <div class="stat-card"><h3>Top Hero</h3><div class="value" id="statTopHero" style="font-size:16px">-</div></div>
+    </div>
+    <div class="controls"><div class="search-box"><input type="text" id="memberSearchInput" placeholder="🔍 Search by member name..."></div><button class="btn" onclick="MembersTab.loadAllData()">🔄 Refresh</button></div>
+
+    <div class="tabs-container">
+      <div class="tabs">
+        <button class="tab active" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
+        <button class="tab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
+        <button class="tab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
+        <button class="tab" onclick="MembersTab.switchTab('chestPointsTab', event)">📦 Chest Points</button>
+        <button class="tab" onclick="MembersTab.switchTab('troopTab', event)">⚔️ Track Troops</button>
+        <button class="tab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
+        <button class="tab" onclick="MembersTab.switchTab('exemptTab', event)">🛡️ Penalty Exemptions</button>
+        <button class="tab" onclick="MembersTab.switchTab('accountsTab', event)">🔐 Member Login Accounts</button>
+      </div>
+      <div id="accountsTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Linked Google Accounts</h3>
+        <p style="color:#b0b0b0; font-size:13px; margin-bottom:12px; text-align:left;">Link a member to a Google account so they can sign in and see their own bank balance and point penalties. The same address can be linked to several members — handy for alt accounts — and the profile page then offers a dropdown to switch between them. Members only get the public pages plus their profile; management pages stay officer-only, controlled by the list in the script.</p>
+        <div class="controls" style="margin-bottom:10px;">
+          <div class="search-box"><input type="text" id="accountsSearchInput" placeholder="🔍 Filter members..."></div>
+          <button class="btn" onclick="MembersTab.saveMemberAccounts()">💾 Save Accounts</button>
+          <button class="btn btn-secondary" onclick="MembersTab.loadMemberAccounts(true)">🔄 Reload</button>
+        </div>
+        <div id="accountsStatus" class="status"></div>
+        <div id="accountsSummary" style="font-size:12px; color:#b0b0b0; margin-bottom:8px; text-align:left;"></div>
+        <div id="accountsList" style="max-height:50vh; overflow-y:auto; border:1px solid #444; border-radius:8px; padding:10px; background:#232526; text-align:left;"></div>
+      </div>
+      <div id="exemptTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Penalty Exemptions</h3>
+        <p style="color:#b0b0b0; font-size:13px; margin-bottom:12px; text-align:left;">Members ticked here never receive an event penalty and are left out of the period-end underperformer report (crypting norm). Use this for utility accounts and leadership alts.</p>
+        <div class="controls" style="margin-bottom:10px;">
+          <div class="search-box"><input type="text" id="exemptSearchInput" placeholder="🔍 Filter members..."></div>
+          <button class="btn" onclick="MembersTab.saveExemptMembers()">💾 Save Exemptions</button>
+          <button class="btn btn-secondary" onclick="MembersTab.loadExemptMembers(true)">🔄 Reload</button>
+        </div>
+        <div id="exemptStatus" class="status"></div>
+        <div id="exemptSummary" style="font-size:12px; color:#b0b0b0; margin-bottom:8px; text-align:left;"></div>
+        <div id="exemptList" style="max-height:50vh; overflow-y:auto; border:1px solid #444; border-radius:8px; padding:10px; background:#232526; text-align:left;"></div>
+      </div>
+      <div id="troopTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Track Troop Levels</h3>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div><label for="troopMemberSelect">Member</label><select id="troopMemberSelect" onchange="MembersTab.loadMemberTroops()"></select></div>
+          <div><label for="troopDateInput">Date</label><input type="date" id="troopDateInput"><div class="note">Defaults to today</div></div>
+        </div>
+        <div class="form-grid troop-form-grid">
+          <div><label>Guardsmen (G)</label><input type="number" id="troopG" min="3" max="9" placeholder="3-9"></div>
+          <div><label>Specialists (S)</label><input type="number" id="troopS" min="3" max="9" placeholder="3-9"></div>
+          <div><label>Monsters (M)</label><input type="number" id="troopM" min="3" max="9" placeholder="3-9"></div>
+          <div><label>Eng. Corps (E)</label><input type="number" id="troopE" min="3" max="9" placeholder="3-9"></div>
+          <div><label>Crypt Lvl (C)</label><input type="number" id="troopC" min="1" max="500" placeholder="1-500"></div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+          <div><label>Notes (optional)</label><input type="text" id="troopNotesInput" placeholder="e.g. upgraded during event"></div>
+        </div>
+        <button class="btn" onclick="MembersTab.submitAllTroops()">💾 Save Changed Levels</button>
+        <div id="troopStatus" class="status"></div>
+      </div>
+      <div id="heroTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Track Hero Level</h3>
+        <div class="form-grid might-form-grid">
+          <div><label for="heroMemberSelect">Member</label><select id="heroMemberSelect"></select></div>
+          <div><label for="heroLevelValue">Hero Level</label><input type="number" id="heroLevelValue" placeholder="Enter hero level" min="0" step="1" onkeypress="if(event.key==='Enter'){var bp=document.getElementById('heroBatchPanel');if(bp&&bp.style.display!=='none'){MembersTab.addToHeroBatch();}else{MembersTab.submitHeroLevelEntry();}}"></div>
+          <div><label for="heroLevelDate">Date</label><input type="date" id="heroLevelDate"><div class="note">Defaults to today (applies to all batch entries)</div></div>
+        </div>
+        <div style="margin-bottom:12px;"><button class="btn" onclick="var bp=document.getElementById('heroBatchPanel');if(bp&&bp.style.display!=='none'){MembersTab.addToHeroBatch();}else{MembersTab.submitHeroLevelEntry();}">💾 Save Hero Level</button><button class="btn" style="background:#7c3aed;color:#fff;margin-left:8px;" onclick="MembersTab.toggleHeroBatch()">📋 Batch Entry</button><div id="heroLevelStatus" class="status"></div></div>
+        <!-- Hero Level Batch panel -->
+        <div id="heroBatchPanel" style="display:none;border:1px solid #444;border-radius:8px;padding:14px;background:#1a1b1c;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <h4 style="margin:0;color:#ffb300;">⚡ Batch Hero Level — <span id="heroBatchCount" style="color:#81c784;">0</span> queued</h4>
+            <div><button class="btn" style="background:#2e7d32;" onclick="MembersTab.saveHeroBatchEntries()">💾 Save All</button><button class="btn btn-secondary" style="margin-left:6px;" onclick="MembersTab.toggleHeroBatch()">✖ Close</button></div>
+          </div>
+          <p style="color:#b0b0b0;font-size:12px;margin-bottom:10px;">Use the Member dropdown & Hero Level field above, press Enter to queue each entry. Click Save All when done.</p>
+          <div id="heroBatchStatus" class="status" style="margin-bottom:8px;"></div>
+          <div style="max-height:50vh;overflow-y:auto;"><table style="width:100%;">
+            <thead><tr><th style="text-align:left;padding:6px 8px;">Member</th><th style="text-align:center;padding:6px 8px;width:100px;">Level</th><th style="text-align:center;padding:6px 8px;width:60px;"></th></tr></thead>
+            <tbody id="heroBatchBody"></tbody>
+          </table></div>
+        </div>
+      </div>
+      <div id="addMemberTab" class="tab-content active">
+        <h3 style="margin:0 0 12px 0;">Add New Member</h3>
+        <div class="form-grid add-member-form-grid">
+          <div>
+            <label for="newMemberNameInput">Member Name</label>
+            <input type="text" id="newMemberNameInput" placeholder="Enter member name">
+          </div>
+          <div>
+            <label for="joinDate">Join Date</label>
+            <input type="date" id="joinDate">
+            <div class="note">Date member joined</div>
+          </div>
+        </div>
+        <button class="btn" onclick="MembersTab.submitAddMember()">➕ Add Member</button>
+        <div id="addMemberStatus" class="status"></div>
+      </div>
+      <div id="nameTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Change Member Name</h3>
+        <div class="form-grid"><div><label for="oldMemberSelect">Current Member</label><select id="oldMemberSelect"></select></div><div><label for="newMemberName">New Name</label><input type="text" id="newMemberName" placeholder="Enter new member name"></div></div>
+        <button class="btn" onclick="MembersTab.submitNameChange()">✏️ Update Name</button><div id="nameChangeStatus" class="status"></div>
+      </div>
+      <div id="removeMemberTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Remove Member</h3>
+        <div class="form-grid"><div><label for="removeMemberSelect">Member to Remove</label><select id="removeMemberSelect"></select></div><div><label for="endDate">End Date</label><input type="date" id="endDate"><div class="note">Date member left</div></div></div>
+        <div style="margin-bottom:12px;"><label for="removeRemarks">Remarks</label><textarea id="removeRemarks" rows="2" placeholder="Reason for leaving or removal (optional)" style="width:100%;padding:10px 12px;border:1px solid #444;border-radius:6px;font-size:14px;background:#232526;color:#e0e0e0;font-family:inherit;resize:vertical;"></textarea></div>
+        <button class="btn" onclick="MembersTab.submitRemoveMember()">🚪 Remove Member</button><div id="removeMemberStatus" class="status"></div>
+      </div>
+      <div id="chestPointsTab" class="tab-content">
+        <h3 style="margin:0 0 12px 0;">Chest Points - Last Active Periods</h3>
+        <div class="controls" style="margin-bottom:10px;">
+          <button class="btn" onclick="MembersTab.loadChestPointsTabData(true)">🔄 Refresh Chest Points</button>
+          <button class="btn" onclick="MembersTab.togglePointTargetsPanel()" style="margin-left:8px;">⚙️ Point Targets</button>
+        </div>
+
+        <!-- Point Targets Configuration Panel -->
+        <div id="pointTargetsPanel" style="display:none; margin-bottom:14px; background:rgba(255,255,255,0.04); border:1px solid #333; border-radius:8px; padding:14px 16px;">
+          <p style="font-size:12px;color:#b0b0b0;margin:0 0 12px 0;">Set a custom point target per player per active period. Overrides the default for that cell only. Saved locally in this browser.</p>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+            <label style="font-size:12px;color:#ffb300;white-space:nowrap;font-weight:600;">Default target:</label>
+            <input type="number" id="ptDefaultInput" min="0" step="100" value="7500" style="width:100px;padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:13px;">
+            <button onclick="MembersTab.savePtDefault()" class="btn" style="padding:5px 14px;font-size:12px;">Save default</button>
+          </div>
+          <div style="border-top:1px solid #333;padding-top:12px;">
+            <div style="font-size:12px;color:#ffb300;font-weight:600;margin-bottom:8px;">Per-player / per-period overrides</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 110px auto;gap:6px;align-items:center;margin-bottom:10px;">
+              <select id="ptPlayerSelect" style="padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;"><option value="">— select player —</option></select>
+              <select id="ptPeriodSelect" style="padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;"><option value="">— select period —</option></select>
+              <input type="number" id="ptOverridePoints" placeholder="Points" min="0" step="100" style="padding:5px 8px;border:1px solid #444;border-radius:5px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              <button onclick="MembersTab.addPtOverride()" class="btn" style="padding:5px 12px;font-size:12px;white-space:nowrap;">➕ Add</button>
+            </div>
+            <div id="ptOverrideList" style="max-height:160px;overflow-y:auto;"></div>
+          </div>
+        </div>
+
+        <div id="chestPointsMeta" class="points-meta">Target: 7,500 points (green), within 10% (orange), below (red).</div>
+        <div class="table-container" style="max-height:52vh;">
+          <div id="chestPointsLoading" class="loading" style="display:none;"><div class="spinner"></div>Loading chest points...</div>
+          <div id="chestPointsError" class="error" style="display:none;"></div>
+          <table id="chestPointsTable" style="display:none;">
+            <thead>
+              <tr id="chestPointsHeader">
+                <th>Member</th>
+              </tr>
+            </thead>
+            <tbody id="chestPointsBody"></tbody>
+          </table>
+          <div id="chestPointsEmpty" style="display:none; text-align:center; padding:30px; color:#b0b0b0;">No active periods found</div>
+        </div>
+      </div>
+    </div>
+    <div id="memberTableSection" class="table-container">
+      <div id="memberLoading" class="loading" style="display:none;"><div class="spinner"></div>Loading members...</div>
+      <div id="memberError" class="error" style="display:none;"></div>
+      <table id="membersTable" style="display:none;">
+        <thead>
+          <tr>
+            <th class="sortable" data-column="name">Name</th>
+            <th class="sortable" data-column="heroLevel" title="Latest recorded hero level">Hero</th>
+            <th class="sortable" data-column="joinDate">Joined</th>
+            <th class="sortable" data-column="category" title="Troop Category">Cat</th>
+            <th class="sortable" data-column="troops" title="Guardsmen / Monsters / Specialists / Eng. Corps / Crypt">G/M/S/E/C</th>
+          </tr>
+        </thead>
+        <tbody id="membersTableBody"></tbody>
+      </table>
+      <div id="memberEmpty" style="display:none; text-align:center; padding:40px; color:#b0b0b0;">No members found</div>
+    </div>
+  </div>
+
+
+  <script>
+    // Slow Apps Script calls can come back as a transient 404 from the redirect target, so retry once.
+    async function postAction(payload, retries = 1) {
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const res = await fetch(window.GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const text = await res.text();
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+          } catch (e) {
+            throw new Error(`Invalid response (HTTP ${res.status}): ${text.slice(0, 120)}`);
+          }
+          if (!res.ok) throw new Error(parsed.error || parsed.message || `HTTP ${res.status}`);
+          return parsed;
+        } catch (err) {
+          if (attempt >= retries) throw err;
+          await new Promise(r => setTimeout(r, 1500 * (attempt + 1)));
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      MembersTab.init();
+    });
+
+    const MembersTab = (() => {
+      let membersData = [];
+      let troopData = {};    // { lowerName: { G, M, S, E, C } }
+      let heroData = {};     // { lowerName: { level, timestamp } }
+      let loadedTroopLevels = {};
+      let filteredData = [];
+      let currentSort = { column: null, direction: 'asc' };
+      let chestPointsData = null;
+      let chestPointsLoadedAt = 0;
+      let chestPointsSortByName = null;
+
+      function init() {
+        loadAllData();
+        setTodayDefault();
+        document.getElementById('memberSearchInput').addEventListener('input', (e) => filterMembers(e.target.value));
+        document.getElementById('exemptSearchInput')?.addEventListener('input', () => renderExemptList());
+        document.getElementById('accountsSearchInput')?.addEventListener('input', () => renderMemberAccounts());
+        document.querySelectorAll('#members th.sortable').forEach(th => {
+          th.addEventListener('click', () => sortTable(th.dataset.column));
+        });
+      }
+
+      // ── Point Targets (server-backed with localStorage cache) ─────────
+      // Schema: { default: 7500, overrides: [ { player, period, points } ] }
+      const PT_KEY = 'ccc_point_targets';
+      let pointTargetsCache = null; // in-memory cache
+
+      function loadPointTargets() {
+        if (pointTargetsCache) return pointTargetsCache;
+        try {
+          const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":7500,"overrides":[]}');
+          if (!Array.isArray(raw.overrides)) raw.overrides = [];
+          pointTargetsCache = raw;
+          return raw;
+        } catch(e) { return { default: 7500, overrides: [] }; }
+      }
+      function savePointTargets(obj) {
+        pointTargetsCache = obj;
+        try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+        // Persist to server (fire-and-forget)
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'savePointTargets', targets: obj })
+        }).catch(() => {});
+      }
+      function loadPointTargetsFromServer() {
+        return fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getPointTargets' })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success !== false) {
+              const obj = { default: result.default || 7500, overrides: Array.isArray(result.overrides) ? result.overrides : [] };
+              pointTargetsCache = obj;
+              try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+            }
+          })
+          .catch(() => {}); // fall back to localStorage cache
+      }
+      // Resolve target for a specific player+period; falls back to period-level target, then global default.
+      // periodTargetPoints: optional number from the period event's own target (from API response)
+      function getEffectiveTarget(playerName, periodName, periodTargetPoints) {
+        const pt = loadPointTargets();
+        const pkey = (playerName || '').toLowerCase().trim();
+        const perkey = (periodName || '').trim();
+        const match = (pt.overrides || []).find(o =>
+          o.player.toLowerCase() === pkey && o.period === perkey
+        );
+        if (match) return match.points;
+        // Use period-level target if set, otherwise global default
+        if (periodTargetPoints !== null && periodTargetPoints !== undefined && !isNaN(Number(periodTargetPoints)) && Number(periodTargetPoints) > 0) {
+          return Number(periodTargetPoints);
+        }
+        return pt.default || 7500;
+      }
+      // getPeriodTarget: returns the target for a specific period (period-level if set, else global default)
+      function getPeriodTarget(periodTargetPoints) {
+        if (periodTargetPoints !== null && periodTargetPoints !== undefined && !isNaN(Number(periodTargetPoints)) && Number(periodTargetPoints) > 0) {
+          return Number(periodTargetPoints);
+        }
+        return loadPointTargets().default || 7500;
+      }
+      function escapeHtmlMem(text) {
+        const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
+      }
+      function togglePointTargetsPanel() {
+        const panel = document.getElementById('pointTargetsPanel');
+        if (!panel) return;
+        const open = panel.style.display !== 'none';
+        panel.style.display = open ? 'none' : 'block';
+        if (!open) renderPointTargetsPanel();
+      }
+      function populatePtSelects() {
+        const playerSel = document.getElementById('ptPlayerSelect');
+        if (playerSel) {
+          const current = playerSel.value;
+          playerSel.innerHTML = '<option value="">— select player —</option>';
+          const names = [...new Set(membersData.map(m => m.name || m.player || '').filter(Boolean))].sort();
+          names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; playerSel.appendChild(o); });
+          if (current) playerSel.value = current;
+        }
+        const periodSel = document.getElementById('ptPeriodSelect');
+        if (periodSel) {
+          const current = periodSel.value;
+          periodSel.innerHTML = '<option value="">— select period —</option>';
+          const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
+          periods.forEach(p => { const o = document.createElement('option'); o.value = p.periodName; o.textContent = `${p.periodName} (${p.startDate} – ${p.endDate})`; periodSel.appendChild(o); });
+          if (current) periodSel.value = current;
+        }
+      }
+      function renderPointTargetsPanel() {
+        const pt = loadPointTargets();
+        const defInput = document.getElementById('ptDefaultInput');
+        if (defInput) defInput.value = pt.default || 7500;
+        populatePtSelects();
+        const list = document.getElementById('ptOverrideList');
+        if (!list) return;
+        const overrides = pt.overrides || [];
+        if (overrides.length === 0) {
+          list.innerHTML = '<p style="font-size:12px;color:#666;margin:0;">No overrides yet. Select a player and period above to add one.</p>';
+          return;
+        }
+        list.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr>
+            <th style="text-align:left;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Player</th>
+            <th style="text-align:left;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Period</th>
+            <th style="text-align:right;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Penalty pts</th>
+            <th style="text-align:right;padding:4px 8px;color:#ffb300;border-bottom:1px solid #333;">Target pts</th>
+            <th style="padding:4px 8px;border-bottom:1px solid #333;"></th>
+          </tr></thead>
+          <tbody>${overrides.map((o, i) =>
+            `<tr>
+              <td style="padding:4px 8px;color:#e0e0e0;border-bottom:1px solid #2a2a2a;">${escapeHtmlMem(o.player)}</td>
+              <td style="padding:4px 8px;color:#b0b0b0;border-bottom:1px solid #2a2a2a;">${escapeHtmlMem(o.period)}</td>
+              <td style="padding:4px 8px;text-align:right;border-bottom:1px solid #2a2a2a;color:${Number(o.penaltyPoints) > 0 ? '#ef5350' : '#666'};">${Number(o.penaltyPoints) > 0 ? '+' + Number(o.penaltyPoints).toLocaleString() : '—'}</td>
+              <td style="padding:4px 8px;text-align:right;border-bottom:1px solid #2a2a2a;">
+                <input type="number" value="${o.points}" min="0" step="100" data-idx="${i}"
+                  onchange="MembersTab.updatePtOverride(this)"
+                  style="width:80px;padding:2px 5px;border:1px solid #444;border-radius:4px;background:#1a1c1e;color:#e0e0e0;font-size:12px;">
+              </td>
+              <td style="padding:4px 8px;border-bottom:1px solid #2a2a2a;">
+                <button data-remove-idx="${i}" style="background:#c62828;color:#fff;border:none;border-radius:4px;padding:2px 7px;font-size:11px;cursor:pointer;">✕</button>
+              </td>
+            </tr>`
+          ).join('')}</tbody></table>`;
+        list.querySelectorAll('button[data-remove-idx]').forEach(btn => {
+          btn.addEventListener('click', function() { removePtOverride(parseInt(this.getAttribute('data-remove-idx'), 10)); });
+        });
+      }
+      function savePtDefault() {
+        const val = parseInt(document.getElementById('ptDefaultInput').value, 10);
+        if (isNaN(val) || val < 0) return;
+        const pt = loadPointTargets();
+        pt.default = val;
+        savePointTargets(pt);
+        renderChestPointsTable();
+      }
+      function addPtOverride() {
+        const player = (document.getElementById('ptPlayerSelect').value || '').trim();
+        const period = (document.getElementById('ptPeriodSelect').value || '').trim();
+        const pts = parseInt(document.getElementById('ptOverridePoints').value, 10);
+        if (!player || !period || isNaN(pts) || pts < 0) return;
+        const pt = loadPointTargets();
+        const idx = (pt.overrides || []).findIndex(o => o.player.toLowerCase() === player.toLowerCase() && o.period === period);
+        if (idx >= 0) { pt.overrides[idx].points = pts; }
+        else { pt.overrides.push({ player, period, points: pts }); }
+        savePointTargets(pt);
+        document.getElementById('ptOverridePoints').value = '';
+        renderPointTargetsPanel();
+        renderChestPointsTable();
+      }
+      function updatePtOverride(input) {
+        const idx = parseInt(input.getAttribute('data-idx'), 10);
+        const pts = parseInt(input.value, 10);
+        if (isNaN(idx) || isNaN(pts) || pts < 0) return;
+        const pt = loadPointTargets();
+        if (pt.overrides[idx]) { pt.overrides[idx].points = pts; savePointTargets(pt); renderChestPointsTable(); }
+      }
+      function removePtOverride(idx) {
+        const pt = loadPointTargets();
+        pt.overrides.splice(idx, 1);
+        savePointTargets(pt);
+        renderPointTargetsPanel();
+        renderChestPointsTable();
+      }
+      // ──────────────────────────────────────────────────────────────────────
+
+      async function loadChestPointsTabData(forceRefresh = false) {
+        // Load point targets from server (updates localStorage cache)
+        await loadPointTargetsFromServer();
+
+        const loading = document.getElementById('chestPointsLoading');
+        const error = document.getElementById('chestPointsError');
+        const table = document.getElementById('chestPointsTable');
+        const empty = document.getElementById('chestPointsEmpty');
+        if (!loading || !error || !table || !empty) return;
+
+        const cacheAgeMs = Date.now() - chestPointsLoadedAt;
+        if (!forceRefresh && chestPointsData && cacheAgeMs < 21600000) {
+          error.style.display = 'none';
+          renderChestPointsTable();
+          return;
+        }
+
+        loading.style.display = 'block';
+        error.style.display = 'none';
+        table.style.display = 'none';
+        empty.style.display = 'none';
+
+        try {
+          const res = await fetch(window.GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getRecentActivePeriodChestPoints', limitPeriods: 5, targetPoints: loadPointTargets().default || 7500 })
+          });
+          const result = await res.json();
+
+          if (!result || !result.success) {
+            throw new Error(result?.message || 'Failed to load chest points');
+          }
+
+          chestPointsData = result;
+          chestPointsLoadedAt = Date.now();
+          renderChestPointsTable();
+        } catch (e) {
+          error.textContent = `Error: ${e.message || e}`;
+          error.style.display = 'block';
+        } finally {
+          loading.style.display = 'none';
+        }
+      }
+
+      function renderChestPointsTable() {
+        const header = document.getElementById('chestPointsHeader');
+        const body = document.getElementById('chestPointsBody');
+        const table = document.getElementById('chestPointsTable');
+        const empty = document.getElementById('chestPointsEmpty');
+        const meta = document.getElementById('chestPointsMeta');
+        if (!header || !body || !table || !empty || !meta) return;
+
+        const periods = Array.isArray(chestPointsData?.periods) ? chestPointsData.periods : [];
+        const membersRaw = Array.isArray(chestPointsData?.members) ? chestPointsData.members : [];
+
+        const defaultTgt = loadPointTargets().default || 7500;
+        meta.textContent = `Default target: ${defaultTgt} points (green ≥ target, orange ≥ 90%, red below). Per-period or per-player overrides may apply. '-' = not a member in that period, '*' = joined during that period.`;
+
+        if (periods.length === 0 || membersRaw.length === 0) {
+          table.style.display = 'none';
+          empty.style.display = 'block';
+          empty.textContent = 'No active period data available';
+          return;
+        }
+
+        const toYmd = (value) => {
+          if (!value) return '';
+          const str = String(value).trim();
+          if (!str) return '';
+
+          const normalizeYmd = (rawYmd) => {
+            const match = String(rawYmd || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!match) return '';
+
+            const year = parseInt(match[1], 10);
+            const first = parseInt(match[2], 10);
+            const second = parseInt(match[3], 10);
+
+            const isValidDate = (y, m, d) => {
+              const dt = new Date(Date.UTC(y, m - 1, d));
+              return dt.getUTCFullYear() === y && dt.getUTCMonth() === (m - 1) && dt.getUTCDate() === d;
+            };
+
+            if (isValidDate(year, first, second)) {
+              return `${year}-${String(first).padStart(2, '0')}-${String(second).padStart(2, '0')}`;
+            }
+            if (isValidDate(year, second, first)) {
+              return `${year}-${String(second).padStart(2, '0')}-${String(first).padStart(2, '0')}`;
+            }
+            return '';
+          };
+
+          const ymdDirect = normalizeYmd(str);
+          if (ymdDirect) return ymdDirect;
+
+          const isoMatch = str.match(/^(\d{4}-\d{2}-\d{2})/);
+          if (isoMatch) {
+            const normalizedIso = normalizeYmd(isoMatch[1]);
+            if (normalizedIso) return normalizedIso;
+          }
+
+          const date = parseDateUTC(str);
+          if (!date || Number.isNaN(date.getTime())) return '';
+          const y = date.getUTCFullYear();
+          const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+          const d = String(date.getUTCDate()).padStart(2, '0');
+          return `${y}-${m}-${d}`;
+        };
+
+
+
+        const toYmdMemberJoinDate = (value) => {
+          if (!value) return '';
+          const str = String(value).trim();
+          if (!str) return '';
+          const ymdMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (ymdMatch) {
+            const year = parseInt(ymdMatch[1], 10);
+            const first = parseInt(ymdMatch[2], 10);
+            const second = parseInt(ymdMatch[3], 10);
+            const isValidDate = (y, m, d) => {
+              const dt = new Date(Date.UTC(y, m - 1, d));
+              return dt.getUTCFullYear() === y && dt.getUTCMonth() === (m - 1) && dt.getUTCDate() === d;
+            };
+            if (isValidDate(year, first, second)) {
+              return `${year}-${String(first).padStart(2, '0')}-${String(second).padStart(2, '0')}`;
+            }
+            if (isValidDate(year, second, first)) {
+              return `${year}-${String(second).padStart(2, '0')}-${String(first).padStart(2, '0')}`;
+            }
+          }
+          return toYmd(str);
+        };
+
+        const members = [...membersRaw].sort((a, b) => {
+          if (chestPointsSortByName) {
+            const cmp = String(a.member || '').localeCompare(String(b.member || ''));
+            return chestPointsSortByName === 'desc' ? -cmp : cmp;
+          }
+          const aResults = Array.isArray(a.periodResults) ? a.periodResults : [];
+          const bResults = Array.isArray(b.periodResults) ? b.periodResults : [];
+          const aJoinDate = toYmdMemberJoinDate(a.joinDate);
+          const bJoinDate = toYmdMemberJoinDate(b.joinDate);
+
+          const aMissedCount = aResults.reduce((count, r, idx) => {
+            const period = periods[idx] || {};
+            const periodEnd = toYmd(period.endDate);
+            const isMemberDuringPeriod = !aJoinDate || !periodEnd || aJoinDate <= periodEnd;
+            if (!isMemberDuringPeriod) return count;
+            const tgt = getEffectiveTarget(a.member, period.periodName, period.targetPoints);
+            return count + (Number(r?.points || 0) < tgt ? 1 : 0);
+          }, 0);
+          const bMissedCount = bResults.reduce((count, r, idx) => {
+            const period = periods[idx] || {};
+            const periodEnd = toYmd(period.endDate);
+            const isMemberDuringPeriod = !bJoinDate || !periodEnd || bJoinDate <= periodEnd;
+            if (!isMemberDuringPeriod) return count;
+            const tgt = getEffectiveTarget(b.member, period.periodName, period.targetPoints);
+            return count + (Number(r?.points || 0) < tgt ? 1 : 0);
+          }, 0);
+
+          if (aMissedCount !== bMissedCount) return bMissedCount - aMissedCount;
+
+          const aTotal = aResults.reduce((sum, r, idx) => {
+            const period = periods[idx] || {};
+            const periodEnd = toYmd(period.endDate);
+            const isMemberDuringPeriod = !aJoinDate || !periodEnd || aJoinDate <= periodEnd;
+            return isMemberDuringPeriod ? (sum + Number(r?.points || 0)) : sum;
+          }, 0);
+          const bTotal = bResults.reduce((sum, r, idx) => {
+            const period = periods[idx] || {};
+            const periodEnd = toYmd(period.endDate);
+            const isMemberDuringPeriod = !bJoinDate || !periodEnd || bJoinDate <= periodEnd;
+            return isMemberDuringPeriod ? (sum + Number(r?.points || 0)) : sum;
+          }, 0);
+          if (aTotal !== bTotal) return aTotal - bTotal;
+
+          return String(a.member || '').localeCompare(String(b.member || ''));
+        });
+
+        header.innerHTML = '';
+        const memberTh = document.createElement('th');
+        memberTh.textContent = 'Member';
+        memberTh.className = 'sortable' + (chestPointsSortByName ? ' sorted-' + chestPointsSortByName : '');
+        memberTh.addEventListener('click', () => {
+          if (!chestPointsSortByName) chestPointsSortByName = 'asc';
+          else if (chestPointsSortByName === 'asc') chestPointsSortByName = 'desc';
+          else chestPointsSortByName = null;
+          renderChestPointsTable();
+        });
+        header.appendChild(memberTh);
+        periods.forEach(period => {
+          const th = document.createElement('th');
+          const periodTgt = getPeriodTarget(period.targetPoints);
+          th.textContent = `${period.periodName} (${period.startDate} - ${period.endDate}) · ${periodTgt.toLocaleString()} pts`;
+          header.appendChild(th);
+        });
+
+        body.innerHTML = '';
+        members.forEach(memberRow => {
+          const row = document.createElement('tr');
+          const firstCell = document.createElement('td');
+          const periodResults = Array.isArray(memberRow.periodResults) ? memberRow.periodResults : [];
+          const joinDate = toYmdMemberJoinDate(memberRow.joinDate);
+          const firstPeriodStart = toYmd(periods[0]?.startDate);
+          const joinedAfterPeriodStart = !!joinDate && !!firstPeriodStart && joinDate > firstPeriodStart;
+          let eligibleCount = 0;
+          let allMissed = true;
+          periodResults.forEach((result, idx) => {
+            const period = periods[idx] || {};
+            const periodEnd = toYmd(period.endDate);
+            const isEligible = !joinDate || !periodEnd || joinDate <= periodEnd;
+            if (!isEligible) return;
+            eligibleCount++;
+            if (Number(result?.points || 0) >= getEffectiveTarget(memberRow.member, period.periodName, period.targetPoints)) {
+              allMissed = false;
+            }
+          });
+          const missedAllGoals = eligibleCount > 0 && allMissed;
+
+          firstCell.className = `member-name${missedAllGoals ? ' missed-all-goals' : ''}`;
+          firstCell.textContent = joinedAfterPeriodStart
+            ? `${memberRow.member || ''} (Joined ${joinDate})`
+            : (memberRow.member || '');
+          row.appendChild(firstCell);
+
+          periods.forEach((period, idx) => {
+            const data = periodResults[idx] || { points: 0, status: 'red' };
+            const td = document.createElement('td');
+            const periodStart = toYmd(period?.startDate);
+            const periodEnd = toYmd(period?.endDate);
+            const isMemberDuringPeriod = !joinDate || !periodEnd || joinDate <= periodEnd;
+            const joinedDuringPeriod = !!joinDate && !!periodStart && !!periodEnd && joinDate >= periodStart && joinDate <= periodEnd;
+
+            if (!isMemberDuringPeriod) {
+              td.className = 'points-cell points-na';
+              td.textContent = '-';
+            } else {
+              const cellPts = Number(data.points || 0);
+              const cellTgt = getEffectiveTarget(memberRow.member, period.periodName, period.targetPoints);
+              const cellStatus = cellPts >= cellTgt ? 'green' : (cellPts >= cellTgt * 0.9 ? 'orange' : 'red');
+              td.className = `points-cell points-${cellStatus}`;
+              const pointsText = cellPts.toLocaleString();
+              td.textContent = joinedDuringPeriod ? `${pointsText}*` : pointsText;
+            }
+            row.appendChild(td);
+          });
+
+          body.appendChild(row);
+        });
+
+        empty.style.display = 'none';
+        table.style.display = 'table';
+      }
+
+      async function loadAllData() {
+        showLoading();
+        try {
+          const t0 = performance.now();
+          const res = await fetch(window.GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getMembersPageBundle' })
+          });
+          const bundle = await res.json();
+          console.log('[PERF] Members page bundle: %dms | Edge cache: %s',
+            Math.round(performance.now() - t0),
+            res.headers.get('X-Cache') || 'N/A');
+
+          if (!bundle || bundle.success === false) {
+            onError({ message: bundle?.error || bundle?.message || 'Failed to load members' });
+            return;
+          }
+          membersData = bundle.members || [];
+
+          // Process troop data
+          troopData = {};
+          (bundle.troops || []).forEach(entry => {
+            const name = (entry.playerName || '').trim();
+            if (name) {
+              troopData[name.toLowerCase()] = {
+                G: entry.G_currentLevel ?? null,
+                M: entry.M_currentLevel ?? null,
+                S: entry.S_currentLevel ?? null,
+                E: entry.E_currentLevel ?? null,
+                C: entry.C_currentLevel ?? null
+              };
+            }
+          });
+
+          // Process hero data
+          heroData = {};
+          (bundle.heroes || []).forEach(entry => {
+            const name = (entry.playerName || '').trim();
+            if (name) heroData[name.toLowerCase()] = { level: entry.level, timestamp: entry.timestamp };
+          });
+
+          filteredData = [...membersData];
+          filteredData.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          currentSort = { column: 'name', direction: 'asc' };
+          populateMemberSelect();
+          if (membersData.length === 0) { showEmpty(); return; }
+          updateStats();
+          renderTable();
+          const nameHeader = document.querySelector('#members th[data-column="name"]');
+          if (nameHeader) nameHeader.classList.add('sorted-asc');
+          showTable();
+        } catch (error) { onError(error); }
+      }
+
+      function onError(error) {
+        console.error('Error loading members:', error);
+        document.getElementById('memberError').textContent = 'Error: ' + error.message;
+        document.getElementById('memberError').style.display = 'block';
+        document.getElementById('memberLoading').style.display = 'none';
+      }
+
+      function updateStats() {
+        document.getElementById('memberTotal').textContent = membersData.length.toLocaleString();
+
+        // Count troop categories
+        const catCounts = { T9: 0, G9: 0, T8: 0, G8: 0 };
+        membersData.forEach(m => {
+          const t = troopData[(m.name || '').toLowerCase()] || {};
+          const cat = determineTroopCategory(t.G, t.M, t.S);
+          if (cat && catCounts[cat] !== undefined) catCounts[cat]++;
+        });
+        document.getElementById('statT9').textContent = catCounts.T9;
+        document.getElementById('statG9').textContent = catCounts.G9;
+        document.getElementById('statT8').textContent = catCounts.T8;
+        document.getElementById('statG8').textContent = catCounts.G8;
+
+        // Top hero
+        let topHeroName = '';
+        let topHeroLevel = 0;
+        membersData.forEach(m => {
+          const h = heroData[(m.name || '').toLowerCase()];
+          if (h && h.level != null && h.level > topHeroLevel) {
+            topHeroLevel = h.level;
+            topHeroName = m.name;
+          }
+        });
+        const topEl = document.getElementById('statTopHero');
+        topEl.textContent = topHeroName ? `${topHeroName} (${topHeroLevel})` : '-';
+        topEl.title = topHeroName ? `${topHeroName}: Hero Level ${topHeroLevel}` : '';
+      }
+
+      function filterMembers(searchTerm) {
+        const term = searchTerm.toLowerCase().trim();
+        filteredData = term ? membersData.filter(m => m.name.toLowerCase().includes(term)) : [...membersData];
+        renderTable();
+        if (filteredData.length === 0) showEmpty();
+        else showTable();
+      }
+
+      // Troop category order for sorting (low → high)
+      const CATEGORY_ORDER = [null, 'G4', 'G5', 'G6', 'G7', 'T7', 'G8', 'T8', 'G9', 'T9'];
+
+      function determineTroopCategory(gLevel, mLevel, sLevel) {
+        const g = Number(gLevel); const m = Number(mLevel); const s = Number(sLevel);
+        const hasG = !isNaN(g) && g > 0; const hasM = !isNaN(m) && m > 0; const hasS = !isNaN(s) && s > 0;
+        if (!hasG) return null;
+        if (g >= 9 && hasM && m >= 9 && hasS && s >= 9) return 'T9';
+        if (g >= 9) return 'G9';
+        if (g >= 8 && hasM && m >= 8 && hasS && s >= 8) return 'T8';
+        if (g >= 8) return 'G8';
+        if (g >= 7 && hasM && m >= 7 && hasS && s >= 7) return 'T7';
+        if (g >= 7) return 'G7';
+        if (g >= 6) return 'G6';
+        if (g >= 5) return 'G5';
+        if (g >= 4) return 'G4';
+        return null;
+      }
+
+      function categoryBadge(cat) {
+        if (!cat) return '<span style="color:#666">—</span>';
+        const colors = {
+          G4: { bg: '#616161', fg: '#e0e0e0' }, G5: { bg: '#616161', fg: '#e0e0e0' },
+          G6: { bg: '#f9a825', fg: '#1a1a1a' }, G7: { bg: '#e65100', fg: '#ffffff' },
+          T7: { bg: '#c62828', fg: '#ffffff' }, G8: { bg: '#00838f', fg: '#ffffff' },
+          T8: { bg: '#1565c0', fg: '#ffffff' }, G9: { bg: '#ab47bc', fg: '#ffffff' },
+          T9: { bg: '#6a1b9a', fg: '#ffffff' }
+        };
+        const c = colors[cat] || { bg: '#424242', fg: '#e0e0e0' };
+        return `<span class="troop-category" style="background:${c.bg};color:${c.fg}">${cat}</span>`;
+      }
+
+      function troopBadge(type, level) {
+        if (!level && level !== 0) return '<span style="color:#666">—</span>';
+        const n = Number(level) || 0;
+        let cls;
+        if (type === 'c') {
+          // Crypt: 1-15 red, 16-20 orange, 21-25 yellow, 26-30 green, 31-35 purple, 36+ pink
+          if (n >= 36) cls = 'lvl-pink';
+          else if (n >= 31) cls = 'lvl-purple';
+          else if (n >= 26) cls = 'lvl-green';
+          else if (n >= 21) cls = 'lvl-yellow';
+          else if (n >= 16) cls = 'lvl-orange';
+          else cls = 'lvl-red';
+        } else {
+          // G/M/S/E: 1-5 red, 6 orange, 7 yellow, 8 green, 9 purple, 10+ pink
+          if (n >= 10) cls = 'lvl-pink';
+          else if (n >= 9) cls = 'lvl-purple';
+          else if (n >= 8) cls = 'lvl-green';
+          else if (n >= 7) cls = 'lvl-yellow';
+          else if (n >= 6) cls = 'lvl-orange';
+          else cls = 'lvl-red';
+        }
+        return `<span class="troop-badge ${cls}">${level}</span>`;
+      }
+
+      function troopCell(troops) {
+        const vals = [troops.G, troops.M, troops.S, troops.E, troops.C];
+        if (vals.every(v => v == null)) return '<span style="color:#666">—</span>';
+        const sep = '<span style="color:#555;font-size:0.7em">/</span>';
+        return troopBadge('g', troops.G) + sep + troopBadge('m', troops.M) + sep + troopBadge('s', troops.S) + sep + troopBadge('e', troops.E) + sep + troopBadge('c', troops.C);
+      }
+
+      function getHeroBg(lvl) {
+        if (lvl > 500) return '#4a148c'; if (lvl > 400) return '#0d47a1';
+        if (lvl > 300) return '#1b5e20'; if (lvl > 200) return '#fbc02d';
+        if (lvl > 100) return '#37474f'; return '#4e342e';
+      }
+      function getHeroFg(lvl) {
+        if (lvl > 500) return '#e1bee7'; if (lvl > 400) return '#bbdefb';
+        if (lvl > 300) return '#c8e6c9'; if (lvl > 200) return '#3e2723';
+        if (lvl > 100) return '#eceff1'; return '#d7ccc8';
+      }
+
+      function sortTable(column) {
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort.column = column;
+          currentSort.direction = 'asc';
+        }
+        filteredData.sort((a, b) => {
+          let aVal, bVal;
+          const keyA = (a.name || '').toLowerCase();
+          const keyB = (b.name || '').toLowerCase();
+          const tA = troopData[keyA] || {};
+          const tB = troopData[keyB] || {};
+          const hA = heroData[keyA];
+          const hB = heroData[keyB];
+          switch (column) {
+            case 'name': aVal = keyA; bVal = keyB; break;
+            case 'joinDate': aVal = parseDateUTC(a.joinDate); bVal = parseDateUTC(b.joinDate); break;
+            case 'heroLevel':
+              aVal = hA ? hA.level : -1; bVal = hB ? hB.level : -1; break;
+            case 'category':
+              aVal = CATEGORY_ORDER.indexOf(determineTroopCategory(tA.G, tA.M, tA.S));
+              bVal = CATEGORY_ORDER.indexOf(determineTroopCategory(tB.G, tB.M, tB.S));
+              break;
+            case 'troops':
+              aVal = (tA.G || 0) + (tA.M || 0) + (tA.S || 0) + (tA.E || 0) + (tA.C || 0);
+              bVal = (tB.G || 0) + (tB.M || 0) + (tB.S || 0) + (tB.E || 0) + (tB.C || 0);
+              break;
+            default: aVal = 0; bVal = 0;
+          }
+          if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+          if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+          return 0;
+        });
+        document.querySelectorAll('#members th.sortable').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
+        const currentTh = document.querySelector(`#members th[data-column="${column}"]`);
+        if (currentTh) currentTh.classList.add(`sorted-${currentSort.direction}`);
+        renderTable();
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById('membersTableBody');
+        tbody.innerHTML = '';
+        filteredData.forEach(member => {
+          const key = (member.name || '').toLowerCase();
+          const troops = troopData[key] || {};
+          const hero = heroData[key];
+          const row = document.createElement('tr');
+          const heroHtml = hero && hero.level != null
+            ? `<span style="display:inline-block;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;background:${getHeroBg(hero.level)};color:${getHeroFg(hero.level)};" title="Updated: ${hero.timestamp || '?'}">${hero.level}</span>`
+            : '<span style="color:#666">—</span>';
+          const cat = determineTroopCategory(troops.G, troops.M, troops.S);
+          row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroHtml}</td><td class="date-value">${formatDate(member.joinDate)}</td><td style="text-align:center">${categoryBadge(cat)}</td><td style="text-align:center;white-space:nowrap;">${troopCell(troops)}</td>`;
+          tbody.appendChild(row);
+        });
+      }
+
+      function populateMemberSelect() {
+        const heroSelect = document.getElementById('heroMemberSelect');
+        const troopSelect = document.getElementById('troopMemberSelect');
+        const oldSelect = document.getElementById('oldMemberSelect');
+        const removeSelect = document.getElementById('removeMemberSelect');
+        if (!membersData || membersData.length === 0) {
+          const empty = '<option value="">-- No members --</option>';
+          [heroSelect, troopSelect, oldSelect, removeSelect].forEach(sel => { if (sel) sel.innerHTML = empty; });
+          return;
+        }
+        const sorted = [...membersData].sort((a, b) => a.name.localeCompare(b.name));
+        const options = ['<option value="">-- Select member --</option>'].concat(sorted.map(m => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`)).join('');
+        [heroSelect, troopSelect, oldSelect, removeSelect].forEach(sel => { if (sel) sel.innerHTML = options; });
+      }
+
+      function setTodayDefault() {
+        const today = getTodayUTCString();
+        ['troopDateInput', 'heroLevelDate', 'joinDate', 'endDate'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = today;
+        });
+      }
+
+      function loadMemberTroops() {
+        const name = document.getElementById('troopMemberSelect').value;
+        const key = name ? name.toLowerCase() : '';
+        const troops = troopData[key] || {};
+        loadedTroopLevels = { ...troops };
+        ['G', 'S', 'M', 'E', 'C'].forEach(t => {
+          document.getElementById('troop' + t).value = troops[t] || '';
+        });
+      }
+
+      async function submitAllTroops() {
+        const playerName = document.getElementById('troopMemberSelect').value;
+        const date = document.getElementById('troopDateInput').value;
+        const notes = document.getElementById('troopNotesInput').value.trim();
+        const status = document.getElementById('troopStatus');
+        status.textContent = ''; status.className = 'status';
+        if (!playerName) { status.textContent = 'Please select a member.'; status.className = 'status err'; return; }
+        const customTimestamp = date ? date + 'T12:00:00Z' : null;
+        const types = ['G', 'S', 'M', 'E', 'C'];
+        const changes = [];
+        for (const t of types) {
+          const raw = document.getElementById('troop' + t).value;
+          if (raw === '') continue;
+          const level = parseInt(raw, 10);
+          const isC = t === 'C';
+          if (isNaN(level) || (isC ? (level < 1 || level > 500) : (level < 3 || level > 9))) {
+            status.textContent = `${t}: ${isC ? 'must be 1-500' : 'must be 3-9'}.`;
+            status.className = 'status err'; return;
+          }
+          if (level !== (loadedTroopLevels[t] || 0)) changes.push({ type: t, level });
+        }
+        if (changes.length === 0) { status.textContent = 'No changes detected.'; status.className = 'status err'; return; }
+        status.textContent = `Saving ${changes.length} change(s)...`;
+        try {
+          const results = await Promise.all(
+            changes.map(c =>
+              fetch(window.GAS_WEB_APP_URL, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'addTroopEntry', playerName, troopType: c.type, troopLevel: c.level, notes, customTimestamp })
+              }).then(r => r.json())
+            )
+          );
+          const ok = results.filter(r => r && r.success).length;
+          const fail = results.length - ok;
+          // Optimistic update
+          const key = playerName.toLowerCase();
+          if (!troopData[key]) troopData[key] = {};
+          changes.forEach(c => { troopData[key][c.type] = c.level; });
+          loadedTroopLevels = { ...troopData[key] };
+          renderTable();
+          status.textContent = fail ? `${ok} saved, ${fail} failed.` : `${ok} troop level(s) updated for ${playerName}.`;
+          status.className = fail ? 'status err' : 'status ok';
+          document.getElementById('troopNotesInput').value = '';
+        } catch (err) {
+          status.textContent = 'Error: ' + err.message;
+          status.className = 'status err';
+        }
+      }
+
+      function submitHeroLevelEntry() {
+        const playerName = document.getElementById('heroMemberSelect').value;
+        const levelRaw = document.getElementById('heroLevelValue').value;
+        const date = document.getElementById('heroLevelDate').value;
+        const status = document.getElementById('heroLevelStatus');
+        status.textContent = '';
+        status.className = 'status';
+        if (!playerName) { status.textContent = 'Please select a member.'; status.classList.add('err'); return; }
+        const level = parseInt(levelRaw, 10);
+        if (isNaN(level) || level < 0) { status.textContent = 'Enter a valid hero level (0 or higher).'; status.classList.add('err'); return; }
+        status.textContent = 'Saving...';
+        const customTimestamp = date ? date + 'T12:00:00Z' : null;
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'recordHeroLevel', playerName, level, customTimestamp })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success) {
+              status.textContent = result.message || `Hero level ${level} saved for ${playerName}.`;
+              status.classList.add('ok');
+              document.getElementById('heroLevelValue').value = '';
+              document.getElementById('heroMemberSelect').focus();
+              // Optimistic update in local data
+              heroData[playerName.toLowerCase()] = { level, timestamp: date || new Date().toISOString() };
+              renderTable();
+            } else {
+              status.textContent = result?.message || 'Failed to save.';
+              status.classList.add('err');
+            }
+          })
+          .catch(error => { status.textContent = `Error: ${error.message}`; status.classList.add('err'); });
+      }
+
+      // ── Hero Level Batch Entry ──
+      let heroBatchQueue = {};
+
+      const escapeAttr = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+      function toggleHeroBatch() {
+        const panel = document.getElementById('heroBatchPanel');
+        if (!panel) return;
+        const isVisible = panel.style.display !== 'none';
+        if (isVisible) { panel.style.display = 'none'; return; }
+        panel.style.display = 'block';
+        heroBatchQueue = {};
+        document.getElementById('heroBatchStatus').textContent = '';
+        renderHeroBatchTable();
+        document.getElementById('heroMemberSelect').focus();
+      }
+
+      function renderHeroBatchTable() {
+        const tbody = document.getElementById('heroBatchBody');
+        if (!tbody) return;
+        const countEl = document.getElementById('heroBatchCount');
+        const queuedKeys = Object.keys(heroBatchQueue);
+        if (countEl) countEl.textContent = queuedKeys.length;
+        if (queuedKeys.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:20px;color:#888;">No entries queued yet. Use the Member dropdown above and press Enter.</td></tr>';
+          return;
+        }
+        let html = '';
+        queuedKeys.forEach(key => {
+          const entry = heroBatchQueue[key];
+          html += '<tr>'
+            + '<td style="padding:4px 8px;">' + escapeHtml(entry.name) + '</td>'
+            + '<td style="text-align:center;padding:4px 8px;color:#81c784;font-weight:700;">' + entry.level + '</td>'
+            + '<td style="text-align:center;padding:4px 8px;"><button class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="MembersTab.removeHeroBatchEntry(\'' + escapeAttr(key) + '\')">✖</button></td>'
+            + '</tr>';
+        });
+        tbody.innerHTML = html;
+      }
+
+      function addToHeroBatch() {
+        const status = document.getElementById('heroLevelStatus');
+        status.textContent = ''; status.className = 'status';
+        const memberSel = document.getElementById('heroMemberSelect');
+        const levelInput = document.getElementById('heroLevelValue');
+        const memberName = memberSel.value;
+        const level = parseInt(levelInput.value, 10);
+        if (!memberName) { status.textContent = 'Select a member.'; status.classList.add('err'); return; }
+        if (isNaN(level) || level < 0) { status.textContent = 'Enter a valid hero level.'; status.classList.add('err'); return; }
+        heroBatchQueue[memberName.toLowerCase()] = { name: memberName, level: level };
+        status.textContent = '\u2713 Queued: ' + memberName + ' \u2192 Level ' + level;
+        status.classList.add('ok');
+        levelInput.value = '';
+        memberSel.value = '';
+        memberSel.focus();
+        renderHeroBatchTable();
+      }
+
+      function removeHeroBatchEntry(key) {
+        delete heroBatchQueue[key];
+        renderHeroBatchTable();
+      }
+
+      function saveHeroBatchEntries() {
+        const status = document.getElementById('heroBatchStatus');
+        status.textContent = ''; status.className = 'status';
+        const keys = Object.keys(heroBatchQueue);
+        if (keys.length === 0) { status.textContent = 'No entries queued.'; status.classList.add('err'); return; }
+        const date = document.getElementById('heroLevelDate').value;
+        const customTimestamp = date ? date + 'T12:00:00Z' : null;
+        const records = keys.map(k => ({ playerName: heroBatchQueue[k].name, level: heroBatchQueue[k].level }));
+        status.textContent = 'Saving ' + records.length + ' entries...';
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'batchRecordHeroLevel', records, customTimestamp })
+        }).then(res => res.json()).then(result => {
+          if (result && result.success !== false) {
+            status.textContent = 'Saved ' + (result.successCount || records.length) + ' hero level entries!';
+            status.classList.add('ok');
+            // Optimistic update for all queued entries
+            keys.forEach(k => {
+              const entry = heroBatchQueue[k];
+              heroData[entry.name.toLowerCase()] = { level: entry.level, timestamp: date || new Date().toISOString() };
+            });
+            renderTable();
+            updateStats();
+            heroBatchQueue = {};
+            renderHeroBatchTable();
+          } else {
+            status.textContent = result?.message || 'Failed to save.';
+            status.classList.add('err');
+          }
+        }).catch(error => { status.textContent = 'Error: ' + error.message; status.classList.add('err'); });
+      }
+
+      function submitAddMember() {
+        const name = document.getElementById('newMemberNameInput').value.trim();
+        const joinDate = document.getElementById('joinDate').value;
+        const status = document.getElementById('addMemberStatus');
+        status.textContent = '';
+        status.className = 'status';
+        if (!name) { status.textContent = 'Please enter a name.'; status.classList.add('err'); return; }
+        if (!joinDate) { status.textContent = 'Please select a join date.'; status.classList.add('err'); return; }
+        status.textContent = 'Adding member...';
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'addMember', name, joinDate })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success) {
+              status.textContent = `Added "${name}".`;
+              status.classList.add('ok');
+              document.getElementById('newMemberNameInput').value = '';
+              const newMember = { name: name, joinDate: joinDate };
+              membersData.push(newMember);
+              filteredData = [...membersData];
+              populateMemberSelect();
+              renderTable();
+              updateStats();
+            } else {
+              status.textContent = result?.message || 'Failed to add.';
+              status.classList.add('err');
+            }
+          })
+          .catch(error => {
+            status.textContent = `Error: ${error.message}`;
+            status.classList.add('err');
+          });
+      }
+
+      function submitNameChange() {
+        const oldName = document.getElementById('oldMemberSelect').value;
+        const newName = document.getElementById('newMemberName').value.trim();
+        const status = document.getElementById('nameChangeStatus');
+        status.textContent = '';
+        status.className = 'status';
+        if (!oldName) { status.textContent = 'Please select a member.'; status.classList.add('err'); return; }
+        if (!newName) { status.textContent = 'Please enter a new name.'; status.classList.add('err'); return; }
+        if (oldName === newName) { status.textContent = 'Names are the same.'; status.classList.add('err'); return; }
+        status.textContent = 'Updating name...';
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'updateMemberName', oldName, newName })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success) {
+              status.textContent = result.message || `Updated "${oldName}" to "${newName}".`;
+              status.classList.add('ok');
+              document.getElementById('newMemberName').value = '';
+              // Update client-side state immediately
+              const idx = membersData.findIndex(m => m.name === oldName);
+              if (idx >= 0) membersData[idx].name = newName;
+              filteredData = [...membersData];
+              populateMemberSelect();
+              renderTable();
+            } else {
+              status.textContent = result?.message || 'Failed to update.';
+              status.classList.add('err');
+            }
+          })
+          .catch(error => {
+            status.textContent = `Error: ${error.message}`;
+            status.classList.add('err');
+          });
+      }
+
+      function submitRemoveMember() {
+        const memberName = document.getElementById('removeMemberSelect').value;
+        const endDate = document.getElementById('endDate').value;
+        const remarks = (document.getElementById('removeRemarks')?.value || '').trim();
+        const status = document.getElementById('removeMemberStatus');
+        status.textContent = '';
+        status.className = 'status';
+        if (!memberName) { status.textContent = 'Please select a member.'; status.classList.add('err'); return; }
+        if (!endDate) { status.textContent = 'Please select an end date.'; status.classList.add('err'); return; }
+        status.textContent = 'Removing member...';
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'disableMember', memberName, endDate, remarks })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result && result.success) {
+              status.textContent = result.message || `Removed "${memberName}".`;
+              status.classList.add('ok');
+              // Update client-side state immediately
+              membersData = membersData.filter(m => m.name !== memberName);
+              filteredData = filteredData.filter(m => m.name !== memberName);
+              populateMemberSelect();
+              renderTable();
+              updateStats();
+            } else {
+              status.textContent = result?.message || 'Failed to remove.';
+              status.classList.add('err');
+            }
+          })
+          .catch(error => {
+            status.textContent = `Error: ${error.message}`;
+            status.classList.add('err');
+          });
+      }
+
+      // ── Penalty Exemptions ────────────────────────────────────────────
+      let exemptSelection = null;   // Set of lowercased member names
+      let exemptMeta = {};
+
+      function loadExemptMembers(force) {
+        const status = document.getElementById('exemptStatus');
+        if (exemptSelection && !force) { renderExemptList(); return; }
+        if (status) { status.textContent = 'Loading exemptions...'; status.className = 'status'; }
+        postAction({ action: 'getExemptMembers' })
+          .then(result => {
+            exemptSelection = new Set();
+            exemptMeta = {};
+            (result && result.members ? result.members : []).forEach(entry => {
+              const key = String(entry.name || '').trim().toLowerCase();
+              if (!key) return;
+              exemptSelection.add(key);
+              exemptMeta[key] = {
+                name: entry.name || key,
+                reason: entry.reason || '',
+                startDate: entry.startDate || '',
+                endDate: entry.endDate || ''
+              };
+            });
+            if (status) { status.textContent = ''; status.className = 'status'; }
+            renderExemptList();
+          })
+          .catch(error => {
+            if (status) { status.textContent = 'Error: ' + error.message; status.className = 'status err'; }
+          });
+      }
+
+      function renderExemptList() {
+        const container = document.getElementById('exemptList');
+        const summary = document.getElementById('exemptSummary');
+        if (!container || !exemptSelection) return;
+
+        const term = (document.getElementById('exemptSearchInput')?.value || '').toLowerCase().trim();
+        const knownKeys = new Set(membersData.map(m => (m.name || '').toLowerCase()));
+        // Exempt names that are no longer clan members must stay listed so they can be removed
+        const extras = [...exemptSelection].filter(key => !knownKeys.has(key)).map(key => (exemptMeta[key] && exemptMeta[key].name) || key);
+        const rows = membersData.map(m => m.name)
+          .concat(extras)
+          .filter(Boolean)
+          .filter(name => !term || name.toLowerCase().includes(term))
+          .sort((a, b) => a.localeCompare(b));
+
+        if (summary) {
+          const datedCount = [...exemptSelection].filter(key => {
+            const meta = exemptMeta[key] || {};
+            return !!(meta.startDate || meta.endDate);
+          }).length;
+          summary.textContent = `${exemptSelection.size} member(s) exempt from penalties (${datedCount} date-limited).`;
+        }
+
+        if (rows.length === 0) {
+          container.innerHTML = '<p style="color:#888; font-size:13px;">No members match this filter.</p>';
+          return;
+        }
+
+        container.innerHTML = rows.map(name => {
+          const key = name.toLowerCase();
+          const checked = exemptSelection.has(key) ? ' checked' : '';
+          const unknown = !knownKeys.has(key) ? ' <span style="color:#888;font-size:11px;">(not an active member)</span>' : '';
+          const meta = exemptMeta[key] || {};
+          return `<div style="display:grid; grid-template-columns: minmax(170px,1.4fr) minmax(150px,1fr) 125px 125px; gap:8px; align-items:center; padding:5px 4px; color:#e0e0e0; font-size:13px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; text-transform:none; letter-spacing:0; font-weight:400; margin:0;">
+              <input type="checkbox" style="width:auto;" data-exempt="${escapeHtml(name)}"${checked} onchange="MembersTab.toggleExemptMember(this)">
+              <span>${escapeHtml(name)}${unknown}</span>
+            </label>
+            <input type="text" placeholder="Reason" value="${escapeHtml(meta.reason || '')}" data-exempt="${escapeHtml(name)}" data-field="reason" onchange="MembersTab.updateExemptField(this)" style="width:100%; padding:6px; font-size:12px;">
+            <input type="date" value="${escapeHtml(meta.startDate || '')}" data-exempt="${escapeHtml(name)}" data-field="startDate" onchange="MembersTab.updateExemptField(this)" title="Start date (blank = always)" style="width:100%; padding:6px; font-size:12px;">
+            <input type="date" value="${escapeHtml(meta.endDate || '')}" data-exempt="${escapeHtml(name)}" data-field="endDate" onchange="MembersTab.updateExemptField(this)" title="End date (blank = always)" style="width:100%; padding:6px; font-size:12px;">
+          </div>`;
+        }).join('');
+      }
+
+      function toggleExemptMember(input) {
+        const name = input.getAttribute('data-exempt') || '';
+        const key = name.toLowerCase();
+        if (input.checked) exemptSelection.add(key); else exemptSelection.delete(key);
+        exemptMeta[key] = exemptMeta[key] || { name, reason: '', startDate: '', endDate: '' };
+        exemptMeta[key].name = name;
+        const summary = document.getElementById('exemptSummary');
+        if (summary) summary.textContent = `${exemptSelection.size} member(s) exempt from penalties.`;
+      }
+
+      function updateExemptField(input) {
+        const name = input.getAttribute('data-exempt') || '';
+        const key = name.toLowerCase();
+        const field = input.getAttribute('data-field') || '';
+        if (!key || !field) return;
+        exemptMeta[key] = exemptMeta[key] || { name, reason: '', startDate: '', endDate: '' };
+        exemptMeta[key].name = name;
+        exemptMeta[key][field] = input.value || '';
+      }
+
+      function saveExemptMembers() {
+        const status = document.getElementById('exemptStatus');
+        if (!exemptSelection) return;
+        const byKey = {};
+        membersData.forEach(m => { if (m.name) byKey[m.name.toLowerCase()] = m.name; });
+        const members = [...exemptSelection].map(key => ({
+          name: byKey[key] || (exemptMeta[key] && exemptMeta[key].name) || key,
+          reason: (exemptMeta[key] && exemptMeta[key].reason) || '',
+          startDate: (exemptMeta[key] && exemptMeta[key].startDate) || '',
+          endDate: (exemptMeta[key] && exemptMeta[key].endDate) || ''
+        }));
+        if (status) { status.textContent = 'Saving...'; status.className = 'status'; }
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'setExemptMembers', members })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (status) {
+              status.textContent = result?.message || 'Exemptions saved.';
+              status.className = 'status ' + (result?.success ? 'ok' : 'err');
+            }
+          })
+          .catch(error => {
+            if (status) { status.textContent = 'Error: ' + error.message; status.className = 'status err'; }
+          });
+      }
+
+      // ── Linked Google Accounts ─────────────────────────────────
+      let memberAccounts = null;   // [{ name, email }]
+
+      function loadMemberAccounts(force) {
+        const status = document.getElementById('accountsStatus');
+        if (memberAccounts && !force) { renderMemberAccounts(); return; }
+        if (status) { status.textContent = 'Loading linked accounts...'; status.className = 'status'; }
+        postAction({ action: 'getMemberGoogleAccounts' })
+          .then(result => {
+            memberAccounts = (result && result.members) ? result.members : [];
+            if (status) { status.textContent = ''; status.className = 'status'; }
+            renderMemberAccounts();
+          })
+          .catch(error => {
+            if (status) { status.textContent = 'Error: ' + error.message; status.className = 'status err'; }
+          });
+      }
+
+      function renderMemberAccounts() {
+        const container = document.getElementById('accountsList');
+        const summary = document.getElementById('accountsSummary');
+        if (!container || !memberAccounts) return;
+
+        const term = (document.getElementById('accountsSearchInput')?.value || '').toLowerCase().trim();
+        const rows = memberAccounts.filter(m => !term || m.name.toLowerCase().includes(term));
+        const linked = memberAccounts.filter(m => m.email).length;
+        if (summary) summary.textContent = `${linked} of ${memberAccounts.length} member(s) have a Google account linked.`;
+
+        if (rows.length === 0) {
+          container.innerHTML = '<p style="color:#888; font-size:13px;">No members match this filter.</p>';
+          return;
+        }
+
+        container.innerHTML = rows.map(m => `<div style="display:grid; grid-template-columns:minmax(120px,1fr) 2fr; gap:10px; align-items:center; padding:5px 4px;">
+          <span style="color:#e0e0e0; font-size:13px; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.name)}</span>
+          <input type="email" value="${escapeHtml(m.email || '')}" placeholder="name@gmail.com" data-account="${escapeHtml(m.name)}"
+            onchange="MembersTab.updateMemberAccount(this)" style="padding:6px 8px; font-size:13px;">
+        </div>`).join('');
+      }
+
+      function updateMemberAccount(input) {
+        const name = input.getAttribute('data-account') || '';
+        const entry = memberAccounts.find(m => m.name === name);
+        if (entry) entry.email = (input.value || '').trim().toLowerCase();
+      }
+
+      function saveMemberAccounts() {
+        const status = document.getElementById('accountsStatus');
+        if (!memberAccounts) return;
+        if (status) { status.textContent = 'Saving...'; status.className = 'status'; }
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'setMemberGoogleAccounts', members: memberAccounts })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (status) {
+              status.textContent = result?.message || 'Accounts saved.';
+              status.className = 'status ' + (result?.success ? 'ok' : 'err');
+            }
+            loadMemberAccounts(true);
+          })
+          .catch(error => {
+            if (status) { status.textContent = 'Error: ' + error.message; status.className = 'status err'; }
+          });
+      }
+
+      function switchTab(tabId, evt) {
+        document.querySelectorAll('#members .tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#members .tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(tabId)?.classList.add('active');
+        if (evt && evt.target) evt.target.classList.add('active');
+
+        const memberTableSection = document.getElementById('memberTableSection');
+        if (memberTableSection) {
+          memberTableSection.style.display = (tabId === 'chestPointsTab' || tabId === 'exemptTab' || tabId === 'accountsTab') ? 'none' : '';
+        }
+
+        if (tabId === 'chestPointsTab') {
+          loadChestPointsTabData();
+        }
+        if (tabId === 'exemptTab') {
+          loadExemptMembers();
+        }
+        if (tabId === 'accountsTab') {
+          loadMemberAccounts();
+        }
+      }
+
+      function formatMight(might) {
+        if (!might || might === 0) return '-';
+        return might.toLocaleString();
+      }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        try {
+          const date = parseDateUTC(dateStr);
+          if (!date) return dateStr;
+          // Format as ISO UTC date string
+          const year = date.getUTCFullYear();
+          const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+          const day = String(date.getUTCDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        } catch (e) {
+          return dateStr;
+        }
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function showLoading() {
+        document.getElementById('memberLoading').style.display = 'block';
+        document.getElementById('memberError').style.display = 'none';
+        document.getElementById('membersTable').style.display = 'none';
+        document.getElementById('memberEmpty').style.display = 'none';
+      }
+
+      function showTable() {
+        document.getElementById('memberLoading').style.display = 'none';
+        document.getElementById('memberError').style.display = 'none';
+        document.getElementById('membersTable').style.display = 'table';
+        document.getElementById('memberEmpty').style.display = 'none';
+      }
+
+      function showEmpty() {
+        document.getElementById('memberLoading').style.display = 'none';
+        document.getElementById('memberError').style.display = 'none';
+        document.getElementById('membersTable').style.display = 'none';
+        document.getElementById('memberEmpty').style.display = 'block';
+      }
+
+      return { init, loadAllData, switchTab, loadMemberTroops, submitAllTroops, submitHeroLevelEntry, toggleHeroBatch, addToHeroBatch, removeHeroBatchEntry, saveHeroBatchEntries, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPtOverride, updatePtOverride, loadExemptMembers, toggleExemptMember, updateExemptField, saveExemptMembers, loadMemberAccounts, updateMemberAccount, saveMemberAccounts };
+    })();
+  </script>
+</body>
+<script>
+// Hamburger menu toggle for mobile navigation
+document.addEventListener('DOMContentLoaded', function() {
+  const hamburger = document.getElementById('navHamburger');
+  const navTabs = document.getElementById('navTabs');
+  if (hamburger && navTabs) {
+    hamburger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navTabs.classList.toggle('open');
+    });
+  }
+  // Optional: close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    if (navTabs.classList.contains('open') && !navTabs.contains(e.target) && !hamburger.contains(e.target)) {
+      navTabs.classList.remove('open');
+    }
+  });
+});
+</script>
+</html>

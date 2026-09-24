@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cCc Champions - Compensation Calculator</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
+  <script src="config.js"></script>
+  <script src="portal-shim.js"></script>
+  <script src="portal-auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      color: #f3f3f3;
+      text-align: center;
+      padding: 32px 16px 60px 16px;
+      min-height: 100vh;
+      background-attachment: fixed;
+    }
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    .goog-te-balloon-frame { display: none !important; }
+
+    .tab-content { padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+
+    .login-container {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .login-container h1 {
+      color: #ffb300;
+      margin-bottom: 20px;
+    }
+
+    .login-container p {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .google-signin {
+      display: inline-block;
+    }
+
+    .header { margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .header p {
+      color: #b0b0b0;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .tab-icon {
+      display: inline-block;
+    }
+
+    /* Sticky Navigation Bar */
+    .tab-nav {
+      background: rgba(30, 34, 40, 0.95);
+      border-bottom: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      width: 100%;
+      left: 0;
+      right: 0;
+      overflow: visible;
+    }
+    .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand img { height: 32px; width: auto; }
+    .tab-buttons {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-items: center;
+      height: 100px;
+    }
+    .tab-btn { 
+      padding: 12px 16px; 
+      background: none; 
+      border: none; 
+      color: #e0e0e0; 
+      font-size: 28px; 
+      font-weight: 500; 
+      border-bottom: 3px solid transparent; 
+      transition: all 0.2s; 
+      white-space: nowrap; 
+      text-decoration: none;
+      display: block;
+      cursor: pointer; 
+      position: relative; 
+    }
+    .tab-btn:hover { color: #ffb300; background: #232526; }
+    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab-btn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #232526;
+      color: #ffb300;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1001;
+      border: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .tab-btn .tab-icon {
+      display: block;
+      margin: 0 auto;
+      height: 40px;
+      width: auto;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 500;
+      white-space: nowrap;
+      filter: drop-shadow(0 2px 8px #000a);
+    }
+
+    .read-only-badge {
+      background: #ff5252;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .logout-btn {
+      background: #ff5252;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #ff1744;
+      transform: scale(1.05);
+    }
+
+    .quick-add-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .quick-add-section h3 {
+      color: #ffb300;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .quick-add-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .quick-add-form {
+      background: #232526;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .quick-add-form label {
+      display: block;
+      color: #ffb300;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .quick-add-form select,
+    .quick-add-form input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .quick-add-form input:focus,
+    .quick-add-form select:focus {
+      outline: none;
+      border-color: #ffb300;
+      box-shadow: 0 0 8px rgba(255, 179, 0, 0.2);
+    }
+
+    .quick-add-form button {
+      width: 100%;
+      padding: 10px;
+      background: #ffb300;
+      color: #232526;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .quick-add-form button:hover {
+      background: #ffc933;
+      transform: scale(1.02);
+    }
+
+    .status {
+      padding: 12px 16px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status.ok {
+      display: block;
+      background: #1b5e20;
+      color: #c8e6c9;
+      border-left: 4px solid #4caf50;
+    }
+
+    .status.err {
+      display: block;
+      background: #b71c1c;
+      color: #ffcdd2;
+      border-left: 4px solid #f44336;
+    }
+
+    .status:not(.ok):not(.err) {
+      display: block;
+      background: #1a237e;
+      color: #bbdefb;
+      border-left: 4px solid #2196f3;
+    }
+
+    /* Incidents Section */
+    .incidents-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .incidents-section h2 {
+      color: #ffb300;
+      margin-bottom: 16px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .incident-form {
+      background: #232526;
+      padding: 16px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      margin-bottom: 16px;
+    }
+
+    .incident-form input {
+      width: 100%;
+      padding: 10px;
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .incident-form input:focus {
+      outline: none;
+      border-color: #ffb300;
+      box-shadow: 0 0 8px rgba(255, 179, 0, 0.2);
+    }
+
+    .added-leaders-section {
+      background: #232526;
+      padding: 16px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      margin-bottom: 16px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .added-leaders-section::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .added-leaders-section::-webkit-scrollbar-track {
+      background: #1a1b1c;
+      border-radius: 4px;
+    }
+
+    .added-leaders-section::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+    }
+
+    .added-leaders-section::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+
+    /* Troop Entry Grids */
+    .troop-grid-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .troop-grid-section h3 {
+      color: #ffb300;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .level-input {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .level-input label {
+      font-size: 11px;
+      color: #ffb300;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .level-input input {
+      width: 100%;
+      padding: 6px;
+      background: #232526;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .level-input input:focus {
+      outline: none;
+      border-color: #ffb300;
+      background: #1a1b1c;
+    }
+
+    /* Monsters Section */
+    .monster-grid-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .monster-grid-section h3 {
+      color: #ffb300;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .monster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 10px;
+    }
+
+    .monster-input {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .monster-input label {
+      font-size: 12px;
+      color: #ffb300;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .monster-input input {
+      padding: 8px;
+      background: #232526;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .monster-input input:focus {
+      outline: none;
+      border-color: #ffb300;
+    }
+
+    /* Buildings Section */
+    .building-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .building-section h3 {
+      color: #ffb300;
+      margin-bottom: 16px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .building-fields {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+
+    .building-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .building-field label {
+      font-size: 12px;
+      color: #ffb300;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .building-field input,
+    .building-field select {
+      padding: 10px;
+      background: #232526;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .building-field input:focus,
+    .building-field select:focus {
+      outline: none;
+      border-color: #ffb300;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #ffb300;
+      color: #232526;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: #ffc933;
+      transform: scale(1.02);
+    }
+
+    .btn-secondary {
+      background: #444;
+      color: #e0e0e0;
+      flex: 1;
+    }
+
+    .btn-secondary:hover {
+      background: #555;
+    }
+
+    /* Results Display */
+    .result-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      display: none;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .result-card {
+      background: #232526;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .result-card-title {
+      font-size: 12px;
+      color: #ccc;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-card-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffb300;
+    }
+
+    .result-card.heroes .result-card-value {
+      color: #ffb300;
+    }
+
+    .result-card.troops .result-card-value {
+      color: #8bc34a;
+    }
+
+    .result-card.monsters .result-card-value {
+      color: #ffc933;
+    }
+
+    .result-card.buildings .result-card-value {
+      color: #ff5252;
+    }
+
+    .result-grand-total {
+      background: linear-gradient(135deg, #ffb300 0%, #ffc933 100%);
+      color: #232526;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .result-grand-total-title {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .result-grand-total-value {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    /* Reports Section */
+    .reports-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .reports-section h2 {
+      color: #ffb300;
+      margin-bottom: 16px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .reports-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .report-card {
+      background: #232526;
+      border: 1px solid #444;
+      border-left: 4px solid #ffb300;
+      border-radius: 6px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .report-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      transform: translateY(-2px);
+      border-left-color: #ffc933;
+    }
+
+    .report-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffb300;
+      margin-bottom: 8px;
+    }
+
+    .report-card-date {
+      font-size: 12px;
+      color: #e0e0e0;
+      margin-bottom: 12px;
+    }
+
+    .report-card-btn {
+      padding: 8px 12px;
+      background: #ffb300;
+      color: #232526;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .report-card-btn:hover {
+      background: #ffc933;
+    }
+
+    .reports-empty {
+      text-align: center;
+      color: #888;
+      padding: 40px 20px;
+      font-size: 14px;
+    }
+
+    .reports-loading {
+      text-align: center;
+      color: #888;
+      padding: 40px 20px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #1a1b1c;
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid #444;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #e0e0e0;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #ffb300;
+    }
+
+    @media (max-width: 768px) {
+      .tab-content {
+        margin-top: 80px;
+      }
+
+      .quick-add-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .level-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .reports-list {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* Hamburger menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: #ffb300;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    /* Responsive navigation: show icons on desktop, plain text on mobile */
+    .tab-label.mobile-only { display: none; }
+    .tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
+
+    @media (max-width: 800px) {
+      .tab-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 9999;
+      }
+      .tab-nav-container {
+        flex-wrap: wrap;
+        padding: 8px;
+      }
+      .nav-brand {
+        flex: 1;
+        margin-right: 8px;
+        font-size: 16px;
+        padding: 8px 0;
+      }
+      .nav-brand img {
+        height: 24px;
+        width: 24px;
+      }
+      .hamburger { 
+        display: flex;
+        order: 2;
+      }
+      .tab-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        max-height: 60vh;
+        overflow-y: auto;
+        background: #232526;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 10000;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        display: none;
+        order: 10;
+      }
+      .tab-buttons.open {
+        display: flex;
+      }
+      .tab-btn {
+        font-size: 18px;
+        padding: 18px 24px;
+        border-bottom: 1px solid #444;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        background: none;
+        height: auto;
+      }
+      .tab-btn:last-child { border-bottom: none; }
+      .tab-label.mobile-only { display: inline; }
+      .tab-icon.desktop-only { display: none; }
+      /* Auth buttons and badges on mobile */
+      #readOnlyBadge,
+      #signedInUserBadge,
+      #logoutBtn,
+      #signInManageBtn {
+        order: 3;
+        margin: 4px 0 4px auto !important;
+        font-size: 11px !important;
+        padding: 6px 8px !important;
+      }
+      body {
+        padding-top: 100px;
+      }
+    }
+
+    @media (min-width: 801px) {
+      .tab-label.mobile-only { display: none; }
+      .tab-icon.desktop-only { display: block; }
+      .tab-buttons {
+        flex-direction: row;
+        align-items: center;
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        display: flex !important;
+      }
+      .tab-btn {
+        font-size: 28px;
+        padding: 12px 16px;
+        border-bottom: 3px solid transparent;
+        display: block;
+        justify-content: center;
+      }
+      .hamburger { display: none; }
+    }
+  </style>
+</head>
+<body>
+    <!-- Google Translate Widget -->
+    <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
+    <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+    <style>
+      @media (max-width: 800px) {
+        #google_translate_element {
+          max-width: 0;
+          overflow: hidden;
+          opacity: 0;
+          pointer-events: none;
+          transition: max-width 0.2s ease, opacity 0.2s ease;
+        }
+        body.translate-open #google_translate_element {
+          max-width: 260px;
+          opacity: 1;
+          pointer-events: auto;
+        }
+        #translateToggleBtn { display: inline-flex !important; }
+      }
+      @media (min-width: 801px) {
+        #translateToggleBtn { display: none !important; }
+      }
+    </style>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const translateToggleBtn = document.getElementById('translateToggleBtn');
+        const translateWidget = document.getElementById('google_translate_element');
+        if (!translateToggleBtn || !translateWidget) return;
+        translateToggleBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          document.body.classList.toggle('translate-open');
+        });
+        document.addEventListener('click', function (e) {
+          if (!document.body.classList.contains('translate-open')) return;
+          if (translateWidget.contains(e.target) || translateToggleBtn.contains(e.target)) return;
+          document.body.classList.remove('translate-open');
+        });
+      });
+    </script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+      }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <!-- Google Sign-In integration -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    // --- Google Sign-In for edit access ---
+    const BACKEND_VERIFY_URL = window.GAS_WEB_APP_URL;
+    const AUTH_KEY = 'ccc_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+
+    function setReadOnlyMode(enabled) {
+      if (enabled) {
+        document.documentElement.classList.add('read-only-mode');
+        if (document.body) document.body.classList.add('read-only-mode');
+      } else {
+        document.documentElement.classList.remove('read-only-mode');
+        if (document.body) document.body.classList.remove('read-only-mode');
+      }
+    }
+
+    function updateSignedInBadge(email) {
+      const badge = document.getElementById('signedInUserBadge');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const signInBtn = document.getElementById('signInManageBtn');
+      if (!badge) return;
+      if (email) {
+        badge.innerHTML = email;
+        badge.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        if (signInBtn) signInBtn.style.display = 'none';
+      } else {
+        badge.textContent = '';
+        badge.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (signInBtn) signInBtn.style.display = 'inline-block';
+      }
+    }
+
+    function handleLogout() {
+      try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+      try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+      setReadOnlyMode(true);
+      updateSignedInBadge(null);
+      setTimeout(() => { window.location.reload(); }, 200);
+    }
+
+    function showGoogleLogin() {
+      const loginDiv = document.createElement('div');
+      loginDiv.id = 'login-overlay';
+      loginDiv.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+      loginDiv.innerHTML = `
+        <div style="background:#232526;padding:32px 24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;gap:16px;min-width:300px;border:1px solid #444;">
+          <h2 style="margin-bottom:8px;color:#ffb300;">Sign in to Manage</h2>
+          <p style="font-size:14px;color:#e0e0e0;text-align:center;margin:0 0 8px 0;">Use your Google account to access management features</p>
+          <div id="g_id_onload" data-client_id="47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com" data-callback="onGoogleSignIn" data-auto_prompt="false" data-ux_mode="popup"></div>
+          <div id="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin" data-shape="rectangular" data-logo_alignment="left"></div>
+          <div style="width:100%;height:1px;background:#444;margin:8px 0;"></div>
+          <button id="guest-btn" style="width:100%;margin-top:8px;padding:12px 20px;border:1px solid #444;background:#232526;color:#ffb300;font-size:15px;font-weight:600;border-radius:6px;cursor:pointer;">Continue as Guest (Read-Only)</button>
+          <div id="login-error" style="color:#ff5252;font-size:13px;display:none;"></div>
+        </div>
+      `;
+      document.body.appendChild(loginDiv);
+      setTimeout(() => {
+        const guestBtn = document.getElementById('guest-btn');
+        if (guestBtn) {
+          guestBtn.onclick = function() {
+            document.getElementById('login-overlay').remove();
+            setReadOnlyMode(true);
+            try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+            try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+            updateSignedInBadge(null);
+          };
+        }
+        if (window.google && google.accounts && google.accounts.id) {
+          try {
+            google.accounts.id.initialize({
+              client_id: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
+              callback: onGoogleSignIn,
+              auto_select: false,
+              ux_mode: 'popup'
+            });
+            google.accounts.id.renderButton(document.getElementById('g_id_signin'), 
+              { type: 'standard', size: 'large', theme: 'outline', text: 'signin', shape: 'rectangular', logo_alignment: 'left' });
+          } catch (e) { console.error('Error rendering Google Sign-In button:', e); }
+        }
+      }, 100);
+    }
+
+    window.onGoogleSignIn = async function(response) {
+      const idToken = response.credential;
+      try {
+        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
+        let tokenRes = await fetch(cfWorkerUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        let tokenData = await tokenRes.json();
+        if (!tokenData.success || !tokenData.token_verified) {
+          throw new Error(tokenData.error || 'Token verification failed');
+        }
+        const email = tokenData.email;
+        const res = await fetch(BACKEND_VERIFY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'verifyUserPermission', email })
+        });
+        const data = await res.json();
+        if (data.isAllowedEditor) {
+          try { localStorage.setItem(AUTH_KEY, idToken); } catch (e) {}
+          try { localStorage.setItem(AUTH_EMAIL_KEY, email); } catch (e) {}
+          setReadOnlyMode(false);
+          updateSignedInBadge(email);
+          const overlay = document.getElementById('login-overlay');
+          if (overlay) overlay.style.display = 'none';
+        } else {
+          setReadOnlyMode(true);
+          const errorDiv = document.getElementById('login-error');
+          if (errorDiv) {
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = 'Your account does not have editor access';
+          }
+        }
+      } catch (error) {
+        console.error('Error during sign-in:', error);
+        const errorDiv = document.getElementById('login-error');
+        if (errorDiv) {
+          errorDiv.style.display = 'block';
+          errorDiv.textContent = 'Sign-in failed: ' + error.message;
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const setRestrictedTabsVisibility = (isVisible) => {
+        const displayValue = isVisible ? '' : 'none';
+        ['events.html', 'members.html', 'warnings.html'].forEach((href) => {
+          document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach((link) => {
+            link.style.display = displayValue;
+          });
+        });
+      };
+      const token = (() => { try { return localStorage.getItem(AUTH_KEY); } catch (e) { return null; } })();
+      const email = (() => { try { return localStorage.getItem(AUTH_EMAIL_KEY); } catch (e) { return null; } })();
+      if (!token || !email) {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+      if (token && email) {
+        setReadOnlyMode(false);
+        updateSignedInBadge(email);
+        setRestrictedTabsVisibility(true);
+        const bankTab = document.getElementById('bankTabBtn');
+        if (bankTab) bankTab.style.display = 'flex';
+      } else {
+        setReadOnlyMode(true);
+        updateSignedInBadge(null);
+        setRestrictedTabsVisibility(false);
+        const bankTab = document.getElementById('bankTabBtn');
+        if (bankTab) bankTab.style.display = 'none';
+        let nav = document.querySelector('.tab-nav-container');
+        if (nav && !document.getElementById('signInManageBtn')) {
+          const btn = document.createElement('button');
+          btn.id = 'signInManageBtn';
+          btn.textContent = '🔑 Sign in to Manage';
+          btn.style = 'margin-left:16px;padding:8px 18px;background:#1a73e8;color:#fff;border:none;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s;';
+          btn.onclick = showGoogleLogin;
+          nav.appendChild(btn);
+        }
+      }
+    });
+  </script>
+
+  <!-- Navigation Bar -->
+  <nav class="tab-nav">
+    <div class="tab-nav-container">
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
+      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="tab-buttons" id="navTabs">
+        <a href="dashboard.html" class="tab-btn" title="Dashboard">
+          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Dashboard</span>
+        </a>
+        <a href="events.html" class="tab-btn" title="Events">
+          <img src="events.png" alt="Events" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Events</span>
+        </a>
+        <a href="members.html" class="tab-btn" title="Members">
+          <img src="members.png" alt="Members" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Members</span>
+        </a>
+        <a href="warnings.html" class="tab-btn" title="Warnings">
+          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Warnings</span>
+        </a>
+        <a href="competition.html" class="tab-btn" title="Competition">
+          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Competition</span>
+        </a>
+        <a href="calendar.html" class="tab-btn" title="Calendar">
+          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Calendar</span>
+        </a>
+        <a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;">
+          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Bank</span>
+        </a>
+      </div>
+      <div id="readOnlyBadge" style="display: none; padding: 8px 12px; background: #fff3cd; border-radius: 4px; font-size: 12px; color: #856404;">🔒 Read-Only Mode</div>
+      <div id="signedInUserBadge" style="display: none; margin-left: auto; padding: 8px 12px; background: #1a1b1c; border-radius: 4px; font-size: 12px; color: #ffb300; border: 1px solid #444;"></div>
+      <button id="logoutBtn" onclick="handleLogout()" style="display: none; margin-left: 8px; padding: 8px 10px; background: #c62828; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Log out</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="tab-content active">
+    <div id="loginPrompt" style="display: none; text-align: center; padding: 40px;">
+      <button id="signInBtn" style="padding: 12px 24px; font-size: 16px; cursor: pointer; background: #ffb300; color: #232526; border: none; border-radius: 4px; font-weight: 600;">Sign in to Manage</button>
+    </div>
+
+    <div class="google-signin" id="googleSignInContainer" style="display: none; text-align: center; padding: 20px;"></div>
+
+    <div id="mainContent" style="display: block;">
+      <div class="header">
+        <h1><img src="compensation.png" alt="Compensation" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Compensation Calculator</h1>
+        <p>Calculate compensation for illegal attacks and save the calculation for future reference</p>
+      </div>
+
+      <!-- Quick Add Section -->
+      <div class="quick-add-section">
+        <h3>⚡ Quick Add</h3>
+        <div class="quick-add-grid">
+          <!-- Quick Add Leaders -->
+          <div class="quick-add-form">
+            <label>Leader Type</label>
+            <select id="quickLeaderType">
+              <option value="hero">Hero</option>
+              <option value="captain">Captain</option>
+            </select>
+            <label>Level (1-600)</label>
+            <input type="number" id="quickLeaderLevel" placeholder="Enter level" min="1" max="600" value="1">
+            <button onclick="CompensationTab.quickAddLeader()">Add Leader</button>
+          </div>
+
+          <!-- Quick Add Troops -->
+          <div class="quick-add-form">
+            <label>Troop Type</label>
+            <select id="quickTroopType">
+              <option value="guardsmen">Guardsmen</option>
+              <option value="specialists">Specialists</option>
+              <option value="siege">Siege</option>
+              <option value="mercenary">Mercenary</option>
+            </select>
+            <label>Level (1-9)</label>
+            <input type="number" id="quickTroopLevel" placeholder="Enter level" min="1" max="9" value="1">
+            <label>Amount</label>
+            <input type="number" id="quickTroopAmount" placeholder="Enter amount" min="1" value="1">
+            <button onclick="CompensationTab.quickAddTroop()">Add Troops</button>
+          </div>
+
+          <!-- Quick Add Monsters -->
+          <div class="quick-add-form">
+            <label>Monster Type</label>
+            <select id="quickMonsterType">
+              <option value="monsterIII">Monster III</option>
+              <option value="monsterIV">Monster IV</option>
+              <option value="monsterV">Monster V</option>
+              <option value="monsterVI">Monster VI</option>
+              <option value="monsterVII">Monster VII</option>
+              <option value="monsterVIII">Monster VIII</option>
+              <option value="monsterIX">Monster IX</option>
+              <option value="griffinV">Griffin V</option>
+              <option value="griffinVI">Griffin VI</option>
+              <option value="griffinVII">Griffin VII</option>
+              <option value="coraxI">Corax I</option>
+              <option value="coraxII">Corax II</option>
+            </select>
+            <label>Amount</label>
+            <input type="number" id="quickMonsterAmount" placeholder="Enter amount" min="1" value="1">
+            <button onclick="CompensationTab.quickAddMonster()">Add Monster</button>
+          </div>
+
+          <!-- Quick Add Buildings -->
+          <div class="quick-add-form">
+            <label>Building Type</label>
+            <select id="quickBuildingType">
+              <option value="clanCapital">Clan Capital</option>
+              <option value="otherBuildingsCount">Other Buildings</option>
+              <option value="portalsCount">Portals</option>
+              <option value="cityWallCount">City Walls</option>
+              <option value="goldAmount">Gold</option>
+              <option value="tarAmount">Tar</option>
+            </select>
+            <label>Amount</label>
+            <input type="number" id="quickBuildingAmount" placeholder="Enter amount" min="1" value="1">
+            <button onclick="CompensationTab.quickAddBuilding()">Add Building</button>
+          </div>
+        </div>
+        <div id="quickAddStatus" class="status"></div>
+      </div>
+
+      <!-- Incidents Section -->
+      <div id="incidentsSection" class="incidents-section">
+        <h2>📋 Incident Details</h2>
+        <div class="incident-form">
+          <input type="text" id="compensationName" placeholder="Enter incident name (e.g., 'Guild War - 2024-11-15')">
+        </div>
+
+        <div class="added-leaders-section" id="addedLeadersList">
+          <div style="color: #888; font-size: 12px; text-align: center; padding: 24px;">No leaders added yet. Use Quick Add above to add heroes and captains.</div>
+        </div>
+      </div>
+
+      <!-- Troops Entry -->
+      <div class="troop-grid-section">
+        <h3>⚔️ Guardsmen (Levels 1-9)</h3>
+        <div class="level-grid">
+          <div class="level-input"><label>Lvl 1</label><input type="number" id="guardsmenL1" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 2</label><input type="number" id="guardsmenL2" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 3</label><input type="number" id="guardsmenL3" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 4</label><input type="number" id="guardsmenL4" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 5</label><input type="number" id="guardsmenL5" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 6</label><input type="number" id="guardsmenL6" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 7</label><input type="number" id="guardsmenL7" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 8</label><input type="number" id="guardsmenL8" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 9</label><input type="number" id="guardsmenL9" placeholder="0" min="0"></div>
+        </div>
+
+        <h3>🛡️ Specialists (Levels 1-9)</h3>
+        <div class="level-grid">
+          <div class="level-input"><label>Lvl 1</label><input type="number" id="specialistsL1" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 2</label><input type="number" id="specialistsL2" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 3</label><input type="number" id="specialistsL3" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 4</label><input type="number" id="specialistsL4" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 5</label><input type="number" id="specialistsL5" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 6</label><input type="number" id="specialistsL6" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 7</label><input type="number" id="specialistsL7" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 8</label><input type="number" id="specialistsL8" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 9</label><input type="number" id="specialistsL9" placeholder="0" min="0"></div>
+        </div>
+
+        <h3>🏹 Siege (Levels 1-9)</h3>
+        <div class="level-grid">
+          <div class="level-input"><label>Lvl 1</label><input type="number" id="siegeL1" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 2</label><input type="number" id="siegeL2" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 3</label><input type="number" id="siegeL3" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 4</label><input type="number" id="siegeL4" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 5</label><input type="number" id="siegeL5" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 6</label><input type="number" id="siegeL6" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 7</label><input type="number" id="siegeL7" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 8</label><input type="number" id="siegeL8" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 9</label><input type="number" id="siegeL9" placeholder="0" min="0"></div>
+        </div>
+
+        <h3>💼 Mercenary (Levels 1-9)</h3>
+        <div class="level-grid">
+          <div class="level-input"><label>Lvl 1</label><input type="number" id="mercenaryL1" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 2</label><input type="number" id="mercenaryL2" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 3</label><input type="number" id="mercenaryL3" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 4</label><input type="number" id="mercenaryL4" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 5</label><input type="number" id="mercenaryL5" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 6</label><input type="number" id="mercenaryL6" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 7</label><input type="number" id="mercenaryL7" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 8</label><input type="number" id="mercenaryL8" placeholder="0" min="0"></div>
+          <div class="level-input"><label>Lvl 9</label><input type="number" id="mercenaryL9" placeholder="0" min="0"></div>
+        </div>
+      </div>
+
+      <!-- Monsters Section -->
+      <div class="monster-grid-section">
+        <h3>👹 Monsters & Creatures</h3>
+        <div class="monster-grid">
+          <div class="monster-input"><label>Monster III</label><input type="number" id="monsterIII" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Monster IV</label><input type="number" id="monsterIV" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Monster V</label><input type="number" id="monsterV" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Monster VI</label><input type="number" id="monsterVI" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Monster VII</label><input type="number" id="monsterVII" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Monster VIII</label><input type="number" id="monsterVIII" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Monster IX</label><input type="number" id="monsterIX" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Griffin V</label><input type="number" id="griffinV" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Griffin VI</label><input type="number" id="griffinVI" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Griffin VII</label><input type="number" id="griffinVII" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Corax I</label><input type="number" id="coraxI" placeholder="0" min="0"></div>
+          <div class="monster-input"><label>Corax II</label><input type="number" id="coraxII" placeholder="0" min="0"></div>
+        </div>
+      </div>
+
+      <!-- Buildings Section -->
+      <div class="building-section">
+        <h3>🏰 Buildings & Resources</h3>
+        <div class="building-fields">
+          <div class="building-field">
+            <label>Clan Capital Lost</label>
+            <select id="clanCapital">
+              <option value="">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+          <div class="building-field">
+            <label>Other Buildings</label>
+            <input type="number" id="otherBuildingsCount" placeholder="0" min="0">
+          </div>
+          <div class="building-field">
+            <label>Portals</label>
+            <input type="number" id="portalsCount" placeholder="0" min="0">
+          </div>
+          <div class="building-field">
+            <label>City Walls</label>
+            <input type="number" id="cityWallCount" placeholder="0" min="0">
+          </div>
+          <div class="building-field">
+            <label>Gold (in thousands)</label>
+            <input type="number" id="goldAmount" placeholder="0" min="0">
+          </div>
+          <div class="building-field">
+            <label>Tar (in thousands)</label>
+            <input type="number" id="tarAmount" placeholder="0" min="0">
+          </div>
+        </div>
+      </div>
+
+      <!-- Results & Action Section -->
+      <div id="compensationStatus" class="status"></div>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="CompensationTab.calculate()">💾 Calculate & Save</button>
+        <button class="btn btn-secondary" onclick="CompensationTab.clearForm()">🔄 Clear Form</button>
+      </div>
+
+      <!-- Results Display -->
+      <div id="compensationResult" class="result-section">
+        <div class="result-grid">
+          <div class="result-card heroes">
+            <div class="result-card-title">Heroes & Captains</div>
+            <div class="result-card-value" id="resultHeroes">0</div>
+          </div>
+          <div class="result-card troops">
+            <div class="result-card-title">Troops</div>
+            <div class="result-card-value" id="resultTroops">0</div>
+          </div>
+          <div class="result-card monsters">
+            <div class="result-card-title">Monsters & Creatures</div>
+            <div class="result-card-value" id="resultMonsters">0</div>
+          </div>
+          <div class="result-card buildings">
+            <div class="result-card-title">Buildings & Resources</div>
+            <div class="result-card-value" id="resultBuildings">0</div>
+          </div>
+        </div>
+        <div class="result-grand-total">
+          <div class="result-grand-total-title">Grand Total: <span id="resultSheetName"></span></div>
+          <div class="result-grand-total-value" id="resultGrandTotal">0 silver</div>
+        </div>
+      </div>
+
+      <!-- Reports History -->
+      <div class="reports-section">
+        <h2>📜 Compensation Reports</h2>
+        <div id="compensationReportsLoading" class="reports-loading" style="display: none;">Loading reports...</div>
+        <div id="compensationReportsList" class="reports-list"></div>
+        <div id="compensationReportsEmpty" class="reports-empty">No compensation reports yet. Create one above!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="compensationDetailModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="CompensationTab.closeDetail()">&times;</button>
+      <div id="compensationDetailContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Check authentication and initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      const isSignedIn = localStorage.getItem('cccClanSignedIn') === 'true';
+      
+      // Always show main content (guest mode)
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('loginPrompt').style.display = 'none';
+      CompensationTab.init();
+      
+      // Setup sign-in button
+      const signInBtn = document.getElementById('signInBtn');
+      if (signInBtn) {
+        signInBtn.addEventListener('click', () => {
+          document.getElementById('loginPrompt').style.display = 'block';
+          document.getElementById('googleSignInContainer').style.display = 'block';
+          initializeGoogleSignIn();
+        });
+      }
+      
+      // If already signed in, authenticate automatically
+      if (isSignedIn) {
+        initializeGoogleSignIn();
+      }
+      
+      updateReadOnlyUI();
+    });
+
+    function logout() {
+      if (confirm('Sign out of cCc Portal?')) {
+        localStorage.removeItem('cccClanSignedIn');
+        localStorage.removeItem('cccClanUser');
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('loginPrompt').style.display = 'block';
+        document.body.classList.remove('read-only-mode');
+      }
+    }
+
+    function updateReadOnlyUI() {
+      const isReadOnly = document.body.classList.contains('read-only-mode');
+      const navBrand = document.getElementById('navBrand');
+      if (navBrand) {
+        navBrand.innerHTML = '<img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions';
+      }
+      const badge = document.getElementById('readOnlyBadge');
+      if (badge) {
+        badge.style.display = isReadOnly ? 'block' : 'none';
+      }
+    }
+
+    // Compensation Tab Implementation
+    const CompensationTab = (() => {
+      const TROOP_VALUES = {
+        guardsmen: 80,
+        specialists: 80,
+        siege: 400,
+        mercenary: 400
+      };
+
+      const MONSTER_VALUES = {
+        'III': 2600, 'IV': 4800, 'V': 7040, 'VI': 9720,
+        'VII': 12570, 'VIII': 15600, 'IX': 18850
+      };
+
+      const GRIFFIN_VALUES = {
+        'V': 1000, 'VI': 1800, 'VII': 2600,
+        'Corax I': 3400, 'Corax II': 4200
+      };
+
+      const BUILDING_VALUES = {
+        'Clan Capital': 100000000,
+        'Other Buildings': 3000000,
+        'Portals': 2000000,
+        'City Wall': 200000,
+        'Gold': 2000,
+        'Tar': 1000
+      };
+
+      let currentEditingReport = null;
+      let addedLeaders = [];
+
+      function calculate() {
+        const name = document.getElementById('compensationName').value.trim();
+        if (!name) {
+          showStatus('Please enter an incident name', 'err');
+          return;
+        }
+
+        let herosCaptains = 0;
+        let troops = 0;
+        let monsters = 0;
+        let buildings = 0;
+
+        const allParameters = {
+          heroes: {},
+          captains: {},
+          guardsmen: {},
+          specialists: {},
+          siege: {},
+          mercenary: {},
+          monsters: {},
+          buildings: {}
+        };
+
+        addedLeaders.forEach(leader => {
+          const baseValue = 1200;
+          herosCaptains += leader.level * leader.amount * baseValue;
+          const paramKey = leader.type === 'hero' ? 'heroes' : 'captains';
+          if (!allParameters[paramKey][leader.level]) {
+            allParameters[paramKey][leader.level] = 0;
+          }
+          allParameters[paramKey][leader.level] += leader.amount;
+        });
+
+        for (let level = 1; level <= 9; level++) {
+          const guardsmenCount = parseInt(document.getElementById(`guardsmenL${level}`).value) || 0;
+          const specialistsCount = parseInt(document.getElementById(`specialistsL${level}`).value) || 0;
+          const siegeCount = parseInt(document.getElementById(`siegeL${level}`).value) || 0;
+          const mercenaryCount = parseInt(document.getElementById(`mercenaryL${level}`).value) || 0;
+
+          troops += guardsmenCount * TROOP_VALUES.guardsmen;
+          troops += specialistsCount * TROOP_VALUES.specialists;
+          troops += siegeCount * TROOP_VALUES.siege;
+          troops += mercenaryCount * TROOP_VALUES.mercenary;
+
+          if (guardsmenCount > 0) allParameters.guardsmen[level] = guardsmenCount;
+          if (specialistsCount > 0) allParameters.specialists[level] = specialistsCount;
+          if (siegeCount > 0) allParameters.siege[level] = siegeCount;
+          if (mercenaryCount > 0) allParameters.mercenary[level] = mercenaryCount;
+        }
+
+        const monsterTypes = ['monsterIII', 'monsterIV', 'monsterV', 'monsterVI', 'monsterVII', 'monsterVIII', 'monsterIX', 'griffinV', 'griffinVI', 'griffinVII', 'coraxI', 'coraxII'];
+        monsterTypes.forEach(type => {
+          const count = parseInt(document.getElementById(type).value) || 0;
+          if (count > 0) {
+            const baseName = type.replace('monster', '').replace('griffin', '').replace('corax', '');
+            const typeKey = type.startsWith('monster') ? baseName : type;
+            
+            if (MONSTER_VALUES[baseName]) {
+              monsters += count * MONSTER_VALUES[baseName];
+            } else if (GRIFFIN_VALUES[typeKey]) {
+              monsters += count * GRIFFIN_VALUES[typeKey];
+            }
+            allParameters.monsters[type] = count;
+          }
+        });
+
+        const clanCapitalValue = document.getElementById('clanCapital').value === '1' ? BUILDING_VALUES['Clan Capital'] : 0;
+        const otherBuildingsCount = parseInt(document.getElementById('otherBuildingsCount').value) || 0;
+        const portalsCount = parseInt(document.getElementById('portalsCount').value) || 0;
+        const cityWallCount = parseInt(document.getElementById('cityWallCount').value) || 0;
+        const goldAmount = parseInt(document.getElementById('goldAmount').value) || 0;
+        const tarAmount = parseInt(document.getElementById('tarAmount').value) || 0;
+
+        buildings += clanCapitalValue;
+        buildings += otherBuildingsCount * BUILDING_VALUES['Other Buildings'];
+        buildings += portalsCount * BUILDING_VALUES['Portals'];
+        buildings += cityWallCount * BUILDING_VALUES['City Wall'];
+        buildings += goldAmount * BUILDING_VALUES['Gold'];
+        buildings += tarAmount * BUILDING_VALUES['Tar'];
+
+        allParameters.buildings = {
+          clanCapital: clanCapitalValue > 0,
+          otherBuildings: otherBuildingsCount,
+          portals: portalsCount,
+          cityWalls: cityWallCount,
+          gold: goldAmount,
+          tar: tarAmount
+        };
+
+        const grandTotal = herosCaptains + troops + monsters + buildings;
+        const breakdown = {
+          herosCaptains: herosCaptains,
+          troops: troops,
+          monsters: monsters,
+          buildings: buildings
+        };
+
+        showStatus('⏳ Saving...', '');
+
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'saveCompensation',
+            incidentName: name,
+            breakdown,
+            grandTotal,
+            allParameters,
+            currentEditingReport
+          })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result.success) {
+              document.getElementById('resultHeroes').textContent = breakdown.herosCaptains.toLocaleString();
+              document.getElementById('resultTroops').textContent = breakdown.troops.toLocaleString();
+              document.getElementById('resultMonsters').textContent = breakdown.monsters.toLocaleString();
+              document.getElementById('resultBuildings').textContent = breakdown.buildings.toLocaleString();
+              document.getElementById('resultGrandTotal').textContent = grandTotal.toLocaleString() + ' silver';
+              document.getElementById('resultSheetName').textContent = result.sheetName;
+              document.getElementById('compensationResult').style.display = 'block';
+              showStatus('✓ Compensation calculated and saved!', 'ok');
+              loadReports();
+            } else {
+              showStatus('✕ Error: ' + (result.error || 'Unknown error'), 'err');
+            }
+          })
+          .catch(error => {
+            showStatus('✕ Error: ' + error.message, 'err');
+          });
+      }
+
+      function clearForm() {
+        document.getElementById('compensationName').value = '';
+        addedLeaders = [];
+        displayAddedLeaders();
+        for (let level = 1; level <= 9; level++) {
+          document.getElementById(`guardsmenL${level}`).value = '';
+          document.getElementById(`specialistsL${level}`).value = '';
+          document.getElementById(`siegeL${level}`).value = '';
+          document.getElementById(`mercenaryL${level}`).value = '';
+        }
+        document.getElementById('monsterIII').value = '';
+        document.getElementById('monsterIV').value = '';
+        document.getElementById('monsterV').value = '';
+        document.getElementById('monsterVI').value = '';
+        document.getElementById('monsterVII').value = '';
+        document.getElementById('monsterVIII').value = '';
+        document.getElementById('monsterIX').value = '';
+        document.getElementById('griffinV').value = '';
+        document.getElementById('griffinVI').value = '';
+        document.getElementById('griffinVII').value = '';
+        document.getElementById('coraxI').value = '';
+        document.getElementById('coraxII').value = '';
+        document.getElementById('clanCapital').value = '';
+        document.getElementById('otherBuildingsCount').value = '';
+        document.getElementById('portalsCount').value = '';
+        document.getElementById('cityWallCount').value = '';
+        document.getElementById('goldAmount').value = '';
+        document.getElementById('tarAmount').value = '';
+        document.getElementById('compensationStatus').textContent = '';
+        document.getElementById('compensationResult').style.display = 'none';
+        currentEditingReport = null;
+      }
+
+      function displayAddedLeaders() {
+        const listDiv = document.getElementById('addedLeadersList');
+        if (addedLeaders.length === 0) {
+          listDiv.innerHTML = '<div style="color: #888; font-size: 12px; text-align: center; padding: 24px;">No leaders added yet. Use Quick Add above to add heroes and captains.</div>';
+          return;
+        }
+        
+        let html = '<table style="width: 100%; border-collapse: collapse; font-size: 13px;">';
+        html += '<tr style="border-bottom: 1px solid #444;"><th style="text-align: left; padding: 8px; color: #ffb300; font-weight: 600;">Type</th><th style="text-align: center; padding: 8px; color: #ffb300; font-weight: 600;">Level</th><th style="text-align: center; padding: 8px; color: #ffb300; font-weight: 600;">Value</th><th style="text-align: center; padding: 8px; color: #ffb300; font-weight: 600;"></th></tr>';
+        
+        addedLeaders.forEach((leader, index) => {
+          const typeLabel = leader.type === 'hero' ? 'Hero' : 'Captain';
+          const baseValue = 1200;
+          const total = leader.amount * leader.level * baseValue;
+          html += `<tr style="border-bottom: 1px solid #333;"><td style="padding: 8px; color: #e0e0e0;">${typeLabel}</td><td style="text-align: center; padding: 8px; color: #e0e0e0;">Lvl ${leader.level}</td><td style="text-align: center; padding: 8px; color: #ffc933;">${total.toLocaleString()}</td><td style="text-align: center; padding: 8px;"><button onclick="CompensationTab.removeLeader(${index})" style="background: #ff5252; border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">Remove</button></td></tr>`;
+        });
+        
+        html += '</table>';
+        listDiv.innerHTML = html;
+      }
+
+      function showStatus(message, type) {
+        const status = document.getElementById('compensationStatus');
+        status.textContent = message;
+        status.className = 'status ' + type;
+      }
+
+      function showQuickStatus(message, type) {
+        const status = document.getElementById('quickAddStatus');
+        status.textContent = message;
+        status.className = 'status ' + type;
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      }
+
+      function quickAddLeader() {
+        const type = document.getElementById('quickLeaderType').value;
+        const level = parseInt(document.getElementById('quickLeaderLevel').value) || 0;
+
+        if (level < 1 || level > 600) {
+          showQuickStatus('Level must be between 1 and 600', 'err');
+          return;
+        }
+
+        addedLeaders.push({ type, level, amount: 1 });
+        displayAddedLeaders();
+        
+        const typeName = type.charAt(0).toUpperCase() + type.slice(1);
+        showQuickStatus(`✓ Added level ${level} ${typeName}`, 'ok');
+        document.getElementById('quickLeaderLevel').value = '1';
+        document.getElementById('quickLeaderLevel').focus();
+      }
+
+      function removeLeader(index) {
+        addedLeaders.splice(index, 1);
+        displayAddedLeaders();
+      }
+
+      function quickAddTroop() {
+        const type = document.getElementById('quickTroopType').value;
+        const level = parseInt(document.getElementById('quickTroopLevel').value) || 0;
+        const amount = parseInt(document.getElementById('quickTroopAmount').value) || 0;
+
+        if (level < 1 || level > 9) {
+          showQuickStatus('Level must be between 1 and 9', 'err');
+          return;
+        }
+
+        if (amount <= 0) {
+          showQuickStatus('Amount must be greater than 0', 'err');
+          return;
+        }
+
+        const fieldId = `${type}L${level}`;
+        const field = document.getElementById(fieldId);
+        if (field) {
+          const currentValue = parseInt(field.value) || 0;
+          field.value = currentValue + amount;
+          field.style.background = '#e8f5e9';
+          setTimeout(() => field.style.background = '#232526', 500);
+          document.getElementById('quickTroopAmount').value = '';
+          document.getElementById('quickTroopAmount').focus();
+        }
+      }
+
+      function quickAddMonster() {
+        const type = document.getElementById('quickMonsterType').value;
+        const amount = parseInt(document.getElementById('quickMonsterAmount').value) || 0;
+
+        if (amount <= 0) {
+          showQuickStatus('Amount must be greater than 0', 'err');
+          return;
+        }
+
+        const field = document.getElementById(type);
+        if (field) {
+          const currentValue = parseInt(field.value) || 0;
+          field.value = currentValue + amount;
+          field.style.background = '#e8f5e9';
+          setTimeout(() => field.style.background = '#232526', 500);
+          showQuickStatus(`✓ Added ${amount} item(s)`, 'ok');
+          document.getElementById('quickMonsterAmount').value = '';
+          document.getElementById('quickMonsterAmount').focus();
+        }
+      }
+
+      function quickAddBuilding() {
+        const type = document.getElementById('quickBuildingType').value;
+        const amount = parseInt(document.getElementById('quickBuildingAmount').value) || 0;
+
+        if (type === 'clanCapital') {
+          if (amount > 0) {
+            document.getElementById(type).value = '1';
+            document.getElementById(type).style.background = '#e8f5e9';
+            setTimeout(() => document.getElementById(type).style.background = '#232526', 500);
+            showQuickStatus(`✓ Clan Capital marked as lost`, 'ok');
+            document.getElementById('quickBuildingAmount').value = '';
+          } else {
+            showQuickStatus('Set amount to 1 to mark Clan Capital as lost', 'err');
+          }
+          return;
+        }
+
+        if (amount <= 0) {
+          showQuickStatus('Amount must be greater than 0', 'err');
+          return;
+        }
+
+        const field = document.getElementById(type);
+        if (field) {
+          const currentValue = parseInt(field.value) || 0;
+          field.value = currentValue + amount;
+          field.style.background = '#e8f5e9';
+          setTimeout(() => field.style.background = '#232526', 500);
+          showQuickStatus(`✓ Added ${amount} item(s)`, 'ok');
+          document.getElementById('quickBuildingAmount').value = '';
+        }
+      }
+
+      function viewDetail(sheetName) {
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getCompensationReportDetails', sheetName })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result.success) {
+              const content = document.getElementById('compensationDetailContent');
+              content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                  <div style="font-size: 13px; color: #ccc; margin-bottom: 4px;">INCIDENT</div>
+                  <div style="font-size: 20px; font-weight: 600; color: #ffb300;">${result.incidentName}</div>
+                  <div style="font-size: 13px; color: #e0e0e0; margin-top: 4px;">📅 ${result.date}</div>
+                </div>
+
+                <div style="display: grid; gap: 12px; margin-bottom: 20px;">
+                  <div style="background: #1a1b1c; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; border: 1px solid #444;">
+                    <span style="color: #ccc; font-size: 13px;">Heroes & Captains</span>
+                    <span style="font-weight: 600; color: #ffb300;">${result.breakdown.herosCaptains.toLocaleString()}</span>
+                  </div>
+                  <div style="background: #1a1b1c; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; border: 1px solid #444;">
+                    <span style="color: #ccc; font-size: 13px;">Troops</span>
+                    <span style="font-weight: 600; color: #8bc34a;">${result.breakdown.troops.toLocaleString()}</span>
+                  </div>
+                  <div style="background: #1a1b1c; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; border: 1px solid #444;">
+                    <span style="color: #ccc; font-size: 13px;">Monsters & Creatures</span>
+                    <span style="font-weight: 600; color: #ffc933;">${result.breakdown.monsters.toLocaleString()}</span>
+                  </div>
+                  <div style="background: #1a1b1c; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; border: 1px solid #444;">
+                    <span style="color: #ccc; font-size: 13px;">Buildings & Resources</span>
+                    <span style="font-weight: 600; color: #ff5252;">${result.breakdown.buildings.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #ffb300 0%, #ffc933 100%); color: #232526; border-radius: 8px; padding: 20px; text-align: center;">
+                  <div style="font-size: 12px; opacity: 0.8; margin-bottom: 8px; font-weight: 600;">GRAND TOTAL</div>
+                  <div style="font-size: 36px; font-weight: 700;">${result.grandTotal.toLocaleString()} silver</div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                  <button onclick="CompensationTab.editReport('${result.sheetName}')" style="padding: 10px 16px; background: #ffb300; color: #232526; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;">✏️ Edit</button>
+                  <button onclick="CompensationTab.deleteReport('${result.sheetName}')" style="padding: 10px 16px; background: #ff5252; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;">🗑️ Delete</button>
+                </div>
+              `;
+              document.getElementById('compensationDetailModal').style.display = 'flex';
+            }
+          })
+          .catch(error => {
+            alert('Error loading report details: ' + error.message);
+          });
+      }
+
+      function closeDetail() {
+        document.getElementById('compensationDetailModal').style.display = 'none';
+      }
+
+      function editReport(sheetName) {
+        closeDetail();
+        showStatus('⏳ Loading report data...', '');
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getCompensationReportParameters', sheetName })
+        })
+          .then(res => res.json())
+          .then(result => {
+            if (result.success) {
+              const params = result.parameters || {};
+              
+              addedLeaders = [];
+              if (params.heroes && Object.keys(params.heroes).length > 0) {
+                Object.entries(params.heroes).forEach(([level, count]) => {
+                  addedLeaders.push({ type: 'hero', level: parseInt(level), amount: count });
+                });
+              }
+              if (params.captains && Object.keys(params.captains).length > 0) {
+                Object.entries(params.captains).forEach(([level, count]) => {
+                  addedLeaders.push({ type: 'captain', level: parseInt(level), amount: count });
+                });
+              }
+              displayAddedLeaders();
+              
+              if (params.guardsmen) {
+                Object.entries(params.guardsmen).forEach(([level, count]) => {
+                  const field = document.getElementById(`guardsmenL${level}`);
+                  if (field) field.value = count;
+                });
+              }
+              if (params.specialists) {
+                Object.entries(params.specialists).forEach(([level, count]) => {
+                  const field = document.getElementById(`specialistsL${level}`);
+                  if (field) field.value = count;
+                });
+              }
+              if (params.siege) {
+                Object.entries(params.siege).forEach(([level, count]) => {
+                  const field = document.getElementById(`siegeL${level}`);
+                  if (field) field.value = count;
+                });
+              }
+              if (params.mercenary) {
+                Object.entries(params.mercenary).forEach(([level, count]) => {
+                  const field = document.getElementById(`mercenaryL${level}`);
+                  if (field) field.value = count;
+                });
+              }
+              if (params.monsters) {
+                Object.entries(params.monsters).forEach(([type, count]) => {
+                  const field = document.getElementById(type);
+                  if (field) field.value = count;
+                });
+              }
+              if (params.buildings) {
+                if (params.buildings.clanCapital) {
+                  document.getElementById('clanCapital').value = '1';
+                } else {
+                  document.getElementById('clanCapital').value = '';
+                }
+                if (params.buildings.otherBuildings) {
+                  document.getElementById('otherBuildingsCount').value = params.buildings.otherBuildings;
+                }
+                if (params.buildings.portals) {
+                  document.getElementById('portalsCount').value = params.buildings.portals;
+                }
+                if (params.buildings.cityWalls) {
+                  document.getElementById('cityWallCount').value = params.buildings.cityWalls;
+                }
+                if (params.buildings.gold) {
+                  document.getElementById('goldAmount').value = params.buildings.gold;
+                }
+                if (params.buildings.tar) {
+                  document.getElementById('tarAmount').value = params.buildings.tar;
+                }
+              }
+              document.getElementById('compensationName').value = result.incidentName;
+              currentEditingReport = sheetName;
+              const incidentsSection = document.getElementById('incidentsSection');
+              if (incidentsSection) {
+                incidentsSection.scrollIntoView({ behavior: 'smooth' });
+              }
+              showStatus('✓ Report loaded! Make changes and click Calculate to save.', 'ok');
+            } else {
+              showStatus('✕ Error: ' + (result.error || 'Unknown error loading parameters'), 'err');
+            }
+          })
+          .catch(error => {
+            showStatus('✕ Error: ' + error.message, 'err');
+          });
+      }
+
+      function deleteReport(sheetName) {
+        if (confirm('⚠️ Delete this compensation report? This cannot be undone.')) {
+          showStatus('⏳ Deleting...', '');
+          fetch(window.GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'deleteCompensationReport', sheetName })
+          })
+            .then(res => res.json())
+            .then(result => {
+              if (result.success) {
+                closeDetail();
+                loadReports();
+                showStatus('✓ Report deleted successfully!', 'ok');
+              } else {
+                showStatus('✕ Error: ' + (result.error || 'Unknown error'), 'err');
+              }
+            })
+            .catch(error => {
+              showStatus('✕ Error: ' + error.message, 'err');
+            });
+        }
+      }
+
+      function loadReports() {
+        const loadingDiv = document.getElementById('compensationReportsLoading');
+        const listDiv = document.getElementById('compensationReportsList');
+        const emptyDiv = document.getElementById('compensationReportsEmpty');
+        
+        loadingDiv.style.display = 'block';
+        listDiv.style.display = 'none';
+        emptyDiv.style.display = 'none';
+
+        fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getCompensationReports' })
+        })
+          .then(res => res.json())
+          .then(result => {
+            loadingDiv.style.display = 'none';
+            
+            if (result.success && result.reports && result.reports.length > 0) {
+              listDiv.innerHTML = '';
+              result.reports.forEach(report => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background: #232526; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.25); cursor: pointer; transition: all 0.2s; border-left: 4px solid #ffb300; border: 1px solid #444;';
+                card.onmouseover = function() { this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.35)'; this.style.transform = 'translateY(-2px)'; this.style.borderLeftColor = '#ffc933'; };
+                card.onmouseout = function() { this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.25)'; this.style.transform = 'translateY(0)'; this.style.borderLeftColor = '#ffb300'; };
+                
+                card.innerHTML = `
+                  <div style="font-size: 14px; font-weight: 600; color: #ffb300; margin-bottom: 8px;">${report.incidentName}</div>
+                  <div style="font-size: 12px; color: #e0e0e0; margin-bottom: 12px;">📅 ${report.date}</div>
+                  <button onclick="CompensationTab.viewDetail('${report.sheetName}')" style="padding: 8px 12px; background: #ffb300; color: #232526; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500; margin-right: 8px;">👁️ View</button>
+                `;
+                listDiv.appendChild(card);
+              });
+              listDiv.style.display = 'grid';
+            } else {
+              emptyDiv.style.display = 'block';
+            }
+          })
+          .catch(error => {
+            loadingDiv.style.display = 'none';
+            console.error('Error loading reports:', error);
+            emptyDiv.style.display = 'block';
+          });
+      }
+
+      function init() {
+        loadReports();
+      }
+
+      return { calculate, clearForm, quickAddLeader, removeLeader, quickAddTroop, quickAddMonster, quickAddBuilding, loadReports, viewDetail, closeDetail, editReport, deleteReport, init };
+    })();
+  </script>
+
+<script>
+// Hamburger menu toggle for mobile navigation
+document.addEventListener('DOMContentLoaded', function() {
+  const hamburger = document.getElementById('navHamburger');
+  const navTabs = document.getElementById('navTabs');
+  if (hamburger && navTabs) {
+    hamburger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navTabs.classList.toggle('open');
+    });
+  }
+  // Optional: close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    if (navTabs.classList.contains('open') && !navTabs.contains(e.target) && !hamburger.contains(e.target)) {
+      navTabs.classList.remove('open');
+    }
+  });
+});
+</script>
+</body>
+</html>
