@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cCc Champions - Resources</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
+  <script src="site-config.js"></script>
+  <script src="config.js"></script>
+  <script src="portal-shim.js"></script>
+  <script src="portal-auth.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      color: #f3f3f3;
+      text-align: center;
+      padding: 32px 16px 60px 16px;
+      min-height: 100vh;
+      background-attachment: fixed;
+    }
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    .goog-te-balloon-frame { display: none !important; }
+    html, body { margin-top: 0 !important; top: 0 !important; }
+    body.translated-ltr, body.translated-rtl { margin-top: 0 !important; top: 0 !important; }
+    .goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; height: 0 !important; }
+    #goog-gt-tt, .goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
+    .goog-text-highlight { background: transparent !important; box-shadow: none !important; }
+    #google_translate_element, #translateToggleBtn { top: auto !important; right: 8px !important; bottom: 8px !important; }
+
+    /* Top Tabs */
+    .tab-nav {
+      background: rgba(30, 34, 40, 0.95);
+      border-bottom: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      position: sticky; top: 0; z-index: 9999; width: 100%; left: 0; right: 0;
+    }
+    .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand img { height: 32px; width: auto; }
+    .tab-buttons { display: flex; gap: 4px; flex: 1; overflow-x: auto; overflow-y: hidden; align-items: center; height: 100px; }
+    .tab-btn {
+      padding: 12px 16px; background: none; border: none; color: #e0e0e0;
+      font-size: 28px; font-weight: 500; border-bottom: 3px solid transparent;
+      transition: all 0.2s; white-space: nowrap; text-decoration: none;
+      display: block; cursor: pointer; position: relative;
+    }
+    .tab-btn:hover { color: #ffb300; background: #232526; }
+    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab-btn[title]:hover::after {
+      content: attr(title); position: absolute; top: -42px; left: 50%; transform: translateX(-50%);
+      background: #232526; color: #ffb300; padding: 6px 12px; border-radius: 4px;
+      font-size: 12px; white-space: nowrap; z-index: 1001; border: 1px solid #444; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .tab-btn .tab-icon { display: block; margin: 0 auto; height: 40px; width: auto; filter: drop-shadow(0 2px 8px #000a); }
+    .tab-label.mobile-only { display: none; }
+    .tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
+
+    /* Login Bar */
+    .login-bar { display: flex; align-items: center; gap: 8px; margin-left: auto; padding: 4px 0; }
+    .login-bar .user-email { font-size: 0.8em; color: #ffb300; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .login-bar button { padding: 6px 14px; border: 1px solid #444; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    #loginBtn { background: #1a1b1c; color: #ffb300; }
+    #loginBtn:hover { background: #2a2b2c; }
+    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
+    #logoutBtn:hover { background: #e53935; }
+
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
+    .hamburger span { display: block; width: 24px; height: 3px; background: #ffb300; border-radius: 2px; transition: all 0.2s; }
+
+    /* Main Content */
+    .container {
+      max-width: 1200px; margin: 0 auto; background: rgba(30, 34, 40, 0.95);
+      border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); padding: 24px 16px;
+      text-align: left;
+    }
+    h1 { color: #ffb300; text-align: center; margin-bottom: 4px; font-size: 1.8em; text-shadow: 0 2px 8px #000a; }
+    .header { margin-bottom: 16px; text-align: center; }
+    .header p { color: #b0b0b0; font-size: 14px; margin-top: 8px; }
+
+    /* Login Gate */
+    .login-gate { max-width: 500px; margin: 80px auto; text-align: center; background: rgba(30, 34, 40, 0.95); border-radius: 16px; padding: 40px 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); border: 1px solid #444; }
+    .login-gate h2 { color: #ffb300; margin-bottom: 12px; }
+    .login-gate p { color: #b0b0b0; margin-bottom: 20px; }
+    .login-gate .btn { padding: 12px 32px; font-size: 1em; }
+
+    /* Filters */
+    .filters {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
+      padding: 14px 16px; background: #33343a; border-radius: 12px;
+      border: 1px solid #444; align-items: flex-end;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 140px; flex: 1; }
+    .filter-group label { font-size: 0.75em; font-weight: 600; color: #ffb300; text-transform: uppercase; }
+    .filter-group input, .filter-group select {
+      padding: 8px 10px; border: 1px solid #444; border-radius: 6px;
+      font-size: 0.9em; background: #232526; color: #e0e0e0;
+    }
+    .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #ffb300; box-shadow: 0 0 0 2px rgba(255,179,0,0.15); }
+    .btn {
+      background: #ffb300; color: #232526; border: none; border-radius: 6px;
+      padding: 5px 12px; cursor: pointer; font-weight: 600; font-size: 0.82em; white-space: nowrap;
+    }
+    .btn:hover { background: #ffc107; }
+    .btn.secondary { background: #444; color: #e0e0e0; }
+    .btn.secondary:hover { background: #555; }
+
+    /* Summary Cards */
+    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .summary-card { background: #232526; border-radius: 10px; padding: 12px 14px; border: 1px solid #444; text-align: center; }
+    .summary-card .card-label { font-size: 0.75em; text-transform: uppercase; font-weight: 600; color: #b0b0b0; margin-bottom: 4px; }
+    .summary-card .card-value { font-size: 1.4em; font-weight: 700; color: #ffb300; }
+    .summary-card .card-value.positive { color: #27ae60; }
+    .summary-card .card-value.negative { color: #c62828; }
+    .summary-card .card-sub { font-size: 0.7em; color: #b0b0b0; margin-top: 2px; }
+
+    /* Table */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+    th {
+      background: #33343a; color: #ffb300; padding: 10px 8px;
+      text-align: left; border-bottom: 2px solid #444; cursor: pointer;
+      white-space: nowrap; user-select: none;
+    }
+    th:hover { background: #444; }
+    th .sort-arrow { font-size: 0.7em; margin-left: 4px; }
+    td { padding: 8px; border-bottom: 1px solid #444; color: #e0e0e0; }
+    tr:hover { background: rgba(255,179,0,0.05); }
+    .amount-positive { color: #27ae60; font-weight: 600; }
+    .amount-negative { color: #c62828; font-weight: 600; }
+    .resource-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; }
+    .resource-badge.dragon-coins { background: rgba(255,243,224,0.15); color: #ffb300; }
+    .resource-badge.olympus-hermes-levels { background: rgba(227,242,253,0.15); color: #42a5f5; }
+    .resource-badge.dark-omen-essence { background: rgba(243,229,245,0.15); color: #ab47bc; }
+
+    /* Player Summary */
+    .player-summary-section { margin-top: 20px; }
+    .player-summary-section h3 { color: #ffb300; margin-bottom: 10px; font-size: 1.1em; }
+    .player-summary-table td { font-size: 0.85em; }
+    .player-summary-table th { font-size: 0.8em; }
+
+    /* View Tabs */
+    .view-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid #444; padding-bottom: 8px; }
+    .view-tab-btn { padding: 8px 14px; background: none; border: none; color: #b0b0b0; font-size: 0.85em; font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .view-tab-btn:hover { color: #ffb300; }
+    .view-tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+
+    /* Pagination */
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .pagination button { background: #33343a; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 0.85em; }
+    .pagination button:hover { background: #444; color: #ffb300; }
+    .pagination button.active { background: #ffb300; color: #232526; border-color: #ffb300; }
+    .pagination button:disabled { opacity: 0.5; cursor: default; }
+    .pagination .page-info { font-size: 0.85em; color: #b0b0b0; }
+
+    .loading { text-align: center; padding: 40px; color: #b0b0b0; }
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #444; border-top-color: #ffb300; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast { position: fixed; bottom: 20px; right: 20px; z-index: 3000; background: #232526; color: #f3f3f3; padding: 12px 20px; border-radius: 8px; font-size: 0.9em; display: none; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+    .toast.success { border-left: 4px solid #27ae60; }
+    .toast.error { border-left: 4px solid #c62828; }
+
+    @media (max-width: 800px) {
+      .tab-nav { position: fixed; top: 0; left: 0; right: 0; width: 100%; z-index: 9999; }
+      .tab-nav-container { flex-wrap: wrap; padding: 8px; }
+      .nav-brand { flex: 1; margin-right: 8px; font-size: 16px; padding: 8px 0; }
+      .nav-brand img { height: 24px; width: 24px; }
+      .hamburger { display: flex; order: 2; }
+      .tab-buttons {
+        flex-direction: column; align-items: stretch; max-height: 60vh; overflow-y: auto;
+        background: #232526; position: absolute; top: 60px; left: 0; right: 0; width: 100%;
+        z-index: 10000; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: none; order: 10;
+      }
+      .tab-buttons.open { display: flex; }
+      .tab-btn { font-size: 18px; padding: 18px 24px; border-bottom: 1px solid #444; display: flex; align-items: center; justify-content: flex-start; background: none; height: auto; }
+      .tab-btn:last-child { border-bottom: none; }
+      .tab-label.mobile-only { display: inline; }
+      .tab-icon.desktop-only { display: none; }
+      .login-bar { order: 2; margin-left: auto; gap: 6px; }
+      .login-bar .user-email { font-size: 0.7em; }
+      .login-bar button { font-size: 0.75em; padding: 5px 10px; }
+      body { padding-top: 100px; }
+      .filters { flex-direction: column; }
+      .filter-group { min-width: 100%; }
+      .summary-cards { grid-template-columns: 1fr 1fr; }
+    }
+    @media (min-width: 801px) {
+      .tab-label.mobile-only { display: none; }
+      .tab-icon.desktop-only { display: block; }
+      .tab-buttons { flex-direction: row; align-items: center; position: static; max-height: none; overflow-y: visible; background: none; box-shadow: none; border-radius: 0; display: flex !important; }
+      .tab-btn { font-size: 28px; padding: 12px 16px; border-bottom: 3px solid transparent; display: block; justify-content: center; }
+      .hamburger { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Translate Widget -->
+  <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
+  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+  <style>
+    @media (max-width: 800px) {
+      #google_translate_element { display: none !important; }
+      body.translate-open #google_translate_element { display: block !important; position: fixed; bottom: 54px; right: 8px; left: 8px; width: auto !important; max-width: calc(100vw - 16px) !important; background: #232526; border: 1px solid #444; border-radius: 8px; padding: 6px; pointer-events: auto; }
+      body.translate-open #google_translate_element .goog-te-gadget, body.translate-open #google_translate_element .goog-te-combo { max-width: 100% !important; width: 100% !important; }
+      #translateToggleBtn { display: inline-flex !important; }
+    }
+    @media (min-width: 801px) { #translateToggleBtn { display: none !important; } }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const translateToggleBtn = document.getElementById('translateToggleBtn');
+      if (!translateToggleBtn) return;
+      translateToggleBtn.addEventListener('click', function (e) { e.stopPropagation(); document.body.classList.toggle('translate-open'); });
+      document.addEventListener('click', function (e) {
+        if (!document.body.classList.contains('translate-open')) return;
+        const w = document.getElementById('google_translate_element');
+        if (w && w.contains(e.target) || translateToggleBtn.contains(e.target)) return;
+        document.body.classList.remove('translate-open');
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    function googleTranslateElementInit() { new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element'); }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <script>
+    // --- Auth ---
+    const AUTH_KEY = 'ccc_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+    let isLoggedIn = false;
+    let currentUser = null;
+
+    function checkLoginState() {
+      try {
+        const authed = localStorage.getItem(AUTH_KEY) === '1';
+        const email = localStorage.getItem(AUTH_EMAIL_KEY);
+        if (authed && email) { isLoggedIn = true; currentUser = { email }; }
+      } catch (e) {}
+      updateLoginUI();
+    }
+
+    function handleLogin() {
+      if (!document.getElementById('gsi-script')) {
+        const s = document.createElement('script'); s.id = 'gsi-script';
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.onload = () => initGoogleLogin(); document.head.appendChild(s);
+      } else { initGoogleLogin(); }
+    }
+
+    function initGoogleLogin() {
+      google.accounts.id.initialize({ client_id: SITE_CONFIG.googleClientId, callback: handleGoogleCallback });
+      google.accounts.id.prompt();
+    }
+
+    async function handleGoogleCallback(response) {
+      try {
+        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
+        const tokenRes = await fetch(cfWorkerUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: response.credential }) });
+        const tokenData = await tokenRes.json();
+        if (!tokenData.success || !tokenData.email) { showToast('Login failed', 'error'); return; }
+        const email = tokenData.email;
+        const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+        const data = await res.json();
+        if (data.success && data.allowed) {
+          isLoggedIn = true; currentUser = { email };
+          localStorage.setItem(AUTH_KEY, '1'); localStorage.setItem(AUTH_EMAIL_KEY, email);
+          updateLoginUI(); showToast('Logged in as ' + email, 'success');
+        } else { showToast('Access denied for ' + email, 'error'); }
+      } catch (err) { showToast('Login error: ' + err.message, 'error'); }
+    }
+
+    function handleLogout() {
+      isLoggedIn = false; currentUser = null;
+      try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+      try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+      updateLoginUI(); showToast('Logged out', 'success');
+    }
+
+    function updateLoginUI() {
+      const emailEl = document.getElementById('userEmail');
+      const loginBtn = document.getElementById('loginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (isLoggedIn && currentUser) {
+        emailEl.textContent = currentUser.email; emailEl.style.display = 'inline';
+        loginBtn.style.display = 'none'; logoutBtn.style.display = 'inline';
+      } else {
+        emailEl.style.display = 'none'; loginBtn.style.display = 'inline'; logoutBtn.style.display = 'none';
+      }
+      // Show/hide content based on login
+      document.getElementById('loginGate').style.display = isLoggedIn ? 'none' : 'block';
+      document.getElementById('mainContent').style.display = isLoggedIn ? 'block' : 'none';
+      // Show/hide restricted tabs
+      const restricted = ['events.html', 'members.html', 'warnings.html', 'profiling.html', 'competition.html', 'resources.html'];
+      restricted.forEach(href => {
+        document.querySelectorAll('.tab-buttons .tab-btn[href="' + href + '"]').forEach(el => { el.style.display = isLoggedIn ? '' : 'none'; });
+      });
+      const bankBtn = document.getElementById('bankTabBtn');
+      if (bankBtn) bankBtn.style.display = isLoggedIn ? 'flex' : 'none';
+      if (isLoggedIn && allData.length === 0) loadResourceData();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => checkLoginState());
+  </script>
+
+  <nav class="tab-nav">
+    <div class="tab-nav-container">
+      <div class="nav-brand"><img src="favicon.png" alt="" style="height:32px;width:32px;vertical-align:middle;margin-right:8px;"> cCc Champions</div>
+      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+      <div class="tab-buttons" id="navTabs">
+        <a href="dashboard.html" class="tab-btn" title="Dashboard">
+          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Dashboard</span>
+        </a>
+        <a href="events.html" class="tab-btn" title="Events">
+          <img src="events.png" alt="Events" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Events</span>
+        </a>
+        <a href="members.html" class="tab-btn" title="Members">
+          <img src="members.png" alt="Members" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Members</span>
+        </a>
+        <a href="profiling.html" class="tab-btn" title="Profiling">
+          <img src="profiling.png" alt="Profiling" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Profiling</span>
+        </a>
+        <a href="warnings.html" class="tab-btn" title="Warnings">
+          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Warnings</span>
+        </a>
+        <a href="resources.html" class="tab-btn active" title="Resources">
+          <img src="resources.png" alt="Resources" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Resources</span>
+        </a>
+        <a href="competition.html" class="tab-btn" title="Competition">
+          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Competition</span>
+        </a>
+        <a href="calendar.html" class="tab-btn" title="Calendar">
+          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Calendar</span>
+        </a>
+        <a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;">
+          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Bank</span>
+        </a>
+      </div>
+      <div class="login-bar">
+        <span class="user-email" id="userEmail" style="display:none"></span>
+        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
+        <button id="logoutBtn" style="display:none" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="login-gate" id="loginGate">
+    <h2 style="color:#ffb300;margin-bottom:12px;">🔒 Login Required</h2>
+    <p style="color:#b0b0b0;margin-bottom:20px;">You need to be logged in to view the Resources page.</p>
+    <button class="btn" onclick="handleLogin()" style="padding:12px 32px;font-size:1em;">🔑 Login</button>
+  </div>
+
+  <div class="container" id="mainContent" style="display:none">
+    <div class="header"><h1><img src="resources.png" alt="Resources" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Clan Resources</h1><p>Resource contributions and distributions</p></div>
+
+    <!-- Filters -->
+    <div class="filters">
+      <div class="filter-group">
+        <label>Member</label>
+        <select id="filterMember"><option value="">All Members</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Resource</label>
+        <select id="filterResource"><option value="">All Resources</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Direction</label>
+        <select id="filterDirection">
+          <option value="">All</option>
+          <option value="sent">Sent (contributed)</option>
+          <option value="received">Received (distributed)</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Date From</label>
+        <input type="date" id="filterDateFrom">
+      </div>
+      <div class="filter-group">
+        <label>Date To</label>
+        <input type="date" id="filterDateTo">
+      </div>
+      <div class="filter-group" style="justify-content:flex-end;flex-direction:row;gap:6px;min-width:auto;flex:0;">
+        <button class="btn" onclick="applyFilters()">🔍 Filter</button>
+        <button class="btn secondary" onclick="resetFilters()">↻ Reset</button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards" id="summaryCards">
+      <div class="summary-card">
+        <div class="card-label">🐉 Dragon Coins</div>
+        <div class="card-value" id="sumDragonCoins">—</div>
+        <div class="card-sub" id="subDragonCoins"></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">🏛️ Olympus Hermes' Levels</div>
+        <div class="card-value" id="sumOlympusHermes">—</div>
+        <div class="card-sub" id="subOlympusHermes"></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">🌑 Dark Omen Essence</div>
+        <div class="card-value" id="sumDarkOmenEssence">—</div>
+        <div class="card-sub" id="subDarkOmenEssence"></div>
+      </div>
+    </div>
+
+    <!-- View Tabs -->
+    <div class="view-tabs">
+      <button class="view-tab-btn active" onclick="switchView('transactions', this)">📋 Transactions</button>
+      <button class="view-tab-btn" onclick="switchView('playerSummary', this)">👥 By Player</button>
+      <button class="view-tab-btn" onclick="switchView('resourceSummary', this)">📦 By Resource</button>
+      <button class="view-tab-btn" onclick="switchView('dragonPayouts', this)">🐉 Dragon Coins</button>
+    </div>
+
+    <!-- Transactions View -->
+    <div id="transactionsView">
+      <div class="loading" id="loadingDiv"><div class="spinner"></div><br>Loading resource data...</div>
+      <div class="table-container" id="tableContainer" style="display:none">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable('date')">Date <span class="sort-arrow" id="sort-date">▼</span></th>
+              <th onclick="sortTable('member')">Member <span class="sort-arrow" id="sort-member"></span></th>
+              <th onclick="sortTable('resource')">Resource <span class="sort-arrow" id="sort-resource"></span></th>
+              <th onclick="sortTable('amount')">Amount <span class="sort-arrow" id="sort-amount"></span></th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Player Summary View -->
+    <div id="playerSummaryView" style="display:none" class="player-summary-section">
+      <div class="table-container">
+        <table class="player-summary-table">
+          <thead>
+            <tr>
+              <th onclick="sortSummary('player', 'member')">Member</th>
+              <th onclick="sortSummary('player', 'contributed')">Contributed</th>
+              <th onclick="sortSummary('player', 'received')">Received</th>
+              <th onclick="sortSummary('player', 'net')">Net</th>
+              <th onclick="sortSummary('player', 'count')">Transactions</th>
+            </tr>
+          </thead>
+          <tbody id="playerSummaryBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Resource Summary View -->
+    <div id="resourceSummaryView" style="display:none" class="player-summary-section">
+      <div class="table-container">
+        <table class="player-summary-table">
+          <thead>
+            <tr>
+              <th onclick="sortSummary('resource', 'name')">Resource</th>
+              <th onclick="sortSummary('resource', 'contributed')">Total Contributed</th>
+              <th onclick="sortSummary('resource', 'received')">Total Distributed</th>
+              <th onclick="sortSummary('resource', 'net')">Net</th>
+              <th onclick="sortSummary('resource', 'members')">Members Involved</th>
+            </tr>
+          </thead>
+          <tbody id="resourceSummaryBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Dragon Coins Payouts View -->
+    <div id="dragonPayoutsView" style="display:none" class="player-summary-section">
+      <div style="margin-bottom:12px;padding:10px 14px;background:rgba(255,243,224,0.1);border:1px solid #555;border-radius:8px;font-size:0.85em;color:#ffb300;">
+        🐉 Dragon Coins are distributed the day after they are contributed. This view shows each player's <strong>last 7 days</strong> balance (contributed − received back). Positive balance = still owed coins.
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+        <div class="summary-card" style="flex:1;min-width:160px;">
+          <div class="card-label">Contributed (7d)</div>
+          <div class="card-value positive" id="dcContributed">—</div>
+        </div>
+        <div class="summary-card" style="flex:1;min-width:160px;">
+          <div class="card-label">Paid Out (7d)</div>
+          <div class="card-value negative" id="dcPaidOut">—</div>
+        </div>
+        <div class="summary-card" style="flex:1;min-width:160px;">
+          <div class="card-label">Total Still Owed</div>
+          <div class="card-value" id="dcOwed">—</div>
+        </div>
+        <div class="summary-card" style="flex:1;min-width:160px;">
+          <div class="card-label">Players Pending</div>
+          <div class="card-value" id="dcPending">—</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+        <div class="filter-group" style="min-width:140px;">
+          <label>Show</label>
+          <select id="dcShowFilter" onchange="renderDragonPayouts()">
+            <option value="owed">Owed only (balance > 0)</option>
+            <option value="all">All players</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="player-summary-table">
+          <thead>
+            <tr>
+              <th onclick="sortSummary('dragon','member')">Member</th>
+              <th onclick="sortSummary('dragon','balance')">Balance (Owed)</th>
+              <th onclick="sortSummary('dragon','contributed')">Total Contributed</th>
+              <th onclick="sortSummary('dragon','paidOut')">Total Paid Out</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="dragonPayoutsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Hamburger toggle
+    document.addEventListener('DOMContentLoaded', () => {
+      const ham = document.getElementById('navHamburger');
+      const tabs = document.getElementById('navTabs');
+      if (ham && tabs) {
+        ham.addEventListener('click', () => tabs.classList.toggle('open'));
+        tabs.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => tabs.classList.remove('open')));
+      }
+    });
+
+    let allData = [];
+    let filteredData = [];
+    let sortField = 'date';
+    let sortAsc = false;
+    let currentPage = 1;
+    const PAGE_SIZE = 50;
+    let currentView = 'transactions';
+    let summarySortField = { player: 'net', resource: 'contributed', dragon: 'balance' };
+    let summarySortAsc = { player: false, resource: false, dragon: false };
+    let membersList = [];
+    let membersJoinDates = {};
+    let formerMembersList = [];
+
+    // ===========================
+    // DATA LOADING
+    // ===========================
+    const DEFAULT_DAYS = 10;
+
+    async function loadResourceData() {
+      try {
+        const [result, members] = await Promise.all([
+          callFunction('getResourceContributions', [DEFAULT_DAYS]),
+          callFunction('getMembersList').catch(() => [])
+        ]);
+        if (result && result.success) {
+          allData = result.data || [];
+          membersList = Array.isArray(members) ? members.map(m => m.name || m) : [];
+          membersJoinDates = {};
+          if (Array.isArray(members)) {
+            members.forEach(m => {
+              const name = (m.name || m || '').toString().trim();
+              const jd = (m.joinDate || '').toString().trim();
+              if (name && jd) membersJoinDates[name.toLowerCase()] = jd;
+            });
+          }
+          formerMembersList = Array.isArray(result.formerMembers) ? result.formerMembers : [];
+          populateFilters(result.resources || [], result.members || []);
+          const cutoff = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate() - DEFAULT_DAYS));
+          document.getElementById('filterDateFrom').value = cutoff.toISOString().split('T')[0];
+          applyFilters();
+          document.getElementById('loadingDiv').style.display = 'none';
+          document.getElementById('tableContainer').style.display = 'block';
+        } else {
+          throw new Error(result?.message || 'Failed to load');
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loadingDiv').innerHTML = '<span style="color:#c62828">Failed to load resource data: ' + escapeHtml(err.message) + '</span>';
+      }
+    }
+
+    function populateFilters(resources, members) {
+      const resSel = document.getElementById('filterResource');
+      resSel.innerHTML = '<option value="">All Resources</option>';
+      resources.forEach(r => { const o = document.createElement('option'); o.value = r; o.textContent = r; resSel.appendChild(o); });
+      const memSel = document.getElementById('filterMember');
+      memSel.innerHTML = '<option value="">All Members</option>';
+      members.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; memSel.appendChild(o); });
+    }
+
+    // ===========================
+    // FILTERS
+    // ===========================
+    function applyFilters() {
+      const member = document.getElementById('filterMember').value;
+      const resource = document.getElementById('filterResource').value;
+      const direction = document.getElementById('filterDirection').value;
+      const dateFrom = document.getElementById('filterDateFrom').value;
+      const dateTo = document.getElementById('filterDateTo').value;
+      filteredData = allData.filter(row => {
+        if (member && row.member !== member) return false;
+        if (resource && row.resource !== resource) return false;
+        if (direction === 'sent' && row.amount < 0) return false;
+        if (direction === 'received' && row.amount > 0) return false;
+        if (dateFrom && row.date < dateFrom) return false;
+        if (dateTo && row.date > dateTo) return false;
+        return true;
+      });
+      currentPage = 1;
+      applySorting();
+      updateSummaryCards();
+      renderCurrentView();
+    }
+
+    function resetFilters() {
+      document.getElementById('filterMember').value = '';
+      document.getElementById('filterResource').value = '';
+      document.getElementById('filterDirection').value = '';
+      document.getElementById('filterDateFrom').value = '';
+      document.getElementById('filterDateTo').value = '';
+      applyFilters();
+    }
+
+    // ===========================
+    // SORTING
+    // ===========================
+    function sortTable(field) {
+      if (sortField === field) sortAsc = !sortAsc;
+      else { sortField = field; sortAsc = field === 'member' || field === 'resource'; }
+      applySorting();
+      renderTransactionsTable();
+      updateSortArrows();
+    }
+
+    function applySorting() {
+      filteredData.sort((a, b) => {
+        let va, vb;
+        switch (sortField) {
+          case 'date': va = a.date; vb = b.date; break;
+          case 'member': va = a.member.toLowerCase(); vb = b.member.toLowerCase(); break;
+          case 'resource': va = a.resource.toLowerCase(); vb = b.resource.toLowerCase(); break;
+          case 'amount': va = a.amount; vb = b.amount; break;
+          default: va = a.date; vb = b.date;
+        }
+        if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return sortAsc ? va - vb : vb - va;
+      });
+    }
+
+    function updateSortArrows() {
+      document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
+      const arrow = document.getElementById('sort-' + sortField);
+      if (arrow) arrow.textContent = sortAsc ? '▲' : '▼';
+    }
+
+    function sortSummary(type, field) {
+      if (summarySortField[type] === field) summarySortAsc[type] = !summarySortAsc[type];
+      else { summarySortField[type] = field; summarySortAsc[type] = false; }
+      renderCurrentView();
+    }
+
+    // ===========================
+    // SUMMARY CARDS
+    // ===========================
+    function updateSummaryCards() {
+      const resMap = {};
+      const topByRes = {};
+      filteredData.forEach(r => {
+        const key = r.resource;
+        if (!resMap[key]) resMap[key] = {in:0,out:0,n:0};
+        if (r.amount > 0) { resMap[key].in += r.amount; } else { resMap[key].out += Math.abs(r.amount); }
+        resMap[key].n++;
+        if (r.amount > 0) {
+          if (!topByRes[key]) topByRes[key] = {};
+          topByRes[key][r.member] = (topByRes[key][r.member] || 0) + r.amount;
+        }
+      });
+      const ids = { 'Dragon Coins':'DragonCoins', "Olympus Hermes' Levels":'OlympusHermes', 'Dark Omen Essence':'DarkOmenEssence' };
+      Object.entries(ids).forEach(([res, id]) => {
+        const d = resMap[res] || {in:0,out:0,n:0};
+        const el = document.getElementById('sum' + id);
+        const sub = document.getElementById('sub' + id);
+        if (res === 'Dragon Coins') {
+          const net = d.in - d.out;
+          el.textContent = (net >= 0 ? '+' : '') + formatNumber(net);
+          el.className = 'card-value ' + (net >= 0 ? 'positive' : 'negative');
+          sub.textContent = '▲ ' + formatNumber(d.in) + '  ▼ ' + formatNumber(d.out);
+        } else {
+          el.textContent = formatNumber(d.in);
+          el.className = 'card-value positive';
+          const players = topByRes[res] || {};
+          const top = Object.entries(players).sort((a,b) => b[1] - a[1])[0];
+          sub.textContent = top ? '👑 ' + top[0] + ' — ' + formatNumber(top[1]) : d.n + ' records';
+        }
+      });
+    }
+
+    // ===========================
+    // VIEW SWITCHING
+    // ===========================
+    function switchView(view, btn) {
+      currentView = view;
+      document.querySelectorAll('.view-tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('transactionsView').style.display = view === 'transactions' ? 'block' : 'none';
+      document.getElementById('playerSummaryView').style.display = view === 'playerSummary' ? 'block' : 'none';
+      document.getElementById('resourceSummaryView').style.display = view === 'resourceSummary' ? 'block' : 'none';
+      document.getElementById('dragonPayoutsView').style.display = view === 'dragonPayouts' ? 'block' : 'none';
+      renderCurrentView();
+    }
+
+    function renderCurrentView() {
+      switch (currentView) {
+        case 'transactions': renderTransactionsTable(); break;
+        case 'playerSummary': renderPlayerSummary(); break;
+        case 'resourceSummary': renderResourceSummary(); break;
+        case 'dragonPayouts': renderDragonPayouts(); break;
+      }
+    }
+
+    // ===========================
+    // TRANSACTIONS TABLE
+    // ===========================
+    function renderTransactionsTable() {
+      const tbody = document.getElementById('tableBody');
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const pageData = filteredData.slice(start, start + PAGE_SIZE);
+      tbody.innerHTML = '';
+      if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#b0b0b0;">No records found</td></tr>';
+      } else {
+        pageData.forEach(row => {
+          const tr = document.createElement('tr');
+          const isPositive = row.amount > 0;
+          tr.innerHTML = `
+            <td>${escapeHtml(row.date)}</td>
+            <td><strong>${escapeHtml(row.member)}</strong></td>
+            <td>${resourceBadge(row.resource)}</td>
+            <td class="${isPositive ? 'amount-positive' : 'amount-negative'}">${isPositive ? '+' : ''}${formatNumber(row.amount)}</td>
+            <td style="font-size:0.85em;color:#b0b0b0;">${isPositive ? '📤 Sent' : '📥 Received'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const container = document.getElementById('pagination');
+      const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
+      if (totalPages <= 1) { container.innerHTML = ''; return; }
+      let html = '';
+      html += `<button onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>«</button>`;
+      html += `<button onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, currentPage + 2);
+      for (let i = startPage; i <= endPage; i++) {
+        html += `<button onclick="goToPage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+      }
+      html += `<button onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+      html += `<button onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>»</button>`;
+      html += `<span class="page-info">${currentPage} / ${totalPages}</span>`;
+      container.innerHTML = html;
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
+      currentPage = Math.max(1, Math.min(page, totalPages));
+      renderTransactionsTable();
+    }
+
+    // ===========================
+    // PLAYER SUMMARY VIEW
+    // ===========================
+    function renderPlayerSummary() {
+      const map = {};
+      filteredData.forEach(row => {
+        if (!map[row.member]) map[row.member] = { contributed: 0, received: 0, count: 0 };
+        if (row.amount > 0) map[row.member].contributed += row.amount;
+        else map[row.member].received += Math.abs(row.amount);
+        map[row.member].count++;
+      });
+      let entries = Object.entries(map).map(([member, data]) => ({ member, ...data, net: data.contributed - data.received }));
+      const field = summarySortField.player;
+      const asc = summarySortAsc.player;
+      entries.sort((a, b) => {
+        let va = a[field], vb = b[field];
+        if (field === 'member') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+        if (typeof va === 'string') return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return asc ? va - vb : vb - va;
+      });
+      const tbody = document.getElementById('playerSummaryBody');
+      tbody.innerHTML = entries.map(e => `
+        <tr>
+          <td><strong>${escapeHtml(e.member)}</strong></td>
+          <td class="amount-positive">+${formatNumber(e.contributed)}</td>
+          <td class="amount-negative">-${formatNumber(e.received)}</td>
+          <td class="${e.net >= 0 ? 'amount-positive' : 'amount-negative'}">${e.net >= 0 ? '+' : ''}${formatNumber(e.net)}</td>
+          <td style="text-align:center">${e.count}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ===========================
+    // RESOURCE SUMMARY VIEW
+    // ===========================
+    function renderResourceSummary() {
+      const map = {};
+      filteredData.forEach(row => {
+        if (!map[row.resource]) map[row.resource] = { contributed: 0, received: 0, members: new Set() };
+        if (row.amount > 0) map[row.resource].contributed += row.amount;
+        else map[row.resource].received += Math.abs(row.amount);
+        map[row.resource].members.add(row.member);
+      });
+      let entries = Object.entries(map).map(([name, data]) => ({
+        name, contributed: data.contributed, received: data.received,
+        net: data.contributed - data.received, members: data.members.size
+      }));
+      const field = summarySortField.resource;
+      const asc = summarySortAsc.resource;
+      entries.sort((a, b) => {
+        let va = a[field], vb = b[field];
+        if (field === 'name') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+        if (typeof va === 'string') return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return asc ? va - vb : vb - va;
+      });
+      const tbody = document.getElementById('resourceSummaryBody');
+      tbody.innerHTML = entries.map(e => `
+        <tr>
+          <td>${resourceBadge(e.name)}</td>
+          <td class="amount-positive">+${formatNumber(e.contributed)}</td>
+          <td class="amount-negative">-${formatNumber(e.received)}</td>
+          <td class="${e.net >= 0 ? 'amount-positive' : 'amount-negative'}">${e.net >= 0 ? '+' : ''}${formatNumber(e.net)}</td>
+          <td style="text-align:center">${e.members}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ===========================
+    // DRAGON COINS PAYOUTS
+    // ===========================
+    function renderDragonPayouts() {
+      const showFilter = document.getElementById('dcShowFilter').value;
+      const membersLower = new Set(membersList.map(m => m.toLowerCase()));
+      const now = new Date();
+      const yesterdayDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+      const yesterday = yesterdayDate.toISOString().split('T')[0];
+      const windowStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 7));
+      const windowStartStr = windowStart.toISOString().split('T')[0];
+
+      const dcRows = allData.filter(r => r.resource === 'Dragon Coins' && membersLower.has(r.member.toLowerCase()) && r.date >= windowStartStr && r.date <= yesterday);
+      const playerMap = {};
+      dcRows.forEach(r => {
+        if (!playerMap[r.member]) playerMap[r.member] = { contributed: 0, paidOut: 0 };
+        if (r.amount > 0) playerMap[r.member].contributed += r.amount;
+        else if (r.amount < 0) playerMap[r.member].paidOut += Math.abs(r.amount);
+      });
+
+      let entries = Object.entries(playerMap).map(([member, data]) => ({ member, contributed: data.contributed, paidOut: data.paidOut, balance: data.contributed - data.paidOut }));
+      let totalContributed = 0, totalPaidOut = 0;
+      entries.forEach(e => { totalContributed += e.contributed; totalPaidOut += e.paidOut; });
+      const totalOwed = totalContributed - totalPaidOut;
+      const pendingCount = entries.filter(e => e.balance > 0).length;
+
+      document.getElementById('dcContributed').textContent = formatNumber(totalContributed);
+      document.getElementById('dcPaidOut').textContent = formatNumber(totalPaidOut);
+      const owedEl = document.getElementById('dcOwed');
+      owedEl.textContent = formatNumber(Math.max(0, totalOwed));
+      owedEl.className = 'card-value ' + (totalOwed > 0 ? 'negative' : 'positive');
+      document.getElementById('dcPending').textContent = pendingCount;
+
+      if (showFilter === 'owed') entries = entries.filter(e => e.balance > 0);
+      const field = summarySortField.dragon;
+      const asc = summarySortAsc.dragon;
+      entries.sort((a, b) => {
+        let va, vb;
+        switch (field) { case 'member': va = a.member.toLowerCase(); vb = b.member.toLowerCase(); break; case 'contributed': va = a.contributed; vb = b.contributed; break; case 'paidOut': va = a.paidOut; vb = b.paidOut; break; case 'balance': va = a.balance; vb = b.balance; break; default: va = a.balance; vb = b.balance; }
+        if (typeof va === 'string') return asc ? va.localeCompare(vb) : vb.localeCompare(va);
+        return asc ? va - vb : vb - va;
+      });
+
+      const tbody = document.getElementById('dragonPayoutsBody');
+      if (entries.length === 0) {
+        const msg = showFilter === 'owed' ? 'No outstanding Dragon Coins in the last 7 days! 🎉' : 'No Dragon Coins activity found for current members in the last 7 days.';
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:#b0b0b0;">${msg}</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = entries.map(e => {
+        let statusHtml, rowStyle;
+        if (e.balance <= 0 && e.contributed > 0) { statusHtml = '<span style="color:#27ae60;font-weight:600;">✅ Settled</span>'; rowStyle = ''; }
+        else if (e.balance > 0 && e.paidOut > 0) { const pct = Math.round((e.paidOut / e.contributed) * 100); statusHtml = `<span style="color:#ffb300;font-weight:600;">⏳ Partial (${pct}%)</span>`; rowStyle = 'background:rgba(255,179,0,0.04);'; }
+        else if (e.balance > 0) { statusHtml = '<span style="color:#c62828;font-weight:700;">❌ Not paid</span>'; rowStyle = 'background:rgba(198,40,40,0.06);'; }
+        else { statusHtml = '<span style="color:#b0b0b0;">—</span>'; rowStyle = ''; }
+        return `<tr style="${rowStyle}"><td><strong>${escapeHtml(e.member)}</strong>${newMemberBadge(e.member)}</td><td style="font-weight:700;color:${e.balance > 0 ? '#c62828' : '#27ae60'}">${formatNumber(e.balance)}</td><td class="amount-positive">+${formatNumber(e.contributed)}</td><td class="${e.paidOut > 0 ? 'amount-negative' : ''}">${e.paidOut > 0 ? '-' : ''}${formatNumber(e.paidOut)}</td><td>${statusHtml}</td></tr>`;
+      }).join('');
+    }
+
+    // ===========================
+    // UTILITIES
+    // ===========================
+    function newMemberBadge(memberName) {
+      const jd = membersJoinDates[(memberName || '').toLowerCase()];
+      if (!jd) return '';
+      const joinDate = new Date(jd + 'T00:00:00Z');
+      if (isNaN(joinDate.getTime())) return '';
+      const now = new Date();
+      const diffDays = Math.floor((now - joinDate) / 86400000);
+      if (diffDays <= 7) return ` <span style="font-size:0.7em;background:rgba(100,181,246,0.2);color:#64b5f6;padding:1px 6px;border-radius:4px;font-weight:600;" title="Joined ${jd}">🆕 ${jd}</span>`;
+      return '';
+    }
+
+    function resourceBadge(name) {
+      const cls = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
+      return `<span class="resource-badge ${cls}">${escapeHtml(name)}</span>`;
+    }
+
+    function formatNumber(n) { return Number(n).toLocaleString(); }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast ' + (type || '');
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+  </script>
+</body>
+</html>
