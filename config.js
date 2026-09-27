@@ -1,8 +1,8 @@
-// STAGING copy of the site: talks to the staging Worker (database), not the
-// live one. Read-only: anything that would change data is refused there, so the
-// Google Sheet is only ever changed from the live site.
+// Cloudflare Worker (public, CORS-friendly)
+// DATABASE VERSION OF THE SITE (new pages, UTC dates).
+// While testing: the staging database Worker. At the switch: the Worker the live site uses.
+// The live site (Google Sheet) was: https://ccc-l1.lady-qwickske.workers.dev/
 window.CLOUDFLARE_WORKER_URL = 'https://ccc-db-staging.lady-qwickske.workers.dev/';
-window.IS_STAGING_SITE = true;
 
 // Frontend should call the worker to avoid GAS CORS restrictions.
 window.GAS_WEB_APP_URL = window.CLOUDFLARE_WORKER_URL;
@@ -93,25 +93,4 @@ window.GAS_WEB_APP_URL = window.CLOUDFLARE_WORKER_URL;
 		startObserver();
 		window.addEventListener('resize', normalizeTopOffset);
 	}
-})();
-
-// Staging marker: a small fixed label on every page, so the staging copy is
-// never mistaken for the live site. Bottom-left, clear of the translate widget.
-(function stagingBadge() {
-	const add = function () {
-		if (document.getElementById('staging-site-badge')) return;
-		const badge = document.createElement('div');
-		badge.id = 'staging-site-badge';
-		badge.textContent = 'STAGING \u2014 read-only';
-		badge.title = 'Test copy of the site using the new database. Make changes on the live site.';
-		badge.style.cssText = [
-			'position:fixed', 'left:8px', 'bottom:8px', 'z-index:2147483647',
-			'background:#c62828', 'color:#fff', 'font:700 12px/1.2 Arial,sans-serif',
-			'padding:6px 10px', 'border-radius:6px', 'box-shadow:0 2px 6px rgba(0,0,0,.35)',
-			'letter-spacing:.5px', 'pointer-events:auto', 'opacity:.92'
-		].join(';');
-		document.body.appendChild(badge);
-	};
-	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add);
-	else add();
 })();

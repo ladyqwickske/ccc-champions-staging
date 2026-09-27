@@ -9,6 +9,7 @@
   <script src="perf-debug.js"></script>
   <script src="site-config.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
@@ -1003,12 +1004,7 @@ function filterPlayerTable() {
     // ── Shared date formatter for period display ──
     function formatDisplayDateStr_(dateStr) {
       if (!dateStr) return '';
-      const d = parseDateUTC(dateStr);
-      if (!d) return dateStr;
-      const utc = getUTCComponents(d);
-      if (!utc) return dateStr;
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${monthNames[utc.month - 1]} ${utc.day}, ${utc.year}`;
+      return cccDate(dateStr); // shared UTC format (ccc-dates.js)
     }
 
     // ── Simplified setDateRange — no more blocking getAllEvents call ──
@@ -1332,10 +1328,10 @@ function filterPlayerTable() {
 
     function formatTimestampWithAgo(timestampText) {
       if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') return null;
-      // Parse UTC timestamp like "2026-04-18 14:30:00 UTC"
-      const cleaned = timestampText.replace(' UTC', '').replace(/\s*\(.*\)/, '').trim();
-      const parsed = new Date(cleaned + 'Z');
-      if (isNaN(parsed.getTime())) return timestampText;
+      // Any timestamp the server sends (e.g. "2026-04-18 14:30:00 UTC"), shown in the shared UTC format
+      const parsed = cccParse(String(timestampText).replace(/\s*\(.*\)\s*$/, ''));
+      if (!parsed) return timestampText;
+      timestampText = cccDateTime(parsed);
       const now = new Date();
       const diffMs = now - parsed;
       const diffMins = Math.floor(diffMs / 60000);

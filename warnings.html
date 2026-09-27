@@ -9,6 +9,7 @@
   <script src="perf-debug.js"></script>
   <script src="site-config.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
@@ -559,7 +560,7 @@
         '<td style="text-align:center"><span class="warn-badge ' + wClass + '">' + data.maxWarningNum + '</span></td>' +
         '<td style="text-align:center">' + data.count + '</td>' +
         '<td class="type-tags">' + data.types.map(t => esc(t)).join(', ') + '</td>' +
-        '<td style="font-size:0.82em">' + data.latestDate + '</td>' +
+        '<td style="font-size:0.82em">' + esc(cccDateTime(data.latestDate)) + '</td>' +
         '<td><div class="action-btns">' +
           '<button onclick="filterByMember(\'' + esc(name) + '\')" title="View history">📜</button>' +
           '<button class="clear-btn" onclick="clearMemberWarningsClick(\'' + esc(name) + '\')" title="Clear all">🧹</button>' +
@@ -609,7 +610,7 @@
           '<span class="warn-name">' + esc(w.member) + '</span>' +
           '<span class="warn-type">' + esc(w.type) + '</span>' +
         '</div>' +
-        '<div class="warn-detail">📅 ' + w.timestamp + (w.issuedBy ? ' &middot; by ' + esc(w.issuedBy) : '') + '</div>' +
+        '<div class="warn-detail">📅 ' + esc(cccDateTime(w.timestamp)) + (w.issuedBy ? ' &middot; by ' + esc(w.issuedBy) : '') + '</div>' +
         (w.comment ? '<div class="warn-comment">"' + esc(w.comment) + '"</div>' : '') +
         '</li>';
     });

@@ -7,6 +7,7 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="perf-debug.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
@@ -650,8 +651,9 @@
       }
       return events;
     }
-    function parseDate(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
-    function fmtDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    // All calendar dates are UTC dates (the game's clock), whatever the viewer's time zone.
+    function parseDate(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])); }
+    function fmtDate(d) { return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()); }
 
     var EVENTS = []; // populated dynamically by expandRecurring() in render()
 
@@ -660,19 +662,19 @@
 
     function init() {
       var now = new Date();
-      viewYear = now.getFullYear();
-      viewMonth = now.getMonth();
+      viewYear = now.getUTCFullYear();
+      viewMonth = now.getUTCMonth();
       render();
     }
 
     window.calNav = function(dir) { viewMonth += dir; if (viewMonth < 0) { viewMonth = 11; viewYear--; } else if (viewMonth > 11) { viewMonth = 0; viewYear++; } render(); };
-    window.calToday = function() { var n = new Date(); viewYear = n.getFullYear(); viewMonth = n.getMonth(); render(); };
+    window.calToday = function() { var n = new Date(); viewYear = n.getUTCFullYear(); viewMonth = n.getUTCMonth(); render(); };
 
     /* ── Render ───────────────────────────────────── */
     function render() {
       // Expand recurring events for the visible month ± 1 month buffer
-      var rangeStart = new Date(viewYear, viewMonth - 1, 1);
-      var rangeEnd = new Date(viewYear, viewMonth + 2, 0);
+      var rangeStart = new Date(Date.UTC(viewYear, viewMonth - 1, 1));
+      var rangeEnd = new Date(Date.UTC(viewYear, viewMonth + 2, 0));
       EVENTS = expandRecurring(rangeStart, rangeEnd);
 
       var grid = document.getElementById('calGrid');
@@ -686,13 +688,12 @@
       for (var d = 0; d < 7; d++) html += '<div class="cal-dow">' + dows[d] + '</div>';
 
       // First day of month (0=Sun ... 6=Sat) → convert to Mon-start
-      var firstDay = new Date(viewYear, viewMonth, 1).getDay();
+      var firstDay = new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay();
       var startOffset = (firstDay === 0) ? 6 : firstDay - 1; // Mon=0
-      var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-      var prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+      var daysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate();
+      var prevMonthDays = new Date(Date.UTC(viewYear, viewMonth, 0)).getUTCDate();
 
-      var today = new Date();
-      var todayStr = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
+      var todayStr = cccTodayUTC();
 
       var totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
@@ -759,7 +760,7 @@
     function renderSidebar() {
       var container = document.getElementById('calUpcoming');
       var now = new Date();
-      var todayStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+      var todayStr = cccTodayUTC();
       // Show upcoming events for the next 60 days
       var sidebarEnd = new Date(now.getTime() + 60 * 86400000);
       var allUpcoming = expandRecurring(now, sidebarEnd);

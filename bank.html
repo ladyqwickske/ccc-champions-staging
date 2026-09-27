@@ -8,6 +8,7 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="perf-debug.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
@@ -572,9 +573,7 @@
 
       function formatTimestamp(value) {
         if (!value) return '-';
-        const parsed = new Date(value);
-        if (isNaN(parsed.getTime())) return String(value);
-        return parsed.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+        return cccDateTime(value); // shared UTC format (ccc-dates.js)
       }
 
       const OTHER_MEMBER_VALUE = '__other__';
@@ -748,7 +747,7 @@
         }
         toggleCustomRecipientRow();
         document.getElementById('remarks').value = transaction.remarks || '';
-        document.getElementById('transactionDate').value = transaction.timestamp ? String(transaction.timestamp).substring(0, 10) : '';
+        document.getElementById('transactionDate').value = transaction.timestamp ? cccDate(transaction.timestamp, '') : '';
         document.getElementById('submitTransactionBtn').textContent = 'Update Transaction';
         updateTransactionFields();
         result.innerHTML = '';

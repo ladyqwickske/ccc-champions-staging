@@ -8,58 +8,19 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="perf-debug.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <script>
-  // Helper: Parse date string as UTC with proper timezone handling
+  // Dates and times are read and shown in UTC with the shared helpers (ccc-dates.js).
   function parseDateUTC(str) {
-    if (!str) return null;
-    if (str instanceof Date) return str;
-    const strTrim = String(str).trim();
-    if (!strTrim) return null;
-    // ISO 8601 with Z or offset
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(strTrim)) {
-      const d = new Date(strTrim);
-      return isNaN(d.getTime()) ? null : d;
-    }
-    // YYYY-MM-DD (treat as UTC start of day)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(strTrim)) {
-      const d = new Date(strTrim + 'T00:00:00Z');
-      return isNaN(d.getTime()) ? null : d;
-    }
-    // M/D/YYYY or MM/DD/YYYY (treat as UTC)
-    const mdy = strTrim.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (mdy) {
-      const month = parseInt(mdy[1], 10) - 1;
-      const day = parseInt(mdy[2], 10);
-      const year = parseInt(mdy[3], 10);
-      const d = new Date(Date.UTC(year, month, day, 0, 0, 0));
-      return isNaN(d.getTime()) ? null : d;
-    }
-    // Fallback: try direct parsing with Z suffix for UTC
-    const d = new Date(strTrim + 'Z');
-    return isNaN(d.getTime()) ? null : d;
+    return cccParse(str);
   }
 
-  // Format a date string as UTC (YYYY-MM-DD HH:mm:ss UTC)
-  function formatDateUTC(dateStr, isEndDate = false) {
+  // Event dates are calendar dates: shown as YYYY-MM-DD (the second argument is no longer needed)
+  function formatDateUTC(dateStr) {
     if (!dateStr) return '';
-    const d = parseDateUTC(dateStr);
-    if (!d) return dateStr;
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    let hh, min, sec;
-    if (isEndDate) {
-      hh = '23';
-      min = '59';
-      sec = '59';
-    } else {
-      hh = String(d.getUTCHours()).padStart(2, '0');
-      min = String(d.getUTCMinutes()).padStart(2, '0');
-      sec = String(d.getUTCSeconds()).padStart(2, '0');
-    }
-    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${sec} UTC`;
+    return cccDate(dateStr);
   }
   </script>
   <style>
@@ -1156,7 +1117,7 @@
       let _periodRanges = null;
       function getPeriodRanges_() {
         if (_periodRanges) return _periodRanges;
-        const today = new Date(); today.setHours(0,0,0,0);
+        const today = new Date(); today.setUTCHours(0,0,0,0);
         const periods = (eventsData || [])
           .filter(e => e.participationMethod === 'period-marker')
           .sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
@@ -1165,16 +1126,16 @@
           const s = parseDateUTC(periods[i].startDate);
           const e = parseDateUTC(periods[i].endDate);
           if (s && e) {
-            const sd = new Date(s); sd.setHours(0,0,0,0);
-            const ed = new Date(e); ed.setHours(23,59,59,999);
+            const sd = new Date(s); sd.setUTCHours(0,0,0,0);
+            const ed = new Date(e); ed.setUTCHours(23,59,59,999);
             if (sd <= today && ed >= today) {
               current = { start: sd, end: ed };
               for (let j = i - 1; j >= 0; j--) {
                 const ps = parseDateUTC(periods[j].startDate);
                 const pe = parseDateUTC(periods[j].endDate);
                 if (ps && pe) {
-                  const psd = new Date(ps); psd.setHours(0,0,0,0);
-                  const ped = new Date(pe); ped.setHours(23,59,59,999);
+                  const psd = new Date(ps); psd.setUTCHours(0,0,0,0);
+                  const ped = new Date(pe); ped.setUTCHours(23,59,59,999);
                   previous = { start: psd, end: ped }; break;
                 }
               }
@@ -1183,7 +1144,7 @@
           }
         }
         if (!current) {
-          const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 14);
+          const cutoff = new Date(today); cutoff.setUTCDate(cutoff.getUTCDate() - 14);
           current = { start: cutoff, end: today };
         }
         _periodRanges = { current, previous };
@@ -1191,13 +1152,13 @@
       }
 
       function classifyEvent(ev) {
-        const today = new Date(); today.setHours(0,0,0,0);
+        const today = new Date(); today.setUTCHours(0,0,0,0);
         const { current, previous } = getPeriodRanges_();
         const start = parseDateUTC(ev.startDate);
         const end = parseDateUTC(ev.endDate);
         if (!start || !end) return 'other';
-        const startDay = new Date(start); startDay.setHours(0,0,0,0);
-        const endDay = new Date(end); endDay.setHours(23,59,59,999);
+        const startDay = new Date(start); startDay.setUTCHours(0,0,0,0);
+        const endDay = new Date(end); endDay.setUTCHours(23,59,59,999);
         // Period-marker events define the periods themselves — classify directly vs today
         if (ev.participationMethod === 'period-marker') {
           if (startDay > today) return 'future';
@@ -1330,7 +1291,7 @@
             ? `<span style="color:#ef5350;font-weight:600;">${Number(event.penaltyAmount).toLocaleString()} ${event.penaltyType === 'points' ? 'pts' : 'silver'}</span>`
             : '<span style="color:#555;">—</span>';
           const row = document.createElement('tr');
-          row.innerHTML = `<td class="event-name">${escapeHtml(event.eventName)}</td><td>${escapeHtml(event.eventType)}</td><td>${formatDateUTC(event.startDate)}</td><td>${formatDateUTC(event.endDate, true)}</td><td>${methodBadge}</td><td style="text-align:center;">${targetPtsDisplay}</td><td style="text-align:center;">${penaltyDisplay}</td><td>${viewButton}<button class="btn action-btn" onclick="EventsTab.editEvent('${escapeAttr(event.eventName)}')">✏️ Edit</button><button class="btn action-btn btn-secondary" onclick="EventsTab.deleteEvent('${escapeAttr(event.eventName)}')">🗑️ Delete</button></td>`;
+          row.innerHTML = `<td class="event-name">${escapeHtml(event.eventName)}</td><td>${escapeHtml(event.eventType)}</td><td>${formatDateUTC(event.startDate)}</td><td>${formatDateUTC(event.endDate)}</td><td>${methodBadge}</td><td style="text-align:center;">${targetPtsDisplay}</td><td style="text-align:center;">${penaltyDisplay}</td><td>${viewButton}<button class="btn action-btn" onclick="EventsTab.editEvent('${escapeAttr(event.eventName)}')">✏️ Edit</button><button class="btn action-btn btn-secondary" onclick="EventsTab.deleteEvent('${escapeAttr(event.eventName)}')">🗑️ Delete</button></td>`;
           tbody.appendChild(row);
         });
         if (sorted.length === 0) {
@@ -1454,20 +1415,9 @@
         if (value instanceof Date) return isNaN(value.getTime()) ? null : value;
         const str = String(value).trim();
         if (!str) return null;
-        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-          const date = new Date(str + 'T00:00:00');
-          return isNaN(date.getTime()) ? null : date;
-        }
-        const mdy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-        if (mdy) {
-          const month = parseInt(mdy[1], 10) - 1;
-          const day = parseInt(mdy[2], 10);
-          const year = parseInt(mdy[3], 10);
-          const date = new Date(year, month, day);
-          return isNaN(date.getTime()) ? null : date;
-        }
-        const parsed = new Date(str);
-        return isNaN(parsed.getTime()) ? null : parsed;
+        // the calendar date, as UTC midnight (ccc-dates.js), so join and event dates compare by day
+        const day = cccDate(str, '');
+        return day ? cccParse(day) : null;
       }
 
       function buildMemberJoinDatesMap() {

@@ -7,6 +7,7 @@
 	<link rel="icon" href="favicon.png" type="image/png">
 	<script src="perf-debug.js"></script>
 	<script src="config.js"></script>
+	<script src="ccc-dates.js"></script>
 	<script src="portal-shim.js"></script>
 	<script src="portal-auth.js"></script>
 	<style>
@@ -549,10 +550,7 @@
 
 		function formatDate(value) {
 			if (!value) return '-';
-			if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
-			const date = new Date(value);
-			if (isNaN(date.getTime())) return '-';
-			return date.toISOString().substring(0, 10);
+			return cccDate(value, '-'); // shared UTC format (ccc-dates.js)
 		}
 
 		async function loadCompetitionLeaderboard() {
@@ -573,7 +571,7 @@
 
 				const data = await response.json();
 				const leaderboard = data && data.success ? (data.leaderboard || []) : [];
-				document.getElementById('updatedAt').textContent = (data && data.lastCalculatedUtc) ? data.lastCalculatedUtc : 'Never';
+				document.getElementById('updatedAt').textContent = (data && data.lastCalculatedUtc) ? cccDateTime(data.lastCalculatedUtc) : 'Never';
 
 				if (!leaderboard.length) {
 					tbody.innerHTML = '<tr><td colspan="6" class="empty">No leaderboard data available yet.</td></tr>';

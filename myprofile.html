@@ -8,6 +8,7 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="site-config.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
@@ -317,9 +318,7 @@
     function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
     function formatTimestamp(value) {
       if (!value) return '-';
-      const parsed = new Date(value);
-      if (isNaN(parsed.getTime())) return String(value);
-      return parsed.toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+      return cccDateTime(value); // shared UTC format (ccc-dates.js)
     }
 
     function renderSignedOut() {
@@ -410,7 +409,7 @@
         const pctColor = pct >= 100 ? '#8bc34a' : (pct >= 70 ? '#42a5f5' : (pct >= 40 ? '#ff9800' : '#ef5350'));
         const periodLabel = active.periodName || 'Current period';
         html += '<h2>Current Period</h2><div class="cards">'
-          + card('Period', escapeHtml(periodLabel), active.startDate + ' → ' + active.endDate)
+          + card('Period', escapeHtml(periodLabel), escapeHtml(cccDate(active.startDate) + ' → ' + cccDate(active.endDate)))
           + card('Points Earned', '<span style="color:' + pctColor + '">' + fmtInt(active.earnedPoints) + '</span>', fmtInt(active.chestCount) + ' chests opened')
           + card('Your Target', fmtInt(active.target), active.penaltyPoints > 0 ? 'Includes +' + fmtInt(active.penaltyPoints) + ' penalty points' : 'Standard target')
           + card('Still Needed', '<span style="color:' + pctColor + '">' + fmtInt(active.remaining) + '</span>', pct != null ? pct + '% of target reached' : '')
@@ -477,7 +476,7 @@
               return '<tr>'
                 + '<td>' + escapeHtml(norm.periodName || '-') + '</td>'
                 + '<td>' + escapeHtml(norm.eventName || '-') + category + '</td>'
-                + '<td>' + escapeHtml(norm.startDate || '-') + ' → ' + escapeHtml(norm.endDate || '-') + '</td>'
+                + '<td>' + escapeHtml(cccDate(norm.startDate, '-')) + ' → ' + escapeHtml(cccDate(norm.endDate, '-')) + '</td>'
                 + '<td>' + fmtInt(norm.achieved) + '</td>'
                 + '<td>' + fmtInt(norm.target) + '</td>'
                 + '<td style="color:' + color + ';font-weight:600;">' + norm.percent + '%</td>'
@@ -524,7 +523,7 @@
         html += '<h2>Silver Penalties Due</h2><div class="table-wrap"><table><thead><tr><th>Penalty</th><th>Due Date</th><th>Status</th></tr></thead><tbody>'
           + penaltyTransactions.map(tx => {
             const dueDate = tx.dueDate || getPenaltyDueDate(tx.timestamp);
-            const overdue = dueDate && dueDate < new Date().toISOString().substring(0, 10);
+            const overdue = dueDate && cccDate(dueDate) < cccTodayUTC();
             return '<tr><td>' + fmt(tx.balance) + '</td><td>' + escapeHtml(formatDateOnly(dueDate)) + '</td><td style="color:' + (overdue ? '#ef5350' : '#8bc34a') + ';font-weight:600;">' + (overdue ? 'Overdue' : 'Due') + '</td></tr>';
           }).join('')
           + '</tbody></table></div>';
@@ -569,8 +568,7 @@
     }
     function formatDateOnly(value) {
       if (!value) return '-';
-      const parsed = new Date(value + 'T00:00:00Z');
-      return isNaN(parsed.getTime()) ? String(value) : parsed.toISOString().substring(0, 10);
+      return cccDate(value); // shared UTC format (ccc-dates.js)
     }
   </script>
 </body>

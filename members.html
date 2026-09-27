@@ -8,38 +8,13 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="perf-debug.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <script>
-  // Helper: Parse date string as UTC with proper timezone handling
+  // Dates are read and shown in UTC with the shared helpers (ccc-dates.js).
   function parseDateUTC(str) {
-    if (!str) return null;
-    if (str instanceof Date) return str;
-    const strTrim = String(str).trim();
-    if (!strTrim) return null;
-    // ISO 8601 with Z (with or without milliseconds)
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(strTrim)) {
-      const d = new Date(strTrim);
-      return isNaN(d.getTime()) ? null : d;
-    }
-    // YYYY-MM-DD (treat as UTC start of day)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(strTrim)) {
-      const d = new Date(strTrim + 'T00:00:00Z');
-      return isNaN(d.getTime()) ? null : d;
-    }
-    // M/D/YYYY or MM/DD/YYYY (treat as UTC)
-    const mdy = strTrim.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-    if (mdy) {
-      const month = parseInt(mdy[1], 10) - 1;
-      const day = parseInt(mdy[2], 10);
-      const year = parseInt(mdy[3], 10);
-      const d = new Date(Date.UTC(year, month, day, 0, 0, 0));
-      return isNaN(d.getTime()) ? null : d;
-    }
-    // Fallback: try direct parsing (append Z only if not already present)
-    const fallback = strTrim.endsWith('Z') ? strTrim : strTrim + 'Z';
-    const d = new Date(fallback);
-    return isNaN(d.getTime()) ? null : d;
+    return cccParse(str);
   }
 
   // Helper: Get today's date at midnight UTC (YYYY-MM-DD format)
@@ -1561,7 +1536,7 @@
           const hero = heroData[key];
           const row = document.createElement('tr');
           const heroHtml = hero && hero.level != null
-            ? `<span style="display:inline-block;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;background:${getHeroBg(hero.level)};color:${getHeroFg(hero.level)};" title="Updated: ${hero.timestamp || '?'}">${hero.level}</span>`
+            ? `<span style="display:inline-block;padding:1px 5px;border-radius:8px;font-size:10px;font-weight:700;background:${getHeroBg(hero.level)};color:${getHeroFg(hero.level)};" title="Updated: ${hero.timestamp ? cccDateTime(hero.timestamp) : '?'}">${hero.level}</span>`
             : '<span style="color:#666">—</span>';
           const cat = determineTroopCategory(troops.G, troops.M, troops.S);
           row.innerHTML = `<td class="member-name">${escapeHtml(member.name)}</td><td style="text-align:center;">${heroHtml}</td><td class="date-value">${formatDate(member.joinDate)}</td><td style="text-align:center">${categoryBadge(cat)}</td><td style="text-align:center;white-space:nowrap;">${troopCell(troops)}</td>`;
@@ -2115,17 +2090,7 @@
 
       function formatDate(dateStr) {
         if (!dateStr) return '-';
-        try {
-          const date = parseDateUTC(dateStr);
-          if (!date) return dateStr;
-          // Format as ISO UTC date string
-          const year = date.getUTCFullYear();
-          const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-          const day = String(date.getUTCDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        } catch (e) {
-          return dateStr;
-        }
+        return cccDate(dateStr); // shared UTC format (ccc-dates.js)
       }
 
       function escapeHtml(text) {

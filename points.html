@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cCc Champions - Points Reference</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <script src="perf-debug.js"></script>
+  <script src="config.js"></script>
+  <script src="portal-shim.js"></script>
+  <script src="portal-auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      color: #f3f3f3;
+      text-align: center;
+      padding: 32px 16px 60px 16px;
+      min-height: 100vh;
+      background-attachment: fixed;
+    }
+    body { top: 0 !important; }
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    .goog-te-balloon-frame { display: none !important; }
+
+    .tab-content { padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+
+    .login-container {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .login-container h1 {
+      color: #ffb300;
+      margin-bottom: 20px;
+    }
+
+    .login-container p {
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .google-signin {
+      display: inline-block;
+    }
+
+    .header { margin-bottom: 16px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .header p {
+      color: #b0b0b0;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .tab-icon {
+      display: inline-block;
+    }
+
+    /* Sticky Navigation Bar */
+    .tab-nav {
+      background: rgba(30, 34, 40, 0.95);
+      border-bottom: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      width: 100%;
+      left: 0;
+      right: 0;
+      overflow: visible;
+    }
+    .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; overflow: visible; flex-wrap: wrap; }
+    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
+    .nav-brand img { height: 32px; width: auto; }
+    .tab-buttons {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-items: center;
+      height: 100px;
+    }
+    .tab-btn { 
+      padding: 12px 16px; 
+      background: none; 
+      border: none; 
+      color: #e0e0e0; 
+      font-size: 28px; 
+      font-weight: 500; 
+      border-bottom: 3px solid transparent; 
+      transition: all 0.2s; 
+      white-space: nowrap; 
+      text-decoration: none;
+      display: block;
+      cursor: pointer; 
+      position: relative; 
+    }
+    .tab-btn:hover { color: #ffb300; background: #232526; }
+    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab-btn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #232526;
+      color: #ffb300;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1001;
+      border: 1px solid #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .tab-btn .tab-icon {
+      display: block;
+      margin: 0 auto;
+      height: 40px;
+      width: auto;
+      font-size: 16px;
+      line-height: 1.2;
+      font-weight: 500;
+      white-space: nowrap;
+      filter: drop-shadow(0 2px 8px #000a);
+    }
+
+    .read-only-badge {
+      background: #ff5252;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .logout-btn {
+      background: #ff5252;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #ff1744;
+      transform: scale(1.05);
+    }
+
+    /* Main Content */
+    .points-reference-table {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .points-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1a1b1c;
+    }
+
+    .points-table thead {
+      background: #232526;
+      border-bottom: 2px solid #444;
+    }
+
+    .points-table th {
+      padding: 16px;
+      text-align: left;
+      color: #ffb300;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-right: 1px solid #333;
+    }
+
+    .points-table th:last-child {
+      border-right: none;
+    }
+
+    .points-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #333;
+      border-right: 1px solid #333;
+      font-size: 13px;
+    }
+
+    .points-table td:last-child {
+      border-right: none;
+    }
+
+    .points-table tbody tr:hover {
+      background: #232526;
+      transition: background 0.2s;
+    }
+
+    .points-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .type-cell {
+      color: #ffb300;
+      font-weight: 600;
+    }
+
+    .level-cell {
+      color: #e0e0e0;
+    }
+
+    .points-cell {
+      color: #8bc34a;
+      font-weight: 600;
+    }
+
+    /* Filter Section */
+    .filter-section {
+      background: #1a1b1c;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-section input {
+      padding: 8px 12px;
+      background: #232526;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+      font-family: inherit;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .filter-section input:focus {
+      outline: none;
+      border-color: #ffb300;
+      box-shadow: 0 0 8px rgba(255, 179, 0, 0.2);
+    }
+
+    .filter-section input::placeholder {
+      color: #888;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      background: #ffb300;
+      color: #232526;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      background: #ffc933;
+      transform: scale(1.05);
+    }
+
+    .filter-info {
+      color: #888;
+      font-size: 12px;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+    }
+
+    @media (max-width: 768px) {
+      .tab-content {
+        margin-top: 80px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .filter-section {
+        flex-direction: column;
+      }
+
+      .filter-section input {
+        min-width: 100%;
+      }
+
+      .points-table {
+        font-size: 12px;
+      }
+
+      .points-table td,
+      .points-table th {
+        padding: 8px;
+      }
+    }
+
+    /* Hamburger menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: #ffb300;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+
+    /* Responsive navigation: show icons on desktop, plain text on mobile */
+    .tab-label.mobile-only { display: none; }
+    .tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
+
+    @media (max-width: 800px) {
+      .tab-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 9999;
+      }
+      .tab-nav-container {
+        flex-wrap: wrap;
+        padding: 8px;
+      }
+      .nav-brand {
+        flex: 1;
+        margin-right: 8px;
+        font-size: 16px;
+        padding: 8px 0;
+      }
+      .nav-brand img {
+        height: 24px;
+        width: 24px;
+      }
+      .hamburger { 
+        display: flex;
+        order: 2;
+      }
+      .tab-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        max-height: 60vh;
+        overflow-y: auto;
+        background: #232526;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        width: 100%;
+        z-index: 10000;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        display: none;
+        order: 10;
+      }
+      .tab-buttons.open {
+        display: flex;
+      }
+      .tab-btn {
+        font-size: 18px;
+        padding: 18px 24px;
+        border-bottom: 1px solid #444;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        background: none;
+        height: auto;
+      }
+      .tab-btn:last-child { border-bottom: none; }
+      .tab-label.mobile-only { display: inline; }
+      .tab-icon.desktop-only { display: none; }
+      /* Auth buttons and badges on mobile */
+      #readOnlyBadge,
+      #signedInUserBadge,
+      #logoutBtn,
+      #signInManageBtn {
+        order: 3;
+        margin: 4px 0 4px auto !important;
+        font-size: 11px !important;
+        padding: 6px 8px !important;
+      }
+      body {
+        padding-top: 100px;
+      }
+    }
+
+    @media (min-width: 801px) {
+      .tab-label.mobile-only { display: none; }
+      .tab-icon.desktop-only { display: block; }
+      .tab-buttons {
+        flex-direction: row;
+        align-items: center;
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+        background: none;
+        box-shadow: none;
+        border-radius: 0;
+        display: flex !important;
+      }
+      .tab-btn {
+        font-size: 28px;
+        padding: 12px 16px;
+        border-bottom: 3px solid transparent;
+        display: block;
+        justify-content: center;
+      }
+      .hamburger { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Translate Widget -->
+  <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
+  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
+  <style>
+    @media (max-width: 800px) {
+      #google_translate_element {
+        max-width: 0;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        transition: max-width 0.2s ease, opacity 0.2s ease;
+      }
+      body.translate-open #google_translate_element {
+        max-width: 260px;
+        opacity: 1;
+        pointer-events: auto;
+      }
+      #translateToggleBtn { display: inline-flex !important; }
+    }
+    @media (min-width: 801px) {
+      #translateToggleBtn { display: none !important; }
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const translateToggleBtn = document.getElementById('translateToggleBtn');
+      const translateWidget = document.getElementById('google_translate_element');
+      if (!translateToggleBtn || !translateWidget) return;
+      translateToggleBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        document.body.classList.toggle('translate-open');
+      });
+      document.addEventListener('click', function (e) {
+        if (!document.body.classList.contains('translate-open')) return;
+        if (translateWidget.contains(e.target) || translateToggleBtn.contains(e.target)) return;
+        document.body.classList.remove('translate-open');
+      });
+    });
+  </script>
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <!-- Login Script -->
+  <style>
+    .login-bar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .login-bar .user-email { color: #ffb300; font-size: 13px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .login-bar button { padding: 6px 14px; border: 1px solid #444; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    #loginBtn { background: #1a1b1c; color: #ffb300; }
+    #loginBtn:hover { background: #2a2b2c; }
+    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
+    #logoutBtn:hover { background: #e53935; }
+    @media (max-width: 800px) {
+      .login-bar { margin-left: 0; margin-top: 8px; justify-content: center; }
+    }
+  </style>
+  <script>
+    let isLoggedIn = false;
+    let currentUser = null;
+    const AUTH_KEY = 'ccc_portal_google_auth';
+    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
+
+    function checkLoginState() {
+      try {
+        const token = localStorage.getItem(AUTH_KEY);
+        const email = localStorage.getItem(AUTH_EMAIL_KEY);
+        if (token && email) {
+          isLoggedIn = true;
+          currentUser = email;
+        }
+      } catch (e) {}
+      updateLoginUI();
+    }
+
+    function handleLogin() {
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Loading...'; }
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = () => initGoogleLogin();
+      script.onerror = () => {
+        showToast('Failed to load Google Sign-In', true);
+        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '🔑 Login'; }
+      };
+      document.head.appendChild(script);
+    }
+
+    function initGoogleLogin() {
+      try {
+        google.accounts.id.initialize({
+          client_id: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
+          callback: handleGoogleCallback,
+          auto_select: false,
+          ux_mode: 'popup'
+        });
+        google.accounts.id.prompt();
+      } catch (e) {
+        showToast('Google Sign-In error', true);
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '🔑 Login'; }
+      }
+    }
+
+    async function handleGoogleCallback(response) {
+      const idToken = response.credential;
+      try {
+        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
+        const tokenRes = await fetch(cfWorkerUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        const tokenData = await tokenRes.json();
+        if (!tokenData.success || !tokenData.token_verified) throw new Error(tokenData.error || 'Token verification failed');
+        const email = tokenData.email;
+        const res = await fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'verifyUserPermission', email })
+        });
+        const data = await res.json();
+        if (data.isAllowedEditor) {
+          try { localStorage.setItem(AUTH_KEY, idToken); } catch (e) {}
+          try { localStorage.setItem(AUTH_EMAIL_KEY, email); } catch (e) {}
+          isLoggedIn = true;
+          currentUser = email;
+          updateLoginUI();
+          showToast('Signed in as ' + email);
+        } else {
+          showToast('Your account does not have editor access', true);
+        }
+      } catch (error) {
+        console.error('Sign-in error:', error);
+        showToast('Sign-in failed: ' + error.message, true);
+      }
+      const loginBtn = document.getElementById('loginBtn');
+      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '🔑 Login'; }
+    }
+
+    function handleLogout() {
+      try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+      try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
+      isLoggedIn = false;
+      currentUser = null;
+      updateLoginUI();
+      showToast('Logged out');
+    }
+
+    function updateLoginUI() {
+      const userEmail = document.getElementById('userEmail');
+      const loginBtn = document.getElementById('loginBtn');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (userEmail) userEmail.textContent = isLoggedIn ? currentUser : '';
+      if (loginBtn) loginBtn.style.display = isLoggedIn ? 'none' : '';
+      if (logoutBtn) logoutBtn.style.display = isLoggedIn ? '' : 'none';
+      const restrictedTabs = ['events.html', 'members.html', 'warnings.html'];
+      restrictedTabs.forEach(href => {
+        document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(link => {
+          link.style.display = isLoggedIn ? '' : 'none';
+        });
+      });
+      const bankTab = document.getElementById('bankTabBtn');
+      if (bankTab) bankTab.style.display = isLoggedIn ? 'flex' : 'none';
+    }
+
+    function showToast(msg, isError) {
+      const t = document.createElement('div');
+      t.textContent = msg;
+      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;color:#fff;background:' + (isError ? '#c62828' : '#2e7d32');
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', checkLoginState);
+  </script>
+
+  <!-- Navigation Bar -->
+  <nav class="tab-nav">
+    <div class="tab-nav-container">
+      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
+      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="tab-buttons" id="navTabs">
+        <a href="dashboard.html" class="tab-btn" title="Dashboard">
+          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Dashboard</span>
+        </a>
+        <a href="events.html" class="tab-btn" title="Events">
+          <img src="events.png" alt="Events" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Events</span>
+        </a>
+        <a href="members.html" class="tab-btn" title="Members">
+          <img src="members.png" alt="Members" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Members</span>
+        </a>
+        <a href="warnings.html" class="tab-btn" title="Warnings">
+          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Warnings</span>
+        </a>
+        <a href="competition.html" class="tab-btn" title="Competition">
+          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Competition</span>
+        </a>
+        <a href="calendar.html" class="tab-btn" title="Calendar">
+          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Calendar</span>
+        </a>
+        <a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;">
+          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
+          <span class="tab-label mobile-only">Bank</span>
+        </a>
+      </div>
+      <div class="login-bar">
+        <span id="userEmail" class="user-email"></span>
+        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
+        <button id="logoutBtn" onclick="handleLogout()" style="display:none;">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="tab-content active">
+    <div id="mainContent" style="display: block;">
+      <div class="header">
+        <h1><img src="chest_points.png" alt="Points Reference" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Points Reference</h1>
+        <p>Reference table for all chest types and their corresponding point values</p>
+      </div>
+
+      <!-- Filter Section -->
+      <div class="filter-section">
+        <input type="text" id="searchInput" placeholder="Search chest type or level..." onkeyup="filterTable()">
+        <button class="filter-btn" onclick="resetFilter()">Reset</button>
+        <span class="filter-info" id="resultCount"></span>
+      </div>
+
+      <!-- Points Table -->
+      <div class="points-reference-table">
+        <table class="points-table" id="pointsTable">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Crypt / Level</th>
+              <th>Points</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td class="type-cell">Arena</td><td class="level-cell">Arena</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Common Crypt</td><td class="level-cell">Level 5 Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Common Crypt</td><td class="level-cell">Level 10 Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Common Crypt</td><td class="level-cell">Level 15 Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Common Crypt</td><td class="level-cell">Level 20 Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Common Crypt</td><td class="level-cell">Level 25 Crypt</td><td class="points-cell">15</td></tr>
+            <tr><td class="type-cell">Rare Crypt</td><td class="level-cell">Level 10 Rare Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Rare Crypt</td><td class="level-cell">Level 15 Rare Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Rare Crypt</td><td class="level-cell">Level 20 Rare Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Rare Crypt</td><td class="level-cell">Level 25 Rare Crypt</td><td class="points-cell">15</td></tr>
+            <tr><td class="type-cell">Rare Crypt</td><td class="level-cell">Level 30 Rare Crypt</td><td class="points-cell">20</td></tr>
+            <tr><td class="type-cell">Epic Crypt</td><td class="level-cell">Level 15 Epic Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Epic Crypt</td><td class="level-cell">Level 20 Epic Crypt</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Epic Crypt</td><td class="level-cell">Level 25 Epic Crypt</td><td class="points-cell">30</td></tr>
+            <tr><td class="type-cell">Epic Crypt</td><td class="level-cell">Level 30 Epic Crypt</td><td class="points-cell">35</td></tr>
+            <tr><td class="type-cell">Epic Crypt</td><td class="level-cell">Level 35 Epic Crypt</td><td class="points-cell">45</td></tr>
+            <tr><td class="type-cell">Tartaros Crypt</td><td class="level-cell">Level 10</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Tartaros Crypt</td><td class="level-cell">Level 15</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Tartaros Crypt</td><td class="level-cell">Level 20</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Tartaros Crypt</td><td class="level-cell">Level 25</td><td class="points-cell">15</td></tr>
+            <tr><td class="type-cell">Tartaros Crypt</td><td class="level-cell">Level 30</td><td class="points-cell">20</td></tr>
+            <tr><td class="type-cell">Tartaros Crypt</td><td class="level-cell">Level 35</td><td class="points-cell">30</td></tr>
+            <tr><td class="type-cell">Elven Citadel</td><td class="level-cell">Level 10</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Elven Citadel</td><td class="level-cell">Level 15</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Elven Citadel</td><td class="level-cell">Level 20</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Elven Citadel</td><td class="level-cell">Level 25</td><td class="points-cell">15</td></tr>
+            <tr><td class="type-cell">Elven Citadel</td><td class="level-cell">Level 30</td><td class="points-cell">20</td></tr>
+            <tr><td class="type-cell">Cursed Citadel</td><td class="level-cell">Level 20</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Cursed Citadel</td><td class="level-cell">Level 25</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Heroic Monster</td><td class="level-cell">Level 16–19</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Heroic Monster</td><td class="level-cell">Level 20–24</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Heroic Monster</td><td class="level-cell">Level 25–30</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Heroic Monster</td><td class="level-cell">Level 31–34</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Heroic Monster</td><td class="level-cell">Level 35–40</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Heroic Monster</td><td class="level-cell">Level 41–45</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Epic Squad</td><td class="level-cell">Any Epic Squad</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Hermes Store</td><td class="level-cell">Store</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Mercenary Exchange</td><td class="level-cell">Exchange</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Ragnarok Shop</td><td class="level-cell">Shop</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Wooden</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Conqueror's</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Bronze</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Silver</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Golden</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Precious</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Store (Bank)</td><td class="level-cell">Magic</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Tournament</td><td class="level-cell">Authority Rush</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Union of Triumph</td><td class="level-cell">Union Chest (Personal)</td><td class="points-cell">0</td></tr>
+            <tr><td class="type-cell">Ancient / Runic / Event Chests</td><td class="level-cell">All listed</td><td class="points-cell">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="noResults" class="no-results" style="display: none;">No results found. Try a different search.</div>
+    </div>
+  </div>
+
+  <script>
+    // All table data (for filtering)
+    const allRows = [];
+
+    // Check authentication and initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      const isSignedIn = localStorage.getItem('cccClanSignedIn') === 'true';
+      
+      // Always show main content (guest mode)
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('loginPrompt').style.display = 'none';
+      initializeTable();
+      
+      // Setup sign-in button
+      const signInBtn = document.getElementById('signInBtn');
+      if (signInBtn) {
+        signInBtn.addEventListener('click', () => {
+          document.getElementById('loginPrompt').style.display = 'block';
+          document.getElementById('googleSignInContainer').style.display = 'block';
+          initializeGoogleSignIn();
+        });
+      }
+      
+      // If already signed in, authenticate automatically
+      if (isSignedIn) {
+        initializeGoogleSignIn();
+      }
+      
+      updateReadOnlyUI();
+    });
+
+    function logout() {
+      if (confirm('Sign out of cCc Portal?')) {
+        localStorage.removeItem('cccClanSignedIn');
+        localStorage.removeItem('cccClanUser');
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('loginPrompt').style.display = 'block';
+        document.body.classList.remove('read-only-mode');
+      }
+    }
+
+    function updateReadOnlyUI() {
+      const isReadOnly = document.body.classList.contains('read-only-mode');
+      const navBrand = document.getElementById('navBrand');
+      if (navBrand) {
+        navBrand.innerHTML = '<img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions';
+      }
+      const badge = document.getElementById('readOnlyBadge');
+      if (badge) {
+        badge.style.display = isReadOnly ? 'block' : 'none';
+      }
+    }
+
+    function initializeTable() {
+      // Store all rows for filtering
+      const tbody = document.getElementById('tableBody');
+      const rows = tbody.querySelectorAll('tr');
+      rows.forEach(row => {
+        const typeCell = row.querySelector('.type-cell');
+        const levelCell = row.querySelector('.level-cell');
+        const pointsCell = row.querySelector('.points-cell');
+        if (typeCell && levelCell && pointsCell) {
+          allRows.push({
+            type: typeCell.textContent.toLowerCase(),
+            level: levelCell.textContent.toLowerCase(),
+            points: pointsCell.textContent,
+            element: row
+          });
+        }
+      });
+      updateResultCount(rows.length);
+    }
+
+    function filterTable() {
+      const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
+      const tbody = document.getElementById('tableBody');
+      const noResults = document.getElementById('noResults');
+      let visibleCount = 0;
+
+      if (!searchInput) {
+        // Show all rows
+        allRows.forEach(row => {
+          row.element.style.display = '';
+          visibleCount++;
+        });
+        noResults.style.display = 'none';
+      } else {
+        // Filter rows
+        allRows.forEach(row => {
+          const matches = row.type.includes(searchInput) || row.level.includes(searchInput) || row.points.includes(searchInput);
+          if (matches) {
+            row.element.style.display = '';
+            visibleCount++;
+          } else {
+            row.element.style.display = 'none';
+          }
+        });
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+
+      updateResultCount(visibleCount);
+    }
+
+    function resetFilter() {
+      document.getElementById('searchInput').value = '';
+      filterTable();
+    }
+
+    function updateResultCount(count) {
+      const totalCount = allRows.length;
+      const resultCount = document.getElementById('resultCount');
+      if (count === totalCount) {
+        resultCount.textContent = `Showing ${count} points`;
+      } else {
+        resultCount.textContent = `Showing ${count} of ${totalCount} points`;
+      }
+    }
+  </script>
+
+<script>
+// Hamburger menu toggle for mobile navigation
+document.addEventListener('DOMContentLoaded', function() {
+  const hamburger = document.getElementById('navHamburger');
+  const navTabs = document.getElementById('navTabs');
+  if (hamburger && navTabs) {
+    hamburger.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navTabs.classList.toggle('open');
+    });
+  }
+  // Optional: close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    if (navTabs.classList.contains('open') && !navTabs.contains(e.target) && !hamburger.contains(e.target)) {
+      navTabs.classList.remove('open');
+    }
+  });
+});
+</script>
+</body>
+</html>

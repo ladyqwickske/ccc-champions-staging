@@ -8,6 +8,7 @@
   <link rel="icon" href="favicon.png" type="image/png">
   <script src="site-config.js"></script>
   <script src="config.js"></script>
+  <script src="ccc-dates.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
@@ -455,7 +456,7 @@
       }
       const sorted = [...rankingsData.rankings];
       const W = rankingsData.weights || {};
-      const metaNote = rankingsData.lastUpdated ? '<span style="font-size:11px;color:#666;font-weight:400;margin-left:8px;">Updated: ' + rankingsData.lastUpdated + '</span>' : '';
+      const metaNote = rankingsData.lastUpdated ? '<span style="font-size:11px;color:#666;font-weight:400;margin-left:8px;">Updated: ' + cccDateTime(rankingsData.lastUpdated) + '</span>' : '';
 
       function rankingCardHtml(m, rank) {
         const rankClass = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
@@ -475,7 +476,7 @@
         }).join('');
         const metaParts = [m.rating];
         if (m.periodsTotal > 0) metaParts.push(m.periodsMet + '/' + m.periodsTotal + ' targets met');
-        if (m.joinDate) metaParts.push('Joined ' + m.joinDate);
+        if (m.joinDate) metaParts.push('Joined ' + cccDate(m.joinDate));
         if (m.warnings > 0) metaParts.push('⚠️ ' + m.warnings + ' warning' + (m.warnings > 1 ? 's' : ''));
         return '<div class="ranking-card">'
           + '<div class="ranking-rank ' + rankClass + '">#' + rank + '</div>'
@@ -487,7 +488,7 @@
       }
 
       const HIGHLIGHT = 5, NEW_DAYS = 14, today = new Date();
-      const seasoned = sorted.filter(function(m) { if (!m.joinDate) return true; return (today - new Date(m.joinDate + 'T00:00:00Z')) / 86400000 >= NEW_DAYS; });
+      const seasoned = sorted.filter(function(m) { if (!m.joinDate) return true; var jd = cccParse(cccDate(m.joinDate, '')); if (!jd) return true; return (today - jd) / 86400000 >= NEW_DAYS; });
       const top = seasoned.slice(0, HIGHLIGHT);
       const bottom = seasoned.length > HIGHLIGHT ? seasoned.slice(-HIGHLIGHT).reverse() : [];
 
@@ -570,8 +571,8 @@
         card('Total Points', formatNumber(cs.totalPoints)),
         card('Point Chests', formatNumber(cs.pointChests)),
         card('Event Chests', formatNumber(cs.eventChests)),
-        m.joinDate ? card('Joined', m.joinDate) : '',
-        cs.lastSeen ? card('Last Seen', cs.lastSeen) : ''
+        m.joinDate ? card('Joined', cccDate(m.joinDate)) : '',
+        cs.lastSeen ? card('Last Seen', cccDateTime(cs.lastSeen)) : ''
       ].filter(Boolean).join('');
 
       // Target Completion
@@ -603,7 +604,7 @@
           } else {
             statusBadge = '<span class="badge badge-gray">N/A</span>';
           }
-          return '<tr><td>' + (p.periodName || p.startDate) + (p.isActive ? ' <span style="font-size:10px;color:#ffb300;">(active)</span>' : '') + '</td><td>' + formatNumber(p.totalPoints) + '</td><td>' + target + '</td><td>' + statusBadge + '</td></tr>';
+          return '<tr><td>' + (p.periodName || cccDate(p.startDate)) + (p.isActive ? ' <span style="font-size:10px;color:#ffb300;">(active)</span>' : '') + '</td><td>' + formatNumber(p.totalPoints) + '</td><td>' + target + '</td><td>' + statusBadge + '</td></tr>';
         }).join('');
       }
 
