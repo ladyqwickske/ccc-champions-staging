@@ -243,6 +243,8 @@
       text-align: left; cursor: pointer;
     }
     .chest-ref-type:hover { background: #33343a; }
+    .chest-ref-group.single .chest-ref-type { cursor: default; }
+    .chest-ref-group.single .chest-ref-type:hover { background: none; }
     .chest-ref-type .toggle-icon { display: inline-block; color: #ffb300; transition: transform 0.15s; width: 10px; flex: none; font-size: 0.8em; }
     .chest-ref-group.expanded .toggle-icon { transform: rotate(90deg); }
     .chest-ref-type .name { flex: 1; font-weight: 600; color: #ffb300; }
@@ -1646,6 +1648,24 @@ function filterPlayerTable() {
     // Chest types opened by the user (kept while searching / reopening)
     const expandedChestRefTypes = new Set();
 
+    // Same groups, order and level labels as the chest splits in the player table:
+    // the database sends each entry's split group (group) and split column label
+    // (levelLabel, e.g. "Basilisk" for an Epic Squad); Apps Script answers without
+    // them fall back to the chest type and level.
+    const CHEST_REF_ORDER = ['Epic Crypt', 'Rare Crypt', 'Common Crypt', 'Epic Squad'];
+    const chestRefLevelSort = (a, b) => {
+      const na = parseFloat(a), nb = parseFloat(b);
+      if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+      if (Number.isFinite(na) && !Number.isFinite(nb)) return -1;
+      if (!Number.isFinite(na) && Number.isFinite(nb)) return 1;
+      return String(a).localeCompare(String(b));
+    };
+    const chestRefLevelText = (lvl) => {
+      if (/^\d+$/.test(lvl)) return 'Lv ' + lvl;
+      const m = lvl.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+      return m ? 'Lv ' + m[1] + '–' + m[2] : lvl;
+    };
+
     // One line per chest type (levels and points range); click it to show every level.
     // While searching, the matching types open by themselves.
     function renderChestRef(data, autoExpand) {
@@ -1653,24 +1673,37 @@ function filterPlayerTable() {
       const groups = [];
       const byType = {};
       data.forEach(chest => {
-        if (!byType[chest.type]) { byType[chest.type] = { type: chest.type, levels: [] }; groups.push(byType[chest.type]); }
-        byType[chest.type].levels.push(chest);
+        const name = String(chest.group || chest.type || '').trim() || 'Other';
+        if (!byType[name]) { byType[name] = { type: name, levels: [] }; groups.push(byType[name]); }
+        byType[name].levels.push({ label: String(chest.levelLabel !== undefined ? chest.levelLabel : (chest.level || '')).trim(), points: chest.points });
       });
       if (!groups.length) { body.innerHTML = '<div class="chest-ref-empty">No chests found.</div>'; return; }
+      groups.sort((a, b) => {
+        const ia = CHEST_REF_ORDER.indexOf(a.type), ib = CHEST_REF_ORDER.indexOf(b.type);
+        const oa = ia >= 0 ? ia : CHEST_REF_ORDER.length, ob = ib >= 0 ? ib : CHEST_REF_ORDER.length;
+        return oa !== ob ? oa - ob : a.type.localeCompare(b.type);
+      });
       body.innerHTML = groups.map(g => {
+        g.levels.sort((a, b) => chestRefLevelSort(a.label, b.label));
         const pts = g.levels.map(l => Number(l.points) || 0);
         const min = Math.min.apply(null, pts), max = Math.max.apply(null, pts);
         const range = min === max ? String(min) : min + '–' + max;
-        const count = g.levels.length;
+        const attr = escapeHtmlDash(g.type).replace(/"/g, '&quot;');
+        if (g.levels.length === 1) {
+          // One level only: nothing to open, the points are on the line itself
+          const only = g.levels[0].label;
+          const extra = only && only.toLowerCase() !== g.type.toLowerCase() ? escapeHtmlDash(chestRefLevelText(only)) + ' · ' : '';
+          return '<div class="chest-ref-group single" data-type="' + attr + '"><div class="chest-ref-type">' +
+            '<span class="toggle-icon"></span><span class="name">' + escapeHtmlDash(g.type) + '</span>' +
+            '<span class="summary">' + extra + range + ' pts</span></div></div>';
+        }
         const open = autoExpand || expandedChestRefTypes.has(g.type);
-        const chips = g.levels.map(l => {
-          const lvl = String(l.level || '').trim();
-          return '<span class="chest-ref-level">' + (lvl ? (/^\d+$/.test(lvl) ? 'Lv ' + escapeHtmlDash(lvl) : escapeHtmlDash(lvl)) : '—') + '<b>' + l.points + '</b></span>';
-        }).join('');
-        return '<div class="chest-ref-group' + (open ? ' expanded' : '') + '" data-type="' + escapeHtmlDash(g.type).replace(/"/g, '&quot;') + '">' +
+        const chips = g.levels.map(l =>
+          '<span class="chest-ref-level">' + (l.label ? escapeHtmlDash(chestRefLevelText(l.label)) : '—') + '<b>' + l.points + '</b></span>').join('');
+        return '<div class="chest-ref-group' + (open ? ' expanded' : '') + '" data-type="' + attr + '">' +
           '<button type="button" class="chest-ref-type" onclick="toggleChestRefType(this)">' +
           '<span class="toggle-icon">▶</span><span class="name">' + escapeHtmlDash(g.type) + '</span>' +
-          '<span class="summary">' + count + (count === 1 ? ' level' : ' levels') + ' · ' + range + ' pts</span></button>' +
+          '<span class="summary">' + g.levels.length + ' levels · ' + range + ' pts</span></button>' +
           '<div class="chest-ref-levels">' + chips + '</div></div>';
       }).join('');
     }
@@ -1685,8 +1718,10 @@ function filterPlayerTable() {
     function filterChestRef() {
       const query = document.getElementById('chestRefSearch').value.toLowerCase().trim();
       const filtered = chestRefData.filter(c =>
-        c.type.toLowerCase().includes(query) ||
-        String(c.level).toLowerCase().includes(query)
+        String(c.group || c.type || '').toLowerCase().includes(query) ||
+        String(c.type || '').toLowerCase().includes(query) ||
+        String(c.level).toLowerCase().includes(query) ||
+        String(c.levelLabel || '').toLowerCase().includes(query)
       );
       renderChestRef(filtered, query.length > 0);
     }
