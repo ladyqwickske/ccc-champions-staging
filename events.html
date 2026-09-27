@@ -2049,7 +2049,7 @@
             : (p.value3 === 'Partial'
               ? '<span style="color:#ff9800;">⚠</span>'
               : (p.value3 === 'N/A'
-                ? '<span style="color:#999;">—</span>'
+                ? '<span class="badge" style="background:#1b5e20;color:#c8e6c9;" title="Joined the clan after this event started: not counted, no penalty">Exempt</span>'
                 : '<span style="color:#f44336;">✕</span>'));
           const row = document.createElement('tr');
           const penaltyCell = showPenalty ? `<td style="text-align:center;">${penaltyCellHtml(p.memberName, p.penalty, p.penaltyStatus)}</td>` : '';
@@ -2771,7 +2771,7 @@
           let statusIcon = '<span class="status-icon na">—</span>';
           let statusSort = 0;
           if (notes.includes('Not Applicable')) {
-            statusIcon = '<span class="status-icon na">—</span>';
+            statusIcon = '<span class="badge" style="background:#1b5e20;color:#c8e6c9;" title="Joined the clan after this event started: not counted, no penalty">Exempt</span>';
             statusSort = -1;
           } else if (!notInClan && targetPoints !== null && !isNaN(targetPoints) && targetPoints > 0) {
             if (pts >= targetPoints) {
