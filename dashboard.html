@@ -215,12 +215,13 @@
     /* Chest Points Reference Popup */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.5); z-index: 10050; justify-content: center; align-items: flex-start;
+      padding: 24px 0;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: #232526; border-radius: 16px; padding: 24px;
-      max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto;
+      background: #232526; border-radius: 16px; padding: 18px 20px;
+      max-width: 560px; width: 95%; max-height: calc(100vh - 48px); overflow-y: auto;
       box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid #444;
     }
     .modal h2 { color: #ffb300; margin-bottom: 12px; }
@@ -234,10 +235,26 @@
       border-radius: 8px; color: #e0e0e0; font-size: 0.9em; margin-bottom: 12px;
     }
     .modal input[type="text"]:focus { outline: none; border-color: #ffb300; box-shadow: 0 0 0 2px rgba(255,179,0,0.15); }
-    .chest-ref-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
-    .chest-ref-table th { background: #33343a; padding: 8px; text-align: left; font-size: 0.85em; color: #ffb300; border-bottom: 2px solid #444; }
-    .chest-ref-table td { padding: 6px 8px; border-bottom: 1px solid #444; color: #e0e0e0; }
-    .chest-ref-table tr:hover { background: #33343a; }
+    /* Chest points: one line per chest type, click to show its levels */
+    .chest-ref-group { border-bottom: 1px solid #3a3b40; }
+    .chest-ref-type {
+      display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 6px;
+      background: none; border: none; color: #e0e0e0; font: inherit; font-size: 0.9em;
+      text-align: left; cursor: pointer;
+    }
+    .chest-ref-type:hover { background: #33343a; }
+    .chest-ref-type .toggle-icon { display: inline-block; color: #ffb300; transition: transform 0.15s; width: 10px; flex: none; font-size: 0.8em; }
+    .chest-ref-group.expanded .toggle-icon { transform: rotate(90deg); }
+    .chest-ref-type .name { flex: 1; font-weight: 600; color: #ffb300; }
+    .chest-ref-type .summary { font-size: 0.85em; color: #aaa; white-space: nowrap; }
+    .chest-ref-levels { display: none; flex-wrap: wrap; gap: 6px; padding: 2px 6px 10px 24px; }
+    .chest-ref-group.expanded .chest-ref-levels { display: flex; }
+    .chest-ref-level {
+      background: #33343a; border: 1px solid #444; border-radius: 6px; padding: 3px 8px;
+      font-size: 0.8em; color: #ccc; white-space: nowrap;
+    }
+    .chest-ref-level b { color: #ffb300; margin-left: 4px; }
+    .chest-ref-empty { padding: 12px 6px; color: #999; font-size: 0.9em; }
 
     /* Chest Points Ref Button */
     .ref-btn {
@@ -666,14 +683,7 @@
       <button class="close-btn" onclick="closeChestPointsRef()">&times;</button>
       <h2>📋 Chest Points Reference</h2>
       <input type="text" id="chestRefSearch" placeholder="Search chests..." oninput="filterChestRef()">
-      <div class="table-container" style="overflow-x:auto;">
-        <table class="chest-ref-table">
-          <thead>
-            <tr><th>Type</th><th>Level</th><th>Points</th></tr>
-          </thead>
-          <tbody id="chestRefBody"></tbody>
-        </table>
-      </div>
+      <div id="chestRefBody"></div>
       <div class="loading" id="chestRefLoading" style="display:none"><div class="spinner" style="display:inline-block;width:24px;height:24px;border:3px solid #444;border-top-color:#ffb300;border-radius:50%;animation:spin 0.8s linear infinite;"></div><br>Loading...</div>
     </div>
   </div>
@@ -1633,23 +1643,52 @@ function filterPlayerTable() {
       document.getElementById('chestRefModal').classList.remove('active');
     }
 
-    function renderChestRef(data) {
-      const tbody = document.getElementById('chestRefBody');
-      tbody.innerHTML = '';
+    // Chest types opened by the user (kept while searching / reopening)
+    const expandedChestRefTypes = new Set();
+
+    // One line per chest type (levels and points range); click it to show every level.
+    // While searching, the matching types open by themselves.
+    function renderChestRef(data, autoExpand) {
+      const body = document.getElementById('chestRefBody');
+      const groups = [];
+      const byType = {};
       data.forEach(chest => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = '<td>' + escapeHtmlDash(chest.type) + '</td><td>' + escapeHtmlDash(String(chest.level)) + '</td><td style="font-weight:600;color:#ffb300;">' + chest.points + '</td>';
-        tbody.appendChild(tr);
+        if (!byType[chest.type]) { byType[chest.type] = { type: chest.type, levels: [] }; groups.push(byType[chest.type]); }
+        byType[chest.type].levels.push(chest);
       });
+      if (!groups.length) { body.innerHTML = '<div class="chest-ref-empty">No chests found.</div>'; return; }
+      body.innerHTML = groups.map(g => {
+        const pts = g.levels.map(l => Number(l.points) || 0);
+        const min = Math.min.apply(null, pts), max = Math.max.apply(null, pts);
+        const range = min === max ? String(min) : min + '–' + max;
+        const count = g.levels.length;
+        const open = autoExpand || expandedChestRefTypes.has(g.type);
+        const chips = g.levels.map(l => {
+          const lvl = String(l.level || '').trim();
+          return '<span class="chest-ref-level">' + (lvl ? (/^\d+$/.test(lvl) ? 'Lv ' + escapeHtmlDash(lvl) : escapeHtmlDash(lvl)) : '—') + '<b>' + l.points + '</b></span>';
+        }).join('');
+        return '<div class="chest-ref-group' + (open ? ' expanded' : '') + '" data-type="' + escapeHtmlDash(g.type).replace(/"/g, '&quot;') + '">' +
+          '<button type="button" class="chest-ref-type" onclick="toggleChestRefType(this)">' +
+          '<span class="toggle-icon">▶</span><span class="name">' + escapeHtmlDash(g.type) + '</span>' +
+          '<span class="summary">' + count + (count === 1 ? ' level' : ' levels') + ' · ' + range + ' pts</span></button>' +
+          '<div class="chest-ref-levels">' + chips + '</div></div>';
+      }).join('');
+    }
+
+    function toggleChestRefType(btn) {
+      const group = btn.parentElement;
+      const type = group.getAttribute('data-type');
+      group.classList.toggle('expanded');
+      if (group.classList.contains('expanded')) expandedChestRefTypes.add(type); else expandedChestRefTypes.delete(type);
     }
 
     function filterChestRef() {
-      const query = document.getElementById('chestRefSearch').value.toLowerCase();
+      const query = document.getElementById('chestRefSearch').value.toLowerCase().trim();
       const filtered = chestRefData.filter(c =>
         c.type.toLowerCase().includes(query) ||
         String(c.level).toLowerCase().includes(query)
       );
-      renderChestRef(filtered);
+      renderChestRef(filtered, query.length > 0);
     }
 
     // Close modal on overlay click
