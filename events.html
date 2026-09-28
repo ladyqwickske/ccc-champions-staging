@@ -819,11 +819,13 @@
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients Towers" checked> Ancients Towers</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients - Tin Man" checked> Ancients - Tin Man</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Tin Man Points" checked> Tin Man Points</label>
+            <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Doomsday Points" checked> Doomsday Points</label>
+            <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Arachne Points" checked> Arachne Points</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ragnarok" checked> Ragnarok</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ragnarok Points" checked> Ragnarok Points</label>
-            <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Shadow City Norm" checked> Shadow City Points</label>
+            <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Shadow City Points" checked> Shadow City Points</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Hellforge Points" checked> Hellforge Points</label>
-            <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Armageddon Target" checked> Armageddon Points</label>
+            <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Armageddon Points" checked> Armageddon Points</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Dark Omens Event" checked> Dark Omens Event</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Olympus" checked> Olympus</label>
             <label style="font-size:12px; color:#ccc; cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Hermes' Chests" checked> Hermes' Chests</label>
@@ -2577,7 +2579,7 @@
         fetch(window.GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'deleteEventType', typeName: eventTypeName })
+          body: JSON.stringify({ action: 'deleteEventType', eventTypeName: eventTypeName })
         }).then(res => res.json()).then(result => {
           if (result && result.success) loadEventTypes();
           else alert(result?.message || 'Failed.');
