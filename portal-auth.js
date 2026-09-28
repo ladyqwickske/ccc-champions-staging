@@ -21,8 +21,7 @@
     'warnings.html',
     'profiling.html',
     'resources.html',
-    'bank.html',
-    'compensation.html'
+    'bank.html'
   ];
 
   var roleFetchInFlight = false;
