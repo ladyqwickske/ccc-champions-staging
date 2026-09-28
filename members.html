@@ -676,6 +676,7 @@
         <button class="tab active" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
         <button class="tab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
         <button class="tab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
+        <button class="tab" onclick="MembersTab.switchTab('chestNameFixTab', event)">🔧 Fix Chest Names</button>
         <button class="tab" onclick="MembersTab.switchTab('chestPointsTab', event)">📦 Chest Points</button>
         <button class="tab" onclick="MembersTab.switchTab('troopTab', event)">⚔️ Track Troops</button>
         <button class="tab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
@@ -767,6 +768,22 @@
         <h3 style="margin:0 0 12px 0;">Change Member Name</h3>
         <div class="form-grid"><div><label for="oldMemberSelect">Current Member</label><select id="oldMemberSelect"></select></div><div><label for="newMemberName">New Name</label><input type="text" id="newMemberName" placeholder="Enter new member name"></div></div>
         <button class="btn" onclick="MembersTab.submitNameChange()">✏️ Update Name</button><div id="nameChangeStatus" class="status"></div>
+      </div>
+      <div id="chestNameFixTab" class="tab-content">
+        <h3 style="margin:0 0 6px 0;">Fix Chest Names</h3>
+        <div class="note" style="margin-bottom:12px;">A player name the chest reader got wrong: move those chests to the right member. Only the chests of the chosen period change (for a real name change in the game, use ✏️ Change Name).</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+          <label for="cnfPeriod" style="margin:0;">Period</label>
+          <select id="cnfPeriod" style="width:auto;" onchange="ChestNameFix.load()"><option value="active">Active period</option><option value="previous">Previous period</option></select>
+          <label style="margin:0 0 0 8px;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="cnfShowAll" onchange="ChestNameFix.render()"> show all names</label>
+          <button class="btn btn-secondary" style="margin:0;" onclick="ChestNameFix.load()">🔄 Reload</button>
+        </div>
+        <div id="cnfPeriodInfo" class="note" style="margin-bottom:8px;"></div>
+        <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr><th style="text-align:left;padding:6px 8px;">Name in the chests</th><th style="text-align:center;padding:6px 8px;width:70px;">Chests</th><th style="text-align:left;padding:6px 8px;">Correct member</th><th style="width:90px;"></th></tr></thead>
+          <tbody id="cnfBody"><tr><td colspan="4" style="padding:8px;color:#999;">Loading…</td></tr></tbody>
+        </table></div>
+        <div id="cnfStatus" class="status" style="display:none;"></div>
       </div>
       <div id="removeMemberTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Remove Member</h3>
@@ -2075,6 +2092,9 @@
         if (tabId === 'chestPointsTab') {
           loadChestPointsTabData();
         }
+        if (tabId === 'chestNameFixTab' && window.ChestNameFix) {
+          window.ChestNameFix.load();
+        }
         if (tabId === 'exemptTab') {
           loadExemptMembers();
         }
@@ -2121,6 +2141,74 @@
       }
 
       return { init, loadAllData, switchTab, loadMemberTroops, submitAllTroops, submitHeroLevelEntry, toggleHeroBatch, addToHeroBatch, removeHeroBatchEntry, saveHeroBatchEntries, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPtOverride, updatePtOverride, loadExemptMembers, toggleExemptMember, updateExemptField, saveExemptMembers, loadMemberAccounts, updateMemberAccount, saveMemberAccounts };
+    })();
+  </script>
+  <script>
+    // 🔧 Fix Chest Names: move chests read under a wrong name (OCR) to the right member,
+    // in the active or previous period (database site only: getChestNamesForFix / fixChestPlayerName).
+    window.ChestNameFix = (function () {
+      let state = { names: [], members: [], period: null };
+      const esc = (t) => { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+      const post = async (body) => {
+        const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        return res.json();
+      };
+      const status = (msg, ok) => {
+        const el = document.getElementById('cnfStatus');
+        el.style.display = msg ? '' : 'none';
+        el.className = 'status ' + (ok ? 'ok' : 'err');
+        el.textContent = msg || '';
+      };
+      async function load() {
+        status('');
+        document.getElementById('cnfBody').innerHTML = '<tr><td colspan="4" style="padding:8px;color:#999;">Loading…</td></tr>';
+        try {
+          const r = await post({ action: 'getChestNamesForFix', period: document.getElementById('cnfPeriod').value });
+          if (!r || !r.success) throw new Error((r && (r.message || r.error)) || 'Could not load the names');
+          state = r;
+          document.getElementById('cnfPeriodInfo').textContent = 'Period ' + r.period.start + ' – ' + (r.period.end || '…');
+          render();
+        } catch (e) {
+          document.getElementById('cnfBody').innerHTML = '';
+          status(e.message, false);
+        }
+      }
+      function render() {
+        const showAll = document.getElementById('cnfShowAll').checked;
+        const rows = (state.names || []).filter(n => showAll || n.status === 'unknown');
+        const options = (sel) => '<option value="">— choose —</option>' + (state.members || []).map(m =>
+          '<option value="' + esc(m) + '"' + (m === sel ? ' selected' : '') + '>' + esc(m) + '</option>').join('');
+        const body = document.getElementById('cnfBody');
+        if (!rows.length) {
+          body.innerHTML = '<tr><td colspan="4" style="padding:8px;color:#81c784;">' +
+            (showAll ? 'No chests in this period yet.' : '✓ Every name in this period is a member. Tick "show all names" to fix a chest given to the wrong member.') + '</td></tr>';
+          return;
+        }
+        body.innerHTML = rows.map((n, i) => {
+          const tag = n.status === 'unknown' ? ' <span style="font-size:11px;color:#ff9800;">not a member</span>'
+            : (n.status === 'former' ? ' <span style="font-size:11px;color:#999;">former member</span>' : '');
+          return '<tr style="border-top:1px solid #444;"><td style="padding:6px 8px;">' + esc(n.name) + tag + '</td>' +
+            '<td style="text-align:center;padding:6px 8px;">' + n.chests + '</td>' +
+            '<td style="padding:6px 8px;"><select data-cnf="' + i + '" style="width:100%;">' + options(n.suggestion) + '</select></td>' +
+            '<td style="padding:6px 8px;"><button class="btn" style="margin:0;padding:6px 12px;" data-cnf-apply="' + i + '">Fix</button></td></tr>';
+        }).join('');
+        body.querySelectorAll('[data-cnf-apply]').forEach(btn => btn.addEventListener('click', () => apply(rows[+btn.dataset.cnfApply], body.querySelector('[data-cnf="' + btn.dataset.cnfApply + '"]').value, btn)));
+      }
+      async function apply(row, target, btn) {
+        if (!target) { status('Choose the correct member for "' + row.name + '" first.', false); return; }
+        if (!confirm('Move ' + row.chests + ' chest(s) from "' + row.name + '" to "' + target + '" in this period?')) return;
+        btn.disabled = true;
+        try {
+          const r = await post({ action: 'fixChestPlayerName', wrongName: row.name, correctName: target, period: document.getElementById('cnfPeriod').value });
+          if (!r || !r.success) throw new Error((r && (r.message || r.error)) || 'The change failed');
+          await load();
+          status(r.message + ' Recalculate events of this period that were already calculated.', true);
+        } catch (e) {
+          btn.disabled = false;
+          status(e.message, false);
+        }
+      }
+      return { load, render };
     })();
   </script>
 </body>
