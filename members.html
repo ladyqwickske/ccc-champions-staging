@@ -140,6 +140,15 @@
     }
     .tab:hover { color: #ffb300; }
     .tab.active { color: #ffb300; border-bottom-color: #ffb300; }
+    .tab[hidden] { display: none; }
+    /* the two groups above the tabs */
+    .tab-groups { display: flex; gap: 8px; width: 100%; margin-bottom: 8px; flex-wrap: wrap; }
+    .tab-group {
+      flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 8px; cursor: pointer;
+      background: #2a2c30; border: 1px solid #444; color: #e0e0e0; font-size: 15px; font-weight: 600; transition: all 0.2s;
+    }
+    .tab-group:hover { border-color: #ffb300; color: #ffb300; }
+    .tab-group.active { background: #ffb300; border-color: #ffb300; color: #232526; }
     
     .tab-content { display: none; margin-top: 12px; }
     .tab-content.active { display: block; }
@@ -673,15 +682,21 @@
 
     <div class="tabs-container">
       <div class="tabs">
-        <button class="tab active" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
-        <button class="tab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
-        <button class="tab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
-        <button class="tab" onclick="MembersTab.switchTab('chestNameFixTab', event)">🔧 Fix Chest Names</button>
-        <button class="tab" onclick="MembersTab.switchTab('chestPointsTab', event)">📦 Chest Points</button>
-        <button class="tab" onclick="MembersTab.switchTab('troopTab', event)">⚔️ Track Troops</button>
-        <button class="tab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
-        <button class="tab" onclick="MembersTab.switchTab('exemptTab', event)">🛡️ Penalty Exemptions</button>
-        <button class="tab" onclick="MembersTab.switchTab('accountsTab', event)">🔐 Member Login Accounts</button>
+        <!-- Two groups; each shows its own tabs (MembersTab.switchGroup / switchTab) -->
+        <div class="tab-groups">
+          <button class="tab-group active" data-group="admin" onclick="MembersTab.switchGroup('admin')">👥 Member Administration</button>
+          <button class="tab-group" data-group="config" onclick="MembersTab.switchGroup('config')">⚙️ Member Configuration</button>
+        </div>
+        <button class="tab active" data-group="admin" data-tab="addMemberTab" onclick="MembersTab.switchTab('addMemberTab', event)">➕ Add Member</button>
+        <button class="tab" data-group="admin" data-tab="removeMemberTab" onclick="MembersTab.switchTab('removeMemberTab', event)">🚪 Remove Member</button>
+        <button class="tab" data-group="admin" data-tab="nameTab" onclick="MembersTab.switchTab('nameTab', event)">✏️ Change Name</button>
+        <button class="tab" data-group="admin" data-tab="heroTab" onclick="MembersTab.switchTab('heroTab', event)">🦸 Hero Level</button>
+        <button class="tab" data-group="admin" data-tab="troopTab" onclick="MembersTab.switchTab('troopTab', event)">⚔️ Track Troops</button>
+        <button class="tab" data-group="admin" data-tab="accountsTab" onclick="MembersTab.switchTab('accountsTab', event)">🔐 Member Login Accounts</button>
+        <button class="tab" data-group="config" data-tab="chestPointsTab" hidden onclick="MembersTab.switchTab('chestPointsTab', event)">📦 Chest Points</button>
+        <button class="tab" data-group="config" data-tab="chestNameFixTab" hidden onclick="MembersTab.switchTab('chestNameFixTab', event)">🔧 Fix Chest Names</button>
+        <button class="tab" data-group="config" data-tab="exemptTab" hidden onclick="MembersTab.switchTab('exemptTab', event)">🛡️ Penalty Exemptions</button>
+        <button class="tab" data-group="config" data-tab="ocrTab" hidden onclick="MembersTab.switchTab('ocrTab', event)">🔤 OCR Corrections</button>
       </div>
       <div id="accountsTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Linked Google Accounts</h3>
@@ -784,6 +799,19 @@
           <tbody id="cnfBody"><tr><td colspan="4" style="padding:8px;color:#999;">Loading…</td></tr></tbody>
         </table></div>
         <div id="cnfStatus" class="status" style="display:none;"></div>
+      </div>
+      <div id="ocrTab" class="tab-content">
+        <h3 style="margin:0 0 6px 0;">OCR Corrections</h3>
+        <div class="note" style="margin-bottom:12px;">The chesttracker's list of words it reads wrong (player and chest names) and what they should be. Changes here reach the chesttracker at its next run; words it learns show up here after that run.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+          <input type="text" id="ocrSearch" placeholder="🔍 Search words or misreadings…" style="flex:1;min-width:200px;" oninput="OcrCorrections.render()">
+          <input type="text" id="ocrNewWord" placeholder="New correct word" style="width:200px;" onkeydown="if(event.key==='Enter')OcrCorrections.addWord()">
+          <button class="btn" style="margin:0;" onclick="OcrCorrections.addWord()">➕ Add word</button>
+          <button class="btn btn-secondary" style="margin:0;" onclick="OcrCorrections.load()">🔄 Reload</button>
+        </div>
+        <div id="ocrInfo" class="note" style="margin-bottom:8px;"></div>
+        <div id="ocrStatus" class="status" style="display:none;"></div>
+        <div id="ocrList"></div>
       </div>
       <div id="removeMemberTab" class="tab-content">
         <h3 style="margin:0 0 12px 0;">Remove Member</h3>
@@ -2078,11 +2106,24 @@
           });
       }
 
+      // Last tab opened in each group, so switching back returns there
+      const lastTabInGroup = { admin: 'addMemberTab', config: 'chestPointsTab' };
+
+      function switchGroup(group) {
+        switchTab(lastTabInGroup[group] || (group === 'config' ? 'chestPointsTab' : 'addMemberTab'));
+      }
+
       function switchTab(tabId, evt) {
         document.querySelectorAll('#members .tab-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('#members .tab').forEach(t => t.classList.remove('active'));
         document.getElementById(tabId)?.classList.add('active');
-        if (evt && evt.target) evt.target.classList.add('active');
+        const btn = document.querySelector(`#members .tab[data-tab="${tabId}"]`) || (evt && evt.target);
+        if (btn) btn.classList.add('active');
+        // show the tabs of the button's group only
+        const group = (btn && btn.getAttribute('data-group')) || 'admin';
+        lastTabInGroup[group] = tabId;
+        document.querySelectorAll('#members .tab[data-group]').forEach(t => { t.hidden = t.getAttribute('data-group') !== group; });
+        document.querySelectorAll('#members .tab-group').forEach(g => g.classList.toggle('active', g.getAttribute('data-group') === group));
 
         const memberTableSection = document.getElementById('memberTableSection');
         if (memberTableSection) {
@@ -2095,6 +2136,10 @@
         if (tabId === 'chestNameFixTab' && window.ChestNameFix) {
           window.ChestNameFix.load();
         }
+        if (tabId === 'ocrTab' && window.OcrCorrections) {
+          window.OcrCorrections.load();
+        }
+        if (memberTableSection && (tabId === 'ocrTab' || tabId === 'chestNameFixTab')) memberTableSection.style.display = 'none';
         if (tabId === 'exemptTab') {
           loadExemptMembers();
         }
@@ -2140,7 +2185,7 @@
         document.getElementById('memberEmpty').style.display = 'block';
       }
 
-      return { init, loadAllData, switchTab, loadMemberTroops, submitAllTroops, submitHeroLevelEntry, toggleHeroBatch, addToHeroBatch, removeHeroBatchEntry, saveHeroBatchEntries, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPtOverride, updatePtOverride, loadExemptMembers, toggleExemptMember, updateExemptField, saveExemptMembers, loadMemberAccounts, updateMemberAccount, saveMemberAccounts };
+      return { init, loadAllData, switchTab, switchGroup, loadMemberTroops, submitAllTroops, submitHeroLevelEntry, toggleHeroBatch, addToHeroBatch, removeHeroBatchEntry, saveHeroBatchEntries, submitAddMember, submitNameChange, submitRemoveMember, loadChestPointsTabData, togglePointTargetsPanel, savePtDefault, addPtOverride, updatePtOverride, loadExemptMembers, toggleExemptMember, updateExemptField, saveExemptMembers, loadMemberAccounts, updateMemberAccount, saveMemberAccounts };
     })();
   </script>
   <script>
@@ -2209,6 +2254,92 @@
         }
       }
       return { load, render };
+    })();
+
+    // 🔤 OCR Corrections: the chesttracker's OcrCorrectionList, shared through the database
+    // (getOcrCorrections / updateOcrCorrections).
+    window.OcrCorrections = (function () {
+      let list = [];
+      const esc = (t) => { const d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+      const attr = (t) => esc(t).replace(/"/g, '&quot;');
+      const post = async (body) => {
+        const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        return res.json();
+      };
+      const status = (msg, ok) => {
+        const el = document.getElementById('ocrStatus');
+        el.style.display = msg ? '' : 'none';
+        el.className = 'status ' + (ok ? 'ok' : 'err');
+        el.textContent = msg || '';
+      };
+      const show = (r) => {
+        list = r.corrections || [];
+        const n = list.reduce((s, c) => s + c.variants.length, 0);
+        document.getElementById('ocrInfo').textContent = list.length + ' words, ' + n + ' misreadings' +
+          (r.lastChange ? ' · last change ' + (window.cccDateTime ? cccDateTime(r.lastChange.at) : r.lastChange.at) + ' by ' + (r.lastChange.by || '?') : '');
+        render();
+      };
+      async function load() {
+        status('');
+        try {
+          const r = await post({ action: 'getOcrCorrections' });
+          if (!r || !r.success) throw new Error((r && (r.message || r.error)) || 'Could not load the list');
+          show(r);
+        } catch (e) { status(e.message, false); }
+      }
+      async function change(changes, okMsg) {
+        status('');
+        try {
+          let email = '';
+          try { email = localStorage.getItem('ccc_portal_google_email') || ''; } catch (e) {}
+          const r = await post({ action: 'updateOcrCorrections', changes: changes, userEmail: email });
+          if (!r || !r.success) throw new Error((r && (r.message || r.error)) || 'The change failed');
+          show(r);
+          status(okMsg || r.message, true);
+        } catch (e) { status(e.message, false); }
+      }
+      function render() {
+        const q = (document.getElementById('ocrSearch').value || '').toLowerCase().trim();
+        const rows = list.filter(c => !q || c.word.toLowerCase().includes(q) || c.variants.some(v => v.toLowerCase().includes(q)));
+        const box = document.getElementById('ocrList');
+        if (!rows.length) { box.innerHTML = '<div class="note" style="padding:8px;">' + (list.length ? 'Nothing matches.' : 'The list is empty until the chesttracker has synced it once.') + '</div>'; return; }
+        box.innerHTML = rows.map(c =>
+          '<div class="ocr-word" data-word="' + attr(c.word) + '" style="border-top:1px solid #444;padding:8px 4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">' +
+            '<strong style="color:#ffb300;min-width:160px;">' + esc(c.word) + '</strong>' +
+            c.variants.map(v => '<span style="background:#33343a;border:1px solid #444;border-radius:12px;padding:2px 4px 2px 10px;font-size:12px;">' + esc(v) +
+              ' <button title="Remove this misreading" data-ocr-rmv="' + attr(v) + '" style="background:none;border:none;color:#ef5350;cursor:pointer;font-size:13px;">×</button></span>').join('') +
+            '<input type="text" placeholder="+ misreading" data-ocr-add style="width:140px;padding:4px 8px;font-size:12px;">' +
+            '<span style="margin-left:auto;display:flex;gap:4px;">' +
+              '<button class="btn btn-secondary" data-ocr-rename style="margin:0;padding:4px 8px;font-size:12px;" title="Change the correct word">✏️</button>' +
+              '<button class="btn btn-secondary" data-ocr-del style="margin:0;padding:4px 8px;font-size:12px;" title="Remove the word and its misreadings">🗑</button></span>' +
+          '</div>').join('');
+        box.querySelectorAll('.ocr-word').forEach(row => {
+          const word = row.getAttribute('data-word');
+          row.querySelectorAll('[data-ocr-rmv]').forEach(b => b.addEventListener('click', () =>
+            change([{ op: 'removeVariant', word: word, incorrect: b.getAttribute('data-ocr-rmv') }], '"' + b.getAttribute('data-ocr-rmv') + '" removed.')));
+          const input = row.querySelector('[data-ocr-add]');
+          input.addEventListener('keydown', (ev) => {
+            if (ev.key !== 'Enter' || !input.value.trim()) return;
+            change([{ op: 'addVariant', word: word, incorrect: input.value.trim() }], '"' + input.value.trim() + '" now reads as "' + word + '".');
+          });
+          row.querySelector('[data-ocr-rename]').addEventListener('click', () => {
+            const nw = prompt('Correct word "' + word + '" becomes:', word);
+            if (nw && nw.trim() && nw.trim() !== word) change([{ op: 'renameWord', word: word, newWord: nw.trim() }], '"' + word + '" is now "' + nw.trim() + '".');
+          });
+          row.querySelector('[data-ocr-del]').addEventListener('click', () => {
+            if (confirm('Remove "' + word + '" and its ' + (list.find(c => c.word === word) || { variants: [] }).variants.length + ' misreading(s)?'))
+              change([{ op: 'removeWord', word: word }], '"' + word + '" removed.');
+          });
+        });
+      }
+      function addWord() {
+        const el = document.getElementById('ocrNewWord');
+        const w = (el.value || '').trim();
+        if (!w) return;
+        el.value = '';
+        change([{ op: 'addWord', word: w }], '"' + w + '" added. Add its misreadings on its line.');
+      }
+      return { load, render, addWord };
     })();
   </script>
 </body>
