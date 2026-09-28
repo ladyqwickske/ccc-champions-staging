@@ -1,4 +1,9 @@
 {
-  "_comment": "Voltron tournament name -> event type in the database. The troop-based event of that type whose dates cover the tournament's end date receives the scores.",
+  "_comment": "Voltron tournament name (or a word in it, e.g. 'Arachne' for 'Arachne's Swarm') -> event type in the database. The troop-based event of that type whose dates cover the tournament's end date receives the scores.",
+  "Doomsday": "Doomsday Points",
+  "Arachne": "Arachne Points",
+  "Ragnarok": "Ragnarok Points",
+  "Shadow City": "Shadow City Points",
+  "Hellforge": "Hellforge Points",
   "Armageddon": "Armageddon Target"
 }

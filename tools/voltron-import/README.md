@@ -4,8 +4,10 @@ Copies each member's tournament **Score** from the Voltron Nexus clan portal int
 matching **troop-based** event in the database, the same way *Troop Events → Batch Entry → Save All* does.
 
 - Tournaments without results for the clan are skipped.
-- `event-map.json` maps a Voltron tournament name to an event type. The troop-based
-  event of that type whose start–end dates cover the tournament's end date gets the scores.
+- `event-map.json` maps a Voltron tournament name to an event type. A key may also be a
+  word in the name (`Arachne` matches `Arachne's Swarm`). The troop-based event of that
+  type whose start–end dates cover the tournament's end date gets the scores; if no such
+  event exists yet, the tournament is skipped and picked up on a later run once it does.
 - Members marked "Did not play" are recorded with `0`.
 - Running it again updates the same rows (no duplicates), so it is safe to run daily.
 

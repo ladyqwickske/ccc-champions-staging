@@ -263,6 +263,17 @@ function buildMatcher(memberNames, corrections) {
   };
 }
 
+// Exact name first, otherwise the longest map key contained in the tournament name.
+function lookupEventType(eventMapLoose, tournamentName) {
+  const name = looseKey(tournamentName);
+  if (eventMapLoose.has(name)) return eventMapLoose.get(name);
+  let best = null;
+  for (const [key, type] of eventMapLoose) {
+    if (key && name.includes(key) && (!best || key.length > best.key.length)) best = { key, type };
+  }
+  return best ? best.type : null;
+}
+
 function findEvent(events, eventType, date) {
   const candidates = events.filter(e =>
     e.participationMethod === 'troop-based' &&
@@ -303,7 +314,7 @@ async function runVoltronImport(options) {
       report.tournaments.push(entry);
 
       if (t.noResults || !t.clickable) { entry.status = 'skipped: no results for this clan'; continue; }
-      const eventType = eventMapLoose.get(looseKey(t.name));
+      const eventType = lookupEventType(eventMapLoose, t.name);
       if (!eventType) { entry.status = 'skipped: no entry in event-map.json'; continue; }
       const found = findEvent(events, eventType, date);
       if (!found.event) {
