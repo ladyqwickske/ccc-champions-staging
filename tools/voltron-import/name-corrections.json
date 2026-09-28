@@ -1,0 +1,4 @@
+{
+  "_comment": "Voltron player name -> member name in the database, for names that do not match on their own.",
+  "_example Voltron name": "Member name"
+}

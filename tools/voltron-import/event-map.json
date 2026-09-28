@@ -1,0 +1,4 @@
+{
+  "_comment": "Voltron tournament name -> event type in the database. The troop-based event of that type whose dates cover the tournament's end date receives the scores.",
+  "Armageddon": "Armageddon Target"
+}
