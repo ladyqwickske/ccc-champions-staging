@@ -2579,7 +2579,7 @@
         fetch(window.GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'deleteEventType', typeName: eventTypeName })
+          body: JSON.stringify({ action: 'deleteEventType', eventTypeName: eventTypeName })
         }).then(res => res.json()).then(result => {
           if (result && result.success) loadEventTypes();
           else alert(result?.message || 'Failed.');
