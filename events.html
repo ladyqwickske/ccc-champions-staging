@@ -892,6 +892,8 @@
       return text.replace(/[&<>"']/g, m => map[m]);
     };
     const escapeAttr = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    // Numbers with thousand separators (the viewer's locale); anything else ('—', '') as is.
+    const fmtNum = (v) => (v === '' || v === null || v === undefined || isNaN(Number(v))) ? (v ?? '') : Number(v).toLocaleString();
 
     window.addEventListener('DOMContentLoaded', () => {
       EventsTab.init();
@@ -2061,9 +2063,9 @@
             const category = (troopSummaryMap[nameKey] || {}).category || '—';
             const targetPoints = (targets && category !== '—') ? Number(targets[category]) : null;
             const targetCell = (targetPoints !== null && !isNaN(targetPoints)) ? targetPoints : '—';
-            row.innerHTML = `<td>${escapeHtml(p.memberName)}</td><td style="text-align:center;">${escapeHtml(category)}</td><td style="text-align:center;">${targetCell}</td><td>${p.value1 || 0}</td><td style="text-align:center;">${icon}</td>${penaltyCell}`;
+            row.innerHTML = `<td>${escapeHtml(p.memberName)}</td><td style="text-align:center;">${escapeHtml(category)}</td><td style="text-align:center;">${fmtNum(targetCell)}</td><td>${fmtNum(p.value1 || 0)}</td><td style="text-align:center;">${icon}</td>${penaltyCell}`;
           } else {
-            row.innerHTML = `<td>${escapeHtml(p.memberName)}</td><td>${p.value1 || 0}</td><td style="text-align:center;">${icon}</td>${penaltyCell}`;
+            row.innerHTML = `<td>${escapeHtml(p.memberName)}</td><td>${fmtNum(p.value1 || 0)}</td><td style="text-align:center;">${icon}</td>${penaltyCell}`;
           }
           tbody.appendChild(row);
         });
@@ -2158,7 +2160,7 @@
             : '<span style="color:#666">—</span>';
           const tr = document.createElement('tr');
           const penaltyCell = showPenalty ? `<td style="text-align:center;">${penaltyCellHtml(row.memberName, row.penalty, row.penaltyStatus)}</td>` : '';
-          tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${row.target}</td><td style="text-align:center;">${row.achieved}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
+          tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${fmtNum(row.target)}</td><td style="text-align:center;">${fmtNum(row.achieved)}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
           tbody.appendChild(tr);
         });
         // Add sort indicators
@@ -2252,7 +2254,7 @@
             : '<span style="color:#666">—</span>';
           const tr = document.createElement('tr');
           const penaltyCell = showPenalty ? `<td style="text-align:center;">${penaltyCellHtml(row.memberName, row.penalty, row.penaltyStatus)}</td>` : '';
-          tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${row.target}</td><td style="text-align:center;">${row.achieved}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
+          tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${fmtNum(row.target)}</td><td style="text-align:center;">${fmtNum(row.achieved)}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
           tbody.appendChild(tr);
         });
         // Add sort indicators
@@ -2685,7 +2687,7 @@
         const method = selectedEvent.participationMethod;
         let info = `Tracking <strong>${escapeHtml(resourceName)}</strong> contributions.`;
         if (method === 'resource-troop') info += ' Targets vary by troop category (G7/G8/T8/G9/T9).';
-        else if (method === 'resource-manual') info += ` Flat target: <strong>${typeConfig?.threshold || selectedEvent.targetPoints || '—'}</strong>.`;
+        else if (method === 'resource-manual') info += ` Flat target: <strong>${fmtNum(typeConfig?.threshold || selectedEvent.targetPoints || '—')}</strong>.`;
         document.getElementById('resourceEventInfo').innerHTML = info;
         document.getElementById('resourceEventActions').style.display = 'block';
         loadResourceParticipationData(eventName);
@@ -2825,9 +2827,9 @@
           const tr = document.createElement('tr');
           const penaltyCell = showPenalty ? `<td style="text-align:center;">${penaltyCellHtml(row.memberName, row.penalty, row.penaltyStatus)}</td>` : '';
           if (isTroop) {
-            tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${row.target}</td><td style="text-align:center;">${row.achieved}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
+            tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${catBadge}</td><td style="text-align:center;">${fmtNum(row.target)}</td><td style="text-align:center;">${fmtNum(row.achieved)}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
           } else {
-            tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${row.achieved}</td><td style="text-align:center;">${row.target}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
+            tr.innerHTML = `<td>${escapeHtml(row.memberName)}</td><td style="text-align:center;">${fmtNum(row.achieved)}</td><td style="text-align:center;">${fmtNum(row.target)}</td><td style="text-align:center;">${row.status}</td>${penaltyCell}`;
           }
           tbody.appendChild(tr);
         });
@@ -2871,7 +2873,7 @@
           const entry = manualBatchQueue[key];
           html += '<tr>'
             + '<td style="padding:4px 8px;">' + escapeHtml(entry.name) + '</td>'
-            + '<td style="text-align:center;padding:4px 8px;color:#4ade80;font-weight:700;">' + entry.points + '</td>'
+            + '<td style="text-align:center;padding:4px 8px;color:#4ade80;font-weight:700;">' + fmtNum(entry.points) + '</td>'
             + '<td style="text-align:center;padding:4px 8px;"><button class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="EventsTab.removeManualBatchEntry(\'' + escapeAttr(key) + '\')">✖</button></td>'
             + '</tr>';
         });
@@ -2889,7 +2891,7 @@
         if (isNaN(points)) { status.textContent = 'Enter points.'; status.classList.add('err'); return; }
 
         manualBatchQueue[memberName.toLowerCase()] = { name: memberName, points: points };
-        status.textContent = '\u2713 Queued: ' + memberName + ' \u2192 ' + points + ' pts';
+        status.textContent = '\u2713 Queued: ' + memberName + ' \u2192 ' + fmtNum(points) + ' pts';
         status.classList.add('ok');
 
         pointsInput.value = '';
@@ -2973,8 +2975,8 @@
           html += '<tr>'
             + '<td style="padding:4px 8px;">' + escapeHtml(entry.name) + '</td>'
             + '<td style="text-align:center;padding:4px 8px;">' + catDisplay + '</td>'
-            + '<td style="text-align:center;padding:4px 8px;color:#aaa;">' + (targetPts !== '' ? targetPts : '—') + '</td>'
-            + '<td style="text-align:center;padding:4px 8px;color:#4ade80;font-weight:700;">' + entry.points + '</td>'
+            + '<td style="text-align:center;padding:4px 8px;color:#aaa;">' + (targetPts !== '' ? fmtNum(targetPts) : '—') + '</td>'
+            + '<td style="text-align:center;padding:4px 8px;color:#4ade80;font-weight:700;">' + fmtNum(entry.points) + '</td>'
             + '<td style="text-align:center;padding:4px 8px;"><button class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="EventsTab.removeBatchEntry(\'' + escapeAttr(key) + '\')">✖</button></td>'
             + '</tr>';
         });
@@ -2992,7 +2994,7 @@
         if (isNaN(points)) { status.textContent = 'Enter points.'; status.classList.add('err'); return; }
 
         batchQueue[memberName.toLowerCase()] = { name: memberName, points: points };
-        status.textContent = '✓ Queued: ' + memberName + ' → ' + points + ' pts';
+        status.textContent = '✓ Queued: ' + memberName + ' → ' + fmtNum(points) + ' pts';
         status.classList.add('ok');
 
         // Reset form for next entry
