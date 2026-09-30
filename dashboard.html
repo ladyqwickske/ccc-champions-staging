@@ -1,1763 +1,962 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cCc Champions - Dashboard</title>
-  <link rel="icon" href="favicon.png" type="image/png">
+  <title>cCc Legends - Dashboard</title>
+  <link rel="icon" type="image/png" href="logo.png">
   <script src="perf-debug.js"></script>
-  <script src="site-config.js"></script>
   <script src="config.js"></script>
-  <script src="ccc-dates.js"></script>
+  <script src="site-config.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #1fc1e6;
+      --primary-soft: #55d9f3;
+      --primary-strong: #0ea5c6;
+      --primary-hover: #076b88;
+      --accent: #ffd24d;
+      --accent-light: #fff49a;
+      --accent-strong: #e6a418;
+      --accent-deep: #c57a00;
+      --bg-dark: #0b3d59;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --bg-card-soft: #dff6ff;
+      --bg-page: #dff6ff;
+      --bg-page-alt: #ffffff;
+      --text: #0b3d59;
+      --text-muted: #076b88;
+      --success: #0ea5c6;
+      --danger: #8a5b00;
+      --border: #55d9f3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #232526 0%, #414345 100%);
-      color: #f3f3f3;
-      text-align: center;
-      padding: 32px 16px 60px 16px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-page-alt) 0%, var(--bg-page) 58%, var(--accent-light) 100%);
+      color: var(--text);
       min-height: 100vh;
       background-attachment: fixed;
+      padding: 60px 8px 80px 8px;
     }
 
-    body { top: 0 !important; }
-    .goog-te-banner-frame.skiptranslate { display: none !important; }
-    .goog-te-balloon-frame { display: none !important; }
-    html, body { margin-top: 0 !important; top: 0 !important; }
-    body.translated-ltr, body.translated-rtl { margin-top: 0 !important; top: 0 !important; }
-    .goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; height: 0 !important; }
-    #goog-gt-tt, .goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
-    .goog-text-highlight { background: transparent !important; box-shadow: none !important; }
-    #google_translate_element, #translateToggleBtn { top: auto !important; right: 8px !important; bottom: 8px !important; }
-
-    /* Top Tabs */
+    /* Tab Navigation */
     .tab-nav {
-      background: rgba(30, 34, 40, 0.95);
-      border-bottom: 1px solid #444;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      position: sticky;
-      top: 0;
-      z-index: 9999;
-      width: 100%;
-      left: 0;
-      right: 0;
-      overflow: visible;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; justify-content: center; gap: 0;
+      background: rgba(255, 255, 255, 0.96); border-bottom: 2px solid var(--primary-soft);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      padding: 0;
     }
-    .tab-nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      overflow: visible;
-      flex-wrap: wrap;
+    .tab-nav a {
+      color: var(--text-muted); text-decoration: none;
+      padding: 12px 18px; font-size: 0.95em; font-weight: 500;
+      border-bottom: 3px solid transparent; transition: all 0.2s;
     }
-    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
-    .nav-brand img { height: 32px; width: auto; }
-    .tab-buttons {
-      display: flex;
-      gap: 4px;
-      flex: 1;
-      overflow-x: auto;
-      overflow-y: hidden;
-      align-items: center;
-      height: 100px;
+    .tab-nav a:hover { color: var(--primary); }
+    .tab-nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .nav-icon { width: 18px; height: 18px; vertical-align: middle; margin-right: 4px; }
+
+    /* Login Bar */
+    .login-bar {
+      position: fixed; top: 0; right: 8px; z-index: 1001;
+      display: flex; align-items: center; gap: 8px; padding: 8px;
     }
-    .tab-btn { 
-      padding: 12px 16px; 
-      background: none; 
-      border: none; 
-      color: #e0e0e0; 
-      font-size: 28px; 
-      font-weight: 500; 
-      border-bottom: 3px solid transparent; 
-      transition: all 0.2s; 
-      white-space: nowrap; 
-      text-decoration: none;
-      display: block;
-      cursor: pointer; 
-      position: relative; 
+    .login-bar .user-email { font-size: 0.8em; color: var(--primary); }
+    .login-bar button {
+      background: var(--primary); color: #ffffff; border: none; border-radius: 6px;
+      padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em;
     }
-    .tab-btn:hover { color: #ffb300; background: #232526; }
-    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
-    .tab-btn[title]:hover::after {
-      content: attr(title);
-      position: absolute;
-      top: -42px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #232526;
-      color: #ffb300;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 1001;
-      border: 1px solid #444;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    .login-bar button:hover { background: var(--primary-hover); }
+    .login-bar .logout-btn { background: var(--accent-light); color: var(--accent-deep); }
+
+    /* Container */
+    .container {
+      max-width: 1200px; margin: 0 auto;
+      background: var(--bg-card); border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(11,61,89,0.12);
+      padding: 24px 16px;
+      border: 1px solid rgba(85,217,243,0.45);
     }
 
-    .tab-btn .tab-icon {
-      display: block;
-      margin: 0 auto;
-      height: 40px;
-      width: auto;
-      font-size: 16px;
-      line-height: 1.2;
-      font-weight: 500;
-      white-space: nowrap;
-      filter: drop-shadow(0 2px 8px #000a);
+    h1 { color: var(--primary); text-align: center; margin-bottom: 4px; font-size: 1.8em; }
+    .site-logo { width: 64px; height: 64px; display: block; margin: 0 auto 8px auto; }
+    .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 16px; font-size: 0.9em; }
+    .last-updated { color: var(--text-muted); font-size: 0.78em; font-style: italic; margin-top: 4px; }
+
+    /* Period Selector */
+    .period-selector {
+      display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
     }
+    .period-selector button {
+      background: var(--bg-card-soft); color: var(--text); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: 0.9em;
+    }
+    .period-selector button.active { background: var(--primary); color: #ffffff; border-color: var(--primary); font-weight: 600; }
 
-    /* Tab Content */
-    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
-    .tab-content.active { display: block; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; }
-    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
-    .loading { text-align: center; padding: 32px; color: #e0e0e0; }
-    .note { font-size: 12px; color: #e0e0e0; margin-top: 4px; }
+    /* Stats Cards */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg-card-soft) 100%); border-radius: 12px; padding: 16px; text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-card .stat-value { font-size: 1.8em; font-weight: 700; color: var(--primary); }
+    .stat-card .stat-label { font-size: 0.8em; color: var(--text-muted); margin-top: 4px; }
 
-    /* Countdown Timer */
-    .countdown-panel { background: linear-gradient(135deg, #1a1f26 0%, #252b33 100%); border: 2px solid #ffb300; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; box-shadow: 0 0 20px rgba(255, 179, 0, 0.2); }
-    .countdown-title { font-size: 16px; font-weight: 600; color: #ffb300; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
-    .countdown-display { font-size: 36px; font-weight: 700; font-family: 'Courier New', monospace; color: #ffb300; margin: 12px 0; text-shadow: 0 0 10px rgba(255, 179, 0, 0.5); letter-spacing: 2px; }
-    .countdown-parts { display: flex; justify-content: center; gap: 20px; margin: 16px 0; }
-    .countdown-part { display: flex; flex-direction: column; align-items: center; }
-    .countdown-value { font-size: 28px; font-weight: 700; color: #ffb300; line-height: 1; }
-    .countdown-label { font-size: 11px; color: #b0b0b0; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .countdown-subtitle { font-size: 13px; color: #e0e0e0; margin-top: 12px; }
-    .countdown-expired { color: #ff5252; font-weight: 600; }
+    /* Period Info */
+    .period-info {
+      text-align: center; padding: 8px; background: linear-gradient(180deg, #ffffff 0%, var(--bg-card-soft) 100%); border-radius: 8px;
+      margin-bottom: 16px; font-size: 0.85em; color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .period-info .period-name { color: var(--primary); font-weight: 600; }
 
-    /* Dashboard */
-    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 24px; }
-    .card { background: #232526; border-radius: 8px; padding: 16px; box-shadow: 0 1px 6px rgba(0,0,0,0.25); text-align: center; border: 1px solid #444; }
-    .card-value { font-size: 28px; font-weight: 700; color: #ffb300; margin-bottom: 4px; text-shadow: 0 2px 8px #000a; }
-    .card-label { font-size: 12px; color: #e0e0e0; text-transform: uppercase; letter-spacing: 0.5px; }
-    .player-list { background: #232526; border-radius: 8px; padding: 0; box-shadow: 0 1px 6px rgba(0,0,0,0.25); margin-bottom: 16px; overflow: auto; max-height: 70vh; border: 1px solid #444; position: relative; }
-    .chest-table { display: table; width: 100%; border-collapse: collapse; background: #232526; border-radius: 8px; }
-    .table-header { display: table-row; background: #232526; border-bottom: 2px solid #444; }
-    .header-cell { display: table-cell; padding: 12px 8px; font-weight: 600; font-size: 11px; color: #ffb300; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; border-right: 1px solid #444; white-space: nowrap; position: sticky; top: 0; background: #232526; z-index: 2; }
-    .header-cell:first-child { text-align: center; position: sticky; left: 0; z-index: 3; min-width: 45px; max-width: 50px; width: 50px; background: #232526; }
-    .header-cell:nth-child(2) { text-align: left; position: sticky; left: 50px; z-index: 3; min-width: 150px; background: #232526; }
-    .header-cell.rank-col { min-width: 45px !important; max-width: 50px !important; width: 50px !important; padding: 12px 4px; text-align: center !important; }
-    .cell.rank-col { min-width: 45px !important; max-width: 50px !important; width: 50px !important; padding: 12px 4px; text-align: center !important; }
-    .type-total-header { cursor: pointer; user-select: none; background: #33343a; font-weight: 600; color: #ffb300; }
-    .type-total-header:hover { background: #444; }
+    /* Player Table - Expandable Chest Type Layout */
+    .player-list { background: #fff; border-radius: 8px; padding: 0; box-shadow: 0 1px 6px rgba(0,0,0,0.08); margin-bottom: 16px; overflow: auto; max-height: 70vh; border: 1px solid var(--border); position: relative; }
+    .chest-table { display: table; width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; }
+    .table-header { display: table-row; background: var(--bg-card-soft); border-bottom: 2px solid var(--accent); }
+    .header-cell { display: table-cell; padding: 10px 8px; font-weight: 600; font-size: 11px; color: var(--primary-hover); text-transform: uppercase; letter-spacing: 0.5px; text-align: center; border-right: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; background: var(--bg-card-soft); z-index: 2; }
+    .header-cell:first-child { text-align: center; position: sticky; left: 0; z-index: 3; min-width: 45px; max-width: 50px; width: 50px; }
+    .header-cell:nth-child(2) { text-align: left; position: sticky; left: 50px; z-index: 3; min-width: 150px; }
+    .header-cell.rank-col { min-width: 45px !important; max-width: 50px !important; width: 50px !important; padding: 10px 4px; text-align: center !important; }
+    .cell.rank-col { min-width: 45px !important; max-width: 50px !important; width: 50px !important; padding: 10px 4px; text-align: center !important; }
+    .type-total-header { cursor: pointer; user-select: none; background: var(--accent-light); font-weight: 600; color: var(--primary-hover); }
+    .type-total-header:hover { background: var(--accent); }
     .toggle-icon { display: inline-block; width: 16px; text-align: center; margin-right: 4px; transition: transform 0.15s; }
     .type-total-header.expanded .toggle-icon { transform: rotate(90deg); }
-    .level-header { background: #33343a; display: none; color: #ffb300; }
+    .level-header { background: #f8f4ea; display: none; color: var(--primary); }
     .level-header.visible { display: table-cell; }
-    .player-row { display: table-row; border-bottom: 1px solid #444; background: #232526; }
-    .player-row:hover { background: #33343a; }
-    .cell { display: table-cell; padding: 12px 8px; border-right: 1px solid #444; text-align: center; font-size: 13px; vertical-align: middle; white-space: nowrap; color: #e0e0e0; background: #232526; }
-    .cell:first-child { text-align: center; font-weight: 500; position: sticky; left: 0; background: #232526; z-index: 1; min-width: 45px; max-width: 50px; width: 50px; }
-    .cell:nth-child(2) { text-align: left; font-weight: 500; position: sticky; left: 50px; background: #232526; z-index: 1; min-width: 150px; }
-    .player-row:hover .cell:first-child, .player-row:hover .cell:nth-child(2) { background: #33343a; }
-    .level-cell { background: #33343a; display: none; font-size: 12px; color: #ffb300; }
+    .player-row { display: table-row; border-bottom: 1px solid #eee; background: #fff; }
+    .player-row:hover { background: rgba(85,217,243,0.14); }
+    .cell { display: table-cell; padding: 10px 8px; border-right: 1px solid #eee; text-align: center; font-size: 13px; vertical-align: middle; white-space: nowrap; color: var(--text); background: #fff; }
+    .cell:first-child { text-align: center; font-weight: 600; color: var(--primary); position: sticky; left: 0; background: #fff; z-index: 1; min-width: 45px; max-width: 50px; width: 50px; }
+    .cell:nth-child(2) { text-align: left; font-weight: 500; position: sticky; left: 50px; background: #fff; z-index: 1; min-width: 150px; }
+    .player-row:hover .cell:first-child, .player-row:hover .cell:nth-child(2) { background: rgba(85,217,243,0.14); }
+    .level-cell { background: #f8f4ea; display: none; font-size: 12px; color: var(--primary); }
     .level-cell.visible { display: table-cell; }
-    .count-zero { color: #444; }
-    .player-red { color: #ff5252; font-weight: 500; }
-    .player-orange { color: #ffb300; font-weight: 500; }
-    .player-green { color: #8bc34a; font-weight: 600; }
-    .new-member-row .cell:nth-child(2) { color: #64b5f6; font-style: italic; }
+    .count-zero { color: #ccc; }
+    .player-red { color: var(--danger); font-weight: 500; }
+    .player-orange { color: #e67e22; font-weight: 500; }
+    .player-green { color: var(--success); font-weight: 600; }
     .troop-category { font-size: 10px; font-style: normal; font-weight: 700; letter-spacing: 0.5px; }
-    .troop-category.cat-T9 { color: #9c5de8; }
-    .troop-category.cat-G9 { color: #42a5f5; }
-    .troop-category.cat-T8 { color: #66bb6a; }
-    .troop-category.cat-G8 { color: #ffa726; }
-    .troop-category.cat-G7 { color: #78909c; }
-    .penalty-target { color: #ffb300; font-size: 10px; font-style: normal; opacity: 0.75; }
-    .date-filter {
-      background: #232526;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.25);
-      margin-bottom: 16px;
-      border: 1px solid #444;
-    }
-    .date-filter-label { font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #ffb300; }
-    .date-preset-btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-    .preset-btn {
-      padding: 6px 12px;
-      background: #232526;
-      border: 1px solid #444;
-      border-radius: 4px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: #e0e0e0;
-    }
-    .preset-btn:hover { background: #333; color: #ffb300; border-color: #ffb300; }
-    .preset-btn.active { background: #ffb300; color: #232526; border-color: #ffb300; }
-    .date-range-display {
-      margin-top: 12px;
-      padding: 8px 12px;
-      background: #33343a;
-      border-radius: 4px;
-      font-size: 13px;
-      color: #ffb300;
-      font-weight: 500;
-      border: 1px solid #444;
-    }
-    .no-date {
-      color: #ffb300;
-      background: rgba(255, 179, 0, 0.15);
-      border: 1px solid rgba(255, 179, 0, 0.35);
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-weight: 700;
-    }
+    .troop-category.cat-G4, .troop-category.cat-G5 { color: #777; }
+    .troop-category.cat-G6 { color: #b88600; }
+    .troop-category.cat-G7 { color: #ff9800; }
+    .troop-category.cat-T7 { color: #e53935; }
+    .troop-category.cat-G8 { color: #0097a7; }
+    .troop-category.cat-T8 { color: #1565c0; }
+    .troop-category.cat-G9 { color: #ab47bc; }
+    .troop-category.cat-T9 { color: #7b1fa2; }
+    .table-container { overflow-x: auto; }
 
     /* Chest Points Reference Popup */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5); z-index: 10050; justify-content: center; align-items: flex-start;
-      padding: 24px 0;
+      background: rgba(0,0,0,0.3); z-index: 2000; justify-content: center; align-items: center;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: #232526; border-radius: 16px; padding: 18px 20px;
-      max-width: 560px; width: 95%; max-height: calc(100vh - 48px); overflow-y: auto;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid #444;
+      background: #ffffff; border-radius: 16px; padding: 24px;
+      max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     }
-    .modal h2 { color: #ffb300; margin-bottom: 12px; }
+    .modal h2 { color: var(--primary); margin-bottom: 12px; }
     .modal .close-btn {
-      float: right; background: none; border: none; color: #e0e0e0;
+      float: right; background: none; border: none; color: var(--text);
       font-size: 1.5em; cursor: pointer; padding: 0 8px;
     }
-    .modal .close-btn:hover { color: #ffb300; }
+    .modal .close-btn:hover { color: var(--primary); }
     .modal input[type="text"] {
-      width: 100%; padding: 10px; background: #33343a; border: 1px solid #444;
-      border-radius: 8px; color: #e0e0e0; font-size: 0.9em; margin-bottom: 12px;
+      width: 100%; padding: 10px; background: #fff; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 0.9em; margin-bottom: 12px;
     }
-    .modal input[type="text"]:focus { outline: none; border-color: #ffb300; box-shadow: 0 0 0 2px rgba(255,179,0,0.15); }
-    /* Chest points: one line per chest type, click to show its levels */
-    .chest-ref-group { border-bottom: 1px solid #3a3b40; }
-    .chest-ref-type {
-      display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 6px;
-      background: none; border: none; color: #e0e0e0; font: inherit; font-size: 0.9em;
-      text-align: left; cursor: pointer;
-    }
-    .chest-ref-type:hover { background: #33343a; }
-    .chest-ref-group.single .chest-ref-type { cursor: default; }
-    .chest-ref-group.single .chest-ref-type:hover { background: none; }
-    .chest-ref-type .toggle-icon { display: inline-block; color: #ffb300; transition: transform 0.15s; width: 10px; flex: none; font-size: 0.8em; }
-    .chest-ref-group.expanded .toggle-icon { transform: rotate(90deg); }
-    .chest-ref-type .name { flex: 1; font-weight: 600; color: #ffb300; }
-    .chest-ref-type .summary { font-size: 0.85em; color: #aaa; white-space: nowrap; }
-    .chest-ref-levels { display: none; flex-wrap: wrap; gap: 6px; padding: 2px 6px 10px 24px; }
-    .chest-ref-group.expanded .chest-ref-levels { display: flex; }
-    .chest-ref-level {
-      background: #33343a; border: 1px solid #444; border-radius: 6px; padding: 3px 8px;
-      font-size: 0.8em; color: #ccc; white-space: nowrap;
-    }
-    .chest-ref-level b { color: #ffb300; margin-left: 4px; }
-    .chest-ref-empty { padding: 12px 6px; color: #999; font-size: 0.9em; }
+    .modal input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(31,193,230,0.18); }
+    .chest-ref-table { font-size: 0.85em; }
+    .chest-ref-table th { background: #f8f4ea; font-size: 0.85em; cursor: pointer; user-select: none; }
+    .chest-ref-table th:hover { background: var(--accent-light); }
+    .chest-ref-table td { padding: 6px 8px; }
 
     /* Chest Points Ref Button */
     .ref-btn {
-      background: #33343a; color: #ffb300; border: 1px solid #ffb300;
-      border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 0.85em;
-      display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+      background: var(--bg-card-soft); color: var(--primary-hover); border: 1px solid var(--primary);
+      border-radius: 8px; padding: 8px 16px; cursor: pointer; font-size: 0.85em;
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .ref-btn:hover { background: #ffb300; color: #232526; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    
-    /* Login Bar */
-    .login-bar {
-      display: flex; align-items: center; gap: 8px;
-      margin-left: auto; padding: 4px 0;
-    }
-    .login-bar .user-email { font-size: 0.8em; color: #ffb300; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .login-bar button {
-      padding: 6px 14px; border: 1px solid #444; border-radius: 4px;
-      font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;
-    }
-    #loginBtn { background: #1a1b1c; color: #ffb300; }
-    #loginBtn:hover { background: #2a2b2c; }
-    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
-    #logoutBtn:hover { background: #e53935; }
+    .ref-btn:hover { background: var(--primary); color: #fff; }
 
-    /* Hamburger menu */
+    /* Countdown Timer */
+    .countdown-panel {
+      background: linear-gradient(135deg, #f0ebe0 0%, #f8f4ea 100%);
+      border: 2px solid var(--primary); border-radius: 12px;
+      padding: 16px; margin-bottom: 16px; text-align: center;
+      box-shadow: 0 0 16px rgba(31,193,230,0.18);
+    }
+    .countdown-title { font-size: 14px; font-weight: 600; color: var(--primary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .countdown-parts { display: flex; justify-content: center; gap: 20px; margin: 8px 0; }
+    .countdown-part { display: flex; flex-direction: column; align-items: center; }
+    .countdown-value { font-size: 28px; font-weight: 700; color: var(--primary); font-family: 'Courier New', monospace; line-height: 1; }
+    .countdown-label { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .countdown-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+    .spinner {
+      display: inline-block; width: 24px; height: 24px;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; z-index: 3000;
+      background: #fff; color: var(--text); padding: 12px 20px;
+      border-radius: 8px; font-size: 0.9em; display: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+
+    /* Responsive */
+    .nav-links { display: flex; }
     .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
+      display: none; background: none; border: none; cursor: pointer; padding: 8px;
+      flex-direction: column; gap: 4px;
     }
     .hamburger span {
-      display: block;
-      width: 24px;
-      height: 3px;
-      background: #ffb300;
-      border-radius: 2px;
-      transition: all 0.2s;
+      display: block; width: 22px; height: 2px; background: var(--primary); border-radius: 2px;
     }
-
-    /* Responsive navigation: show icons on desktop, plain text on mobile */
-    .tab-label.mobile-only { display: none; }
-    .tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
-
-    @media (max-width: 800px) {
-      .tab-nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        z-index: 9999;
-      }
-      .tab-nav-container {
-        flex-wrap: wrap;
-        padding: 8px;
-      }
-      .nav-brand {
-        flex: 1;
-        margin-right: 8px;
-        font-size: 16px;
-        padding: 8px 0;
-      }
-      .nav-brand img {
-        height: 24px;
-        width: 24px;
-      }
-      .hamburger { 
-        display: flex;
-        order: 2;
-      }
-      .tab-buttons {
-        flex-direction: column;
-        align-items: stretch;
-        max-height: 60vh;
-        overflow-y: auto;
-        background: #232526;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        width: 100%;
-        z-index: 10000;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-        display: none;
-        order: 10;
-      }
-      .tab-buttons.open {
-        display: flex;
-      }
-      .tab-btn {
-        font-size: 18px;
-        padding: 18px 24px;
-        border-bottom: 1px solid #444;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        background: none;
-        height: auto;
-      }
-      .tab-btn:last-child { border-bottom: none; }
-      .tab-label.mobile-only { display: inline; }
-      .tab-icon.desktop-only { display: none; }
+    @media (max-width: 600px) {
+      body { padding: 50px 4px 70px 4px; }
+      .tab-nav { flex-wrap: wrap; padding: 0 8px; align-items: center; }
+      .hamburger { display: flex; }
       .login-bar {
-        order: 2;
-        margin-left: auto;
-        gap: 6px;
+        position: static; flex: 1; justify-content: flex-end;
+        padding: 4px 0; gap: 6px;
       }
-      .login-bar .user-email { font-size: 0.7em; }
-      .login-bar button { font-size: 0.75em; padding: 5px 10px; }
-      body {
-        padding-top: 100px;
-      }
-
-      /* Keep member name column compact on small screens */
-      .header-cell:nth-child(2),
-      .cell:nth-child(2) {
-        min-width: 110px;
-        max-width: 130px;
-        width: 120px;
-      }
-    }
-
-    @media (min-width: 801px) {
-      .tab-label.mobile-only { display: none; }
-      .tab-icon.desktop-only { display: block; }
-      .tab-buttons {
-        flex-direction: row;
-        align-items: center;
-        position: static;
-        max-height: none;
-        overflow-y: visible;
-        background: none;
-        box-shadow: none;
-        border-radius: 0;
-        display: flex !important;
-      }
-      .tab-btn {
-        font-size: 28px;
-        padding: 12px 16px;
-        border-bottom: 3px solid transparent;
-        display: block;
-        justify-content: center;
-      }
-      .hamburger { display: none; }
+      .nav-links { display: none; width: 100%; flex-direction: column; order: 10; }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 10px 12px; font-size: 0.9em; border-bottom: 1px solid var(--border); }
+      .stat-card .stat-value { font-size: 1.4em; }
+      .container { padding: 16px 8px; }
+      .header-cell:nth-child(2), .cell:nth-child(2) { min-width: 110px; max-width: 130px; width: 120px; }
     }
   </style>
 </head>
 <body>
-  <!-- Google Translate Widget -->
-  <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
-  <style>
-    @media (max-width: 800px) {
-      #google_translate_element {
-        display: none !important;
-      }
-      body.translate-open #google_translate_element {
-        display: block !important;
-        position: fixed;
-        bottom: 54px;
-        right: 8px;
-        left: 8px;
-        width: auto !important;
-        max-width: calc(100vw - 16px) !important;
-        background: #232526;
-        border: 1px solid #444;
-        border-radius: 8px;
-        padding: 6px;
-        pointer-events: auto;
-      }
-      body.translate-open #google_translate_element .goog-te-gadget,
-      body.translate-open #google_translate_element .goog-te-combo {
-        max-width: 100% !important;
-        width: 100% !important;
-      }
-      #translateToggleBtn { display: inline-flex !important; }
-    }
-    @media (min-width: 801px) {
-      #translateToggleBtn { display: none !important; }
-    }
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const translateToggleBtn = document.getElementById('translateToggleBtn');
-      const translateWidget = document.getElementById('google_translate_element');
-      if (!translateToggleBtn || !translateWidget) return;
-      translateToggleBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        document.body.classList.toggle('translate-open');
-      });
-      document.addEventListener('click', function (e) {
-        if (!document.body.classList.contains('translate-open')) return;
-        if (translateWidget.contains(e.target) || translateToggleBtn.contains(e.target)) return;
-        document.body.classList.remove('translate-open');
-      });
-    });
-  </script>
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-  <script>
-    // --- Auth (SK6-style) ---
-    const AUTH_KEY = 'ccc_portal_google_auth';
-    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
-    let isLoggedIn = false;
-    let currentUser = null;
 
-    function checkLoginState() {
+<!-- Tab Navigation -->
+<nav class="tab-nav" id="tabNav">
+  <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></button>
+  <div class="login-bar" id="loginBar">
+    <span class="user-email" id="userEmail" style="display:none"></span>
+    <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
+    <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="dashboard.html" class="active"><img src="chest.png" class="nav-icon" alt=""> Dashboard</a>
+    <a href="events.html" id="navEvents" style="display:none"><img src="events.png" class="nav-icon" alt=""> Events</a>
+    <a href="members.html" id="navMembers" style="display:none"><img src="members.png" class="nav-icon" alt=""> Members</a>
+    <a href="profiling.html" id="navProfiling" style="display:none"><img src="profiling.png" class="nav-icon" alt=""> Profiling</a>
+    <a href="warnings.html" id="navWarnings" style="display:none"><img src="warning.png" class="nav-icon" alt=""> Warnings</a>
+    <a href="calendar.html"><img src="calendar.png" class="nav-icon" alt=""> Calendar</a>
+    <a href="bank.html" id="navBank" style="display:none"><img src="bank.png" class="nav-icon" alt=""> Bank</a>
+  </div>
+</nav>
+
+<div class="container">
+  <img src="chest.png" alt="cCc Legends" class="site-logo">
+  <h1>cCc Legends</h1>
+  <p class="subtitle">Clan Dashboard</p>
+
+  <!-- Period Selector -->
+  <div class="period-selector">
+    <button class="active" onclick="selectPeriod('active', this)">Active Period</button>
+    <button onclick="selectPeriod('previous', this)">Previous Period</button>
+    <button class="ref-btn" onclick="openChestPointsRef()">📋 Chest Points</button>
+  </div>
+
+  <!-- Period Info -->
+  <div class="period-info" id="periodInfo">
+    <span class="period-name" id="periodName">Loading...</span>
+    <span id="periodDates"></span>
+    <div class="last-updated" id="lastImportedDisplay">Last Imported: <span class="no-date">Loading...</span></div>
+  </div>
+
+  <!-- Countdown Timer -->
+  <div class="countdown-panel" id="countdownPanel" style="display:none;">
+    <div class="countdown-title">⏳ Period Ends In</div>
+    <div class="countdown-parts" id="countdownParts"></div>
+    <div class="countdown-subtitle" id="countdownSubtitle"></div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-value" id="statChests">-</div><div class="stat-label">Chests</div></div>
+    <div class="stat-card"><div class="stat-value" id="statPoints">-</div><div class="stat-label">Total Points</div></div>
+    <div class="stat-card"><div class="stat-value" id="statRequired">-</div><div class="stat-label">Required Points</div><div style="font-size:0.7em;color:var(--text-muted)" id="customTargetNote"></div></div>
+    <div class="stat-card"><div class="stat-value" id="statTotalMembers">-</div><div class="stat-label">Total Members</div></div>
+    <div class="stat-card"><div class="stat-value" id="statActiveMembers">-</div><div class="stat-label">Active Members</div></div>
+  </div>
+  <div class="color-legend" style="text-align:center;margin-bottom:16px;font-size:0.82em;color:var(--text-muted);">
+    <span style="color:var(--success);font-weight:600;">&#9632;</span> ≥ Required &nbsp;
+    <span style="color:#e67e22;font-weight:600;">&#9632;</span> ≥ 90% &nbsp;
+    <span style="color:var(--danger);font-weight:600;">&#9632;</span> Below 90%
+  </div>
+
+  <!-- Player Rankings -->
+  <h2 style="color: var(--primary); margin-bottom: 12px; text-align: center;">Player Rankings</h2>
+  <div style="margin-bottom:12px;max-width:400px;margin-left:auto;margin-right:auto;">
+    <input type="text" id="playerFilterInput" placeholder="🔍 Filter by player name..." style="width:100%;padding:10px 14px;font-size:14px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);outline:none;box-shadow:0 1px 4px rgba(0,0,0,0.06);" oninput="filterPlayerTable()">
+  </div>
+  <div class="loading" id="loadingDiv"><div class="spinner"></div><br>Loading data...</div>
+  <div class="player-list" id="playerList" style="display:none"></div>
+</div>
+
+<!-- Chest Points Reference Modal -->
+<div class="modal-overlay" id="chestRefModal">
+  <div class="modal">
+    <button class="close-btn" onclick="closeChestPointsRef()">&times;</button>
+    <h2>📋 Chest Points Reference</h2>
+    <input type="text" id="chestRefSearch" placeholder="Search chests..." oninput="filterChestRef()">
+    <div class="table-container">
+      <table class="chest-ref-table">
+        <thead>
+          <tr><th onclick="sortChestRef('type')">Type</th><th onclick="sortChestRef('level')">Level</th><th onclick="sortChestRef('points')">Points</th></tr>
+        </thead>
+        <tbody id="chestRefBody"></tbody>
+      </table>
+    </div>
+    <div class="loading" id="chestRefLoading" style="display:none"><div class="spinner"></div><br>Loading...</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ===========================
+  // STATE
+  // ===========================
+  let currentPeriod = 'active';
+  let playerData = [];
+  let chestRefData = [];
+  let isLoggedIn = false;
+  let currentUser = null;
+  let currentPeriodDates = null;
+  let targetPoints = 3000;
+  let playerTargets = {}; // per-member custom targets: { name: points }
+  let currentSplits = {};
+  let troopCategoriesByPlayer = {};
+  const expandedTypes = new Set();
+
+  // ===========================
+  // INITIALIZATION
+  // ===========================
+  document.addEventListener('DOMContentLoaded', () => {
+    checkLoginState();
+    loadDashboard();
+  });
+
+  // ===========================
+  // AUTH
+  // ===========================
+  function checkLoginState() {
+    const stored = localStorage.getItem('leg_auth');
+    if (stored) {
       try {
-        const authed = localStorage.getItem(AUTH_KEY) === '1';
-        const email = localStorage.getItem(AUTH_EMAIL_KEY);
-        if (authed && email) {
+        const auth = JSON.parse(stored);
+        if (auth.email && auth.allowed) {
           isLoggedIn = true;
-          currentUser = { email };
+          currentUser = auth;
+          updateLoginUI();
         }
       } catch (e) {}
-      updateLoginUI();
     }
+  }
 
-    function handleLogin() {
-      if (!document.getElementById('gsi-script')) {
-        const s = document.createElement('script');
-        s.id = 'gsi-script';
-        s.src = 'https://accounts.google.com/gsi/client';
-        s.onload = () => initGoogleLogin();
-        document.head.appendChild(s);
-      } else {
-        initGoogleLogin();
-      }
+  function handleLogin() {
+    if (!document.getElementById('gsi-script')) {
+      const script = document.createElement('script');
+      script.id = 'gsi-script';
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = () => initGoogleLogin();
+      document.head.appendChild(script);
+    } else {
+      initGoogleLogin();
     }
+  }
 
-    function initGoogleLogin() {
-      google.accounts.id.initialize({
-        client_id: SITE_CONFIG.googleClientId,
-        callback: handleGoogleCallback
+  function initGoogleLogin() {
+    google.accounts.id.initialize({
+      client_id: SITE_CONFIG.googleClientId,
+      callback: handleGoogleCallback
+    });
+    google.accounts.id.prompt();
+  }
+
+  async function handleGoogleCallback(response) {
+    try {
+      const res = await fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: response.credential })
       });
-      google.accounts.id.prompt();
-    }
+      const data = await res.json();
 
-    async function handleGoogleCallback(response) {
-      try {
-        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
-        const tokenRes = await fetch(cfWorkerUrl, {
+      if (data.success && data.email) {
+        const verifyRes = await fetch(window.GAS_WEB_APP_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken: response.credential })
+          body: JSON.stringify({ action: 'api', fn: 'verifyGoogleLogin', args: [{ email: data.email }] })
         });
-        const tokenData = await tokenRes.json();
-        if (!tokenData.success || !tokenData.email) {
-          showToast('Login failed', 'error'); return;
-        }
-        const email = tokenData.email;
-        const res = await fetch(window.GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        const data = await res.json();
-        if (data.success && data.allowed) {
+        const verifyData = await verifyRes.json();
+        const authResult = verifyData.data || verifyData;
+
+        if (authResult.success && authResult.allowed) {
           isLoggedIn = true;
-          currentUser = { email };
-          localStorage.setItem(AUTH_KEY, '1');
-          localStorage.setItem(AUTH_EMAIL_KEY, email);
+          currentUser = { email: data.email, allowed: true };
+          localStorage.setItem('leg_auth', JSON.stringify(currentUser));
           updateLoginUI();
-          showToast('Logged in as ' + email, 'success');
+          showToast('Logged in as ' + data.email, 'success');
         } else {
-          showToast('Access denied for ' + email, 'error');
+          showToast('Access denied for ' + data.email, 'error');
         }
-      } catch (err) {
-        showToast('Login error: ' + err.message, 'error');
-      }
-    }
-
-    function handleLogout() {
-      isLoggedIn = false;
-      currentUser = null;
-      try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
-      try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
-      updateLoginUI();
-      showToast('Logged out', 'success');
-    }
-
-    function updateLoginUI() {
-      const emailEl = document.getElementById('userEmail');
-      const loginBtn = document.getElementById('loginBtn');
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (isLoggedIn && currentUser) {
-        emailEl.textContent = currentUser.email;
-        emailEl.style.display = 'inline';
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline';
       } else {
-        emailEl.style.display = 'none';
-        loginBtn.style.display = 'inline';
-        logoutBtn.style.display = 'none';
+        showToast('Login failed', 'error');
       }
-      // Show/hide restricted tabs
-      const restricted = ['events.html', 'members.html', 'warnings.html', 'profiling.html', 'resources.html'];
-      restricted.forEach(href => {
-        document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(el => {
-          el.style.display = isLoggedIn ? '' : 'none';
-        });
-      });
-      const bankBtn = document.getElementById('bankTabBtn');
-      if (bankBtn) bankBtn.style.display = isLoggedIn ? 'flex' : 'none';
+    } catch (err) {
+      showToast('Login error: ' + err.message, 'error');
     }
+  }
 
-    function isUserLoggedIn() { return isLoggedIn; }
+  function handleLogout() {
+    isLoggedIn = false;
+    currentUser = null;
+    localStorage.removeItem('leg_auth');
+    updateLoginUI();
+    showToast('Logged out', 'success');
+  }
 
-    function showToast(msg, type) {
-      let t = document.getElementById('toast');
-      if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:3000;background:#232526;color:#f3f3f3;padding:12px 20px;border-radius:8px;font-size:0.9em;display:none;box-shadow:0 2px 12px rgba(0,0,0,0.3);'; document.body.appendChild(t); }
-      t.textContent = msg;
-      t.style.borderLeft = type === 'success' ? '4px solid #27ae60' : type === 'error' ? '4px solid #c62828' : '4px solid #ffb300';
-      t.style.display = 'block';
-      setTimeout(() => { t.style.display = 'none'; }, 3000);
+  function updateLoginUI() {
+    const emailEl = document.getElementById('userEmail');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (isLoggedIn && currentUser) {
+      emailEl.textContent = currentUser.email;
+      emailEl.style.display = 'inline';
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline';
+    } else {
+      emailEl.style.display = 'none';
+      loginBtn.style.display = 'inline';
+      logoutBtn.style.display = 'none';
     }
+    document.getElementById('navEvents').style.display = isLoggedIn ? '' : 'none';
+    document.getElementById('navMembers').style.display = isLoggedIn ? '' : 'none';
+    document.getElementById('navProfiling').style.display = isLoggedIn ? '' : 'none';
+    document.getElementById('navWarnings').style.display = isLoggedIn ? '' : 'none';
+    document.getElementById('navBank').style.display = isLoggedIn ? '' : 'none';
+  }
 
-    window.addEventListener('DOMContentLoaded', () => checkLoginState());
-  </script>
-  
-  <nav class="tab-nav">
-    <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
-      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <div class="tab-buttons" id="navTabs">
-        <a href="dashboard.html" class="tab-btn active" title="Dashboard">
-          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Dashboard</span>
-        </a>
-        <a href="events.html" class="tab-btn" title="Events">
-          <img src="events.png" alt="Events" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Events</span>
-        </a>
-        <a href="members.html" class="tab-btn" title="Members">
-          <img src="members.png" alt="Members" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Members</span>
-        </a>
-        <a href="profiling.html" class="tab-btn" title="Profiling">
-          <img src="profiling.png" alt="Profiling" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Profiling</span>
-        </a>
-        <a href="warnings.html" class="tab-btn" title="Warnings">
-          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Warnings</span>
-        </a>
-        <a href="resources.html" class="tab-btn" title="Resources">
-          <img src="resources.png" alt="Resources" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Resources</span>
-        </a>
-        <a href="competition.html" class="tab-btn" title="Competition">
-          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Competition</span>
-        </a>
-        <a href="calendar.html" class="tab-btn" title="Calendar">
-          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Calendar</span>
-        </a>
-        <a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;">
-          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Bank</span>
-        </a>
-      </div>
-      <div class="login-bar">
-        <span class="user-email" id="userEmail" style="display:none"></span>
-        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
-        <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
-      </div>
-    </div>
-  </nav>
+  // ===========================
+  // LAST IMPORTED DISPLAY
+  // ===========================
+  function formatTimestampWithAgo(timestampText) {
+    if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') return null;
+    const cleaned = timestampText.replace(' UTC', '').replace(/\s*\(.*\)/, '').trim();
+    const parsed = new Date(cleaned + 'Z');
+    if (isNaN(parsed.getTime())) return timestampText;
+    const now = new Date();
+    const diffMs = now - parsed;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return timestampText + ' (just now)';
+    if (diffMins < 60) return timestampText + ` (${diffMins}m ago)`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return timestampText + ` (${diffHours}h ${diffMins % 60}m ago)`;
+    const diffDays = Math.floor(diffHours / 24);
+    return timestampText + ` (${diffDays}d ${diffHours % 24}h ago)`;
+  }
 
-  <div id="dashboard" class="tab-content active">
-    <h1><img src="chests.png" alt="" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Chest Tracker Dashboard</h1>
-    
-    <div class="countdown-panel" id="countdownPanel" style="display:none;">
-      <div class="countdown-title">⏳ Period Ends In</div>
-      <div class="countdown-parts" id="countdownParts"></div>
-      <div class="countdown-subtitle" id="countdownSubtitle">Resets at 17:00 UTC on the period end date</div>
-    </div>
-    
-    <div class="date-filter">
-      <div class="date-filter-label">📅 Date Range Filter</div>
-      <div class="date-preset-btns">
-        <button class="preset-btn" data-preset="lastday" onclick="setDateRange('lastday')">Active Period</button>
-        <button class="preset-btn" data-preset="prevweek" onclick="setDateRange('prevweek')">Previous Period</button>
-        <button class="ref-btn" onclick="openChestPointsRef()">📋 Chest Points</button>
-      </div>
-      <div class="date-range-display" id="dateRangeDisplay">Viewing: All Time</div>
-      <div class="date-range-display" id="lastImportedDisplay" style="font-size: 12px; color: #ffb300; margin-top: 8px;">Last Imported: <span class="no-date">Loading...</span> | Required Points: 7500</div>
-      <input type="date" id="startDate" style="display:none;">
-      <input type="date" id="endDate" style="display:none;">
-    </div>
-
-    <div class="summary-cards" id="summaryCards">
-      <div class="card"><div class="card-value" id="totalChests">-</div><div class="card-label">Total Chests</div></div>
-      <div class="card"><div class="card-value" id="totalMembers">-</div><div class="card-label">Clan Members</div></div>
-      <div class="card"><div class="card-value" id="totalPlayers">-</div><div class="card-label">Active Players</div></div>
-      <div class="card"><div class="card-value" id="totalPoints">-</div><div class="card-label">Total Points</div></div>
-    </div>
-
-    <h2>🥇 Player Rankings</h2>
-
-    <div style="margin-bottom:16px;max-width:400px;margin-left:auto;margin-right:auto;">
-      <input type="text" id="playerFilterInput" placeholder="🔍 Filter by member name..." style="width:100%;padding:10px 14px;font-size:15px;border-radius:6px;border:1px solid #444;background:#232526;color:#ffb300;outline:none;box-shadow:0 1px 6px rgba(0,0,0,0.15);margin-bottom:4px;" oninput="filterPlayerTable()">
-    </div>
-    <div class="player-list" id="playerList"><div class="loading">Loading player stats...</div></div>
-  </div>
-
-  <!-- Chest Points Reference Modal -->
-  <div class="modal-overlay" id="chestRefModal">
-    <div class="modal">
-      <button class="close-btn" onclick="closeChestPointsRef()">&times;</button>
-      <h2>📋 Chest Points Reference</h2>
-      <input type="text" id="chestRefSearch" placeholder="Search chests..." oninput="filterChestRef()">
-      <div id="chestRefBody"></div>
-      <div class="loading" id="chestRefLoading" style="display:none"><div class="spinner" style="display:inline-block;width:24px;height:24px;border:3px solid #444;border-top-color:#ffb300;border-radius:50%;animation:spin 0.8s linear infinite;"></div><br>Loading...</div>
-    </div>
-  </div>
-
-  <script>
-    // ── Per-player custom point targets (server-backed with localStorage cache) ──
-    const PT_KEY = 'ccc_point_targets';
-    let pointTargetsCache = null;
-    let pointTargetsDirty_ = false; // true if user saved targets this session
-
-    function loadPointTargets() {
-      if (pointTargetsCache) return pointTargetsCache;
-      try {
-        const raw = JSON.parse(localStorage.getItem(PT_KEY) || '{"default":7500,"overrides":[]}');
-        if (!Array.isArray(raw.overrides)) raw.overrides = [];
-        pointTargetsCache = raw;
-        return raw;
-      } catch(e) { return { default: 7500, overrides: [] }; }
-    }
-    function savePointTargets(obj) {
-      pointTargetsCache = obj;
-      pointTargetsDirty_ = true; // prevent bundle from overwriting until next full reload
-      try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
-      fetch(window.GAS_WEB_APP_URL, {
+  function updateLastImportedDisplay(timestampText) {
+    const display = document.getElementById('lastImportedDisplay');
+    if (!display) return;
+    if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') {
+      fetch(window.GAS_WEB_APP_URL || '', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'savePointTargets', targets: obj })
-      }).catch(() => {});
-    }
-    function loadPointTargetsFromServer() {
-      return fetch(window.GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getPointTargets' })
+        body: JSON.stringify({ action: 'getLastImportTimestamp' })
       })
         .then(res => res.json())
         .then(result => {
-          if (result && result.success !== false) {
-            const obj = { default: result.default || 7500, overrides: Array.isArray(result.overrides) ? result.overrides : [] };
-            pointTargetsCache = obj;
-            try { localStorage.setItem(PT_KEY, JSON.stringify(obj)); } catch(e) {}
+          const ts = (typeof result === 'string' && result) ||
+                     (result && result.data && typeof result.data === 'string' && result.data) ||
+                     null;
+          if (ts && ts !== 'Never') {
+            display.textContent = 'Last Imported: ' + (formatTimestampWithAgo(ts) || ts);
+          } else {
+            display.innerHTML = 'Last Imported: <span class="no-date">Never</span>';
           }
         })
-        .catch(() => {});
-    }
-    function getPlayerTarget(name, periodName, periodTargetPoints) {
-      const pt = loadPointTargets();
-      const key = (name || '').toLowerCase().trim();
-      const perkey = (periodName || '').trim();
-      // 1. Per-player per-period override
-      const match = (pt.overrides || []).find(o =>
-        o.player.toLowerCase() === key && o.period === perkey
-      );
-      if (match) return match.points;
-      // 2. Period-level custom target (from the event's targetPoints field)
-      if (periodTargetPoints != null && !isNaN(Number(periodTargetPoints)) && Number(periodTargetPoints) > 0) {
-        return Number(periodTargetPoints);
-      }
-      // 3. Global default
-      return pt.default || 7500;
-    }
-    function escapeHtmlDash(text) {
-      const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
-    }
-    // ─────────────────────────────────────────────────────────────────────────
-
-    // Helper: Format date in UTC
-function formatDateUTC(date) {
-  if (!(date instanceof Date)) return '';
-  return date.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
-}
-
-// Helper: Get UTC components (year, month, day) from a Date object
-function getUTCComponents(date) {
-  if (!(date instanceof Date)) return null;
-  return {
-    year: date.getUTCFullYear(),
-    month: date.getUTCMonth() + 1,
-    day: date.getUTCDate(),
-    hours: date.getUTCHours(),
-    minutes: date.getUTCMinutes(),
-    seconds: date.getUTCSeconds()
-  };
-}
-
-// Helper: Format date as YYYY-MM-DD using UTC timezone
-function formatDateAsUTC(date) {
-  const utc = getUTCComponents(date);
-  if (!utc) return '';
-  return `${utc.year}-${String(utc.month).padStart(2, '0')}-${String(utc.day).padStart(2, '0')}`;
-}
-
-// Helper: Create a Date object at start of day UTC (00:00:00 UTC)
-function getUTCStartOfDay(year, month, day) {
-  return new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
-}
-
-// Helper: Create a Date object at end of day UTC (23:59:59 UTC)
-function getUTCEndOfDay(year, month, day) {
-  return new Date(Date.UTC(year, month - 1, day, 23, 59, 59));
-}
-
-// Helper: Get current UTC date (midnight UTC)
-function getTodayUTC() {
-  const now = new Date();
-  const utc = getUTCComponents(now);
-  return getUTCStartOfDay(utc.year, utc.month, utc.day);
-}
-
-// Helper: Get effective date for period matching, accounting for the 5PM UTC boundary.
-// After 17:00 UTC, the next calendar day's period is considered active (matches server-side getActivePeriodDates logic).
-function getEffectiveDateUTC() {
-  const now = new Date();
-  const BOUNDARY_HOUR = 17; // Must match CONFIG.PERIOD_BOUNDARY_HOUR_UTC on the server
-  const effective = new Date(now);
-  if (now.getUTCHours() >= BOUNDARY_HOUR) {
-    effective.setUTCDate(effective.getUTCDate() + 1);
-  }
-  const utc = getUTCComponents(effective);
-  return getUTCStartOfDay(utc.year, utc.month, utc.day);
-}
-
-// Helper: Parse date string as UTC
-function parseDateUTC(str) {
-  // Accepts ISO, 'YYYY-MM-DD', or 'YYYY-MM-DD HH:MM:SS'
-  if (!str) return null;
-  if (str instanceof Date) return str;
-  let d = null;
-  // ISO 8601 with Z or offset
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(str)) {
-    d = new Date(str);
-  } else if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-    d = new Date(str + 'T00:00:00Z');
-  } else if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(str)) {
-    d = new Date(str.replace(' ', 'T') + 'Z');
-  } else {
-    d = new Date(str);
-  }
-  if (isNaN(d.getTime())) {
-    return null;
-  }
-  return d;
-}
-// Patch countdown and period display to use UTC
-function updateCountdownTimer(endDateStr) {
-  // Always treat endDateStr as UTC and target 17:00:00Z (5PM UTC game reset)
-  let endDate;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(endDateStr)) {
-    endDate = new Date(endDateStr + 'T17:00:00Z');
-    //console.log('[Countdown][DEBUG] Parsed endDate from date only:', endDateStr, '->', endDate.toISOString());
-  } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(endDateStr)) {
-    endDate = new Date(endDateStr);
-    //console.log('[Countdown][DEBUG] Parsed endDate from ISO string:', endDateStr, '->', endDate.toISOString());
-  } else {
-    // fallback: try to parse as UTC
-    endDate = new Date(endDateStr + 'Z');
-    //console.log('[Countdown][DEBUG] Fallback parse endDate:', endDateStr, '->', endDate.toISOString());
-  }
-  if (!endDateStr || !(endDate instanceof Date) || isNaN(endDate.getTime())) {
-    console.warn('[Countdown][DEBUG] Invalid endDate:', endDateStr, endDate);
-    // Show 00 for all fields if invalid
-    const countdownPanel = document.getElementById('countdownPanel');
-    const countdownSubtitle = document.getElementById('countdownSubtitle');
-    const countdownParts = document.getElementById('countdownParts');
-    if (!countdownPanel || !countdownSubtitle || !countdownParts) return;
-    countdownPanel.style.display = 'block';
-    countdownSubtitle.textContent = '';
-    countdownParts.innerHTML = '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Days</span></div>' +
-      '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Hours</span></div>' +
-      '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Minutes</span></div>' +
-      '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Seconds</span></div>';
-    return;
-  }
-
-  function updateDisplay() {
-    const countdownPanel = document.getElementById('countdownPanel');
-    const countdownSubtitle = document.getElementById('countdownSubtitle');
-    const countdownParts = document.getElementById('countdownParts');
-    if (!countdownPanel || !countdownSubtitle || !countdownParts) return;
-    // Use current UTC time (new Date() is always UTC for arithmetic)
-    const now = new Date();
-    const timeLeft = endDate - now;
-    //console.log('[Countdown][DEBUG] now:', now.toISOString(), 'endDate:', endDate.toISOString(), 'timeLeft(ms):', timeLeft);
-    if (timeLeft <= 0) {
-      countdownPanel.style.display = 'block';
-      countdownSubtitle.textContent = 'Event period has ended.';
-      countdownParts.innerHTML = '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Days</span></div>' +
-        '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Hours</span></div>' +
-        '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Minutes</span></div>' +
-        '<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">Seconds</span></div>';
-     // console.log('[Countdown][DEBUG] Timer ended.');
-      return;
-    }
-    countdownPanel.style.display = 'block';
-    countdownSubtitle.textContent = 'All times are shown in UTC.';
-    let seconds = Math.floor(timeLeft / 1000);
-    const days = Math.floor(seconds / 86400);
-    seconds %= 86400;
-    const hours = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const minutes = Math.floor(seconds / 60);
-    seconds %= 60;
-    countdownParts.innerHTML =
-      `<div class="countdown-part"><span class="countdown-value">${String(days).padStart(2, '0')}</span><span class="countdown-label">Days</span></div>` +
-      `<div class="countdown-part"><span class="countdown-value">${String(hours).padStart(2, '0')}</span><span class="countdown-label">Hours</span></div>` +
-      `<div class="countdown-part"><span class="countdown-value">${String(minutes).padStart(2, '0')}</span><span class="countdown-label">Minutes</span></div>` +
-      `<div class="countdown-part"><span class="countdown-value">${String(seconds).padStart(2, '0')}</span><span class="countdown-label">Seconds</span></div>`;
-    //console.log('[Countdown][DEBUG] Timer running. Days:', days, 'Hours:', hours, 'Minutes:', minutes, 'Seconds:', seconds);
-  }
-  updateDisplay();
-  setInterval(updateDisplay, 1000);
-window.addEventListener('error', function(e) {
-  console.error('[Countdown] GLOBAL JS ERROR:', e.message, e.filename, e.lineno, e.colno, e.error);
-});
-}
-
-// --- Table filter and sort functions must be defined before any inline event handler usage ---
-function filterPlayerTable() {
-      const input = document.getElementById('playerFilterInput');
-      const filter = input ? input.value.trim().toLowerCase() : '';
-      const table = document.getElementById('playerTable');
-      if (!table) return;
-      const rows = table.querySelectorAll('.player-row');
-      rows.forEach(row => {
-        const nameCell = row.querySelector('.cell:nth-child(2)');
-        if (!nameCell) return;
-        const name = nameCell.textContent.trim().toLowerCase();
-        if (!filter || name.includes(filter)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
-    }
-
-    function addPlayerTableSortHandlers() {
-      const table = document.getElementById('playerTable');
-      if (!table) return;
-      const headers = table.querySelectorAll('.header-cell.sortable');
-      headers.forEach(header => {
-        header.style.cursor = 'pointer';
-        header.onclick = function() {
-          const sortKey = header.getAttribute('data-sort');
-          let dir = header.getAttribute('data-dir') || 'desc';
-          dir = dir === 'desc' ? 'asc' : 'desc';
-          headers.forEach(h => h.removeAttribute('data-dir'));
-          header.setAttribute('data-dir', dir);
-          sortPlayerTable(sortKey, dir);
-          // Update sort icons
-          headers.forEach(h => {
-            const icon = h.querySelector('.sort-icon');
-            if (icon) icon.textContent = '▲▼';
-          });
-          const icon = header.querySelector('.sort-icon');
-          if (icon) icon.textContent = dir === 'asc' ? '▲' : '▼';
-        };
-      });
-    }
-
-    function sortPlayerTable(key, dir) {
-      const table = document.getElementById('playerTable');
-      if (!table) return;
-      const rows = Array.from(table.querySelectorAll('.player-row'));
-      let idx;
-      if (key === 'rank') idx = 0;
-      else if (key === 'player') idx = 1;
-      else if (key === 'pts') idx = 2;
-      else if (key === 'total') idx = 3;
-      else return;
-      rows.sort((a, b) => {
-        let va = a.querySelectorAll('.cell')[idx]?.textContent.trim();
-        let vb = b.querySelectorAll('.cell')[idx]?.textContent.trim();
-        if (key === 'rank' || key === 'pts' || key === 'total') {
-          va = parseInt(va.replace(/[^\d]/g, '')) || 0;
-          vb = parseInt(vb.replace(/[^\d]/g, '')) || 0;
-        } else {
-          va = va.toLowerCase();
-          vb = vb.toLowerCase();
-        }
-        if (va < vb) return dir === 'asc' ? -1 : 1;
-        if (va > vb) return dir === 'asc' ? 1 : -1;
-        return 0;
-      });
-      rows.forEach(row => table.appendChild(row));
-    }
-
-    const isSidebar = false;
-    const expandedTypes = new Set();
-    let currentViewingStartDate = null; // Store start date for highlighting new members
-    let currentViewingPeriodName = null; // Store period name for per-player target lookup
-    let currentPeriodTargetPoints = null; // Store per-period custom target points (from event)
-    let currentPreset = 'lastday'; // Keep selected preset so backend can canonicalize range
-    
-
-
-    // ============ RESPONSE NORMALIZATION ============
-    // Normalizes API responses to consistent format {success: bool, data: ?, error: ?}
-
-    function applyMemberMask(playerList) {
-      if (isUserLoggedIn()) return playerList;
-      const masked = (typeof SITE_CONFIG !== 'undefined' && Array.isArray(SITE_CONFIG.maskedMembers)) ? SITE_CONFIG.maskedMembers : [];
-      if (masked.length === 0) return playerList;
-      const maskedNorm = masked.map(n => n.trim().toLowerCase());
-      return playerList.filter(p => !maskedNorm.includes((p.player || '').trim().toLowerCase()));
-    }
-
-    function normalizeResponse(result) {
-      if (!result) return { success: false, error: 'No result' };
-      if (result.success !== undefined) return result; // Already normalized
-      if (Array.isArray(result)) return { success: true, data: result };
-      if (result.error) return { success: false, error: result.error };
-      if (result.message && !result.data) return { success: true, message: result.message };
-      // Handle objects with data - preserve both data and specific keys
-      if (typeof result === 'object') {
-        return { success: true, data: result, ...result };
-      }
-      return { success: true, data: result }; // Default
-    }
-
-      // Dashboard
-    window.onload = function() {
-      loadPointTargets(); // instant from localStorage — no server call needed
-      // pointTargets are included in the getDashboardBundle response,
-      // so no separate loadPointTargetsFromServer() call is needed.
-      setDateRange('lastday');
-    };
-
-    // ── Shared date formatter for period display ──
-    function formatDisplayDateStr_(dateStr) {
-      if (!dateStr) return '';
-      return cccDate(dateStr); // shared UTC format (ccc-dates.js)
-    }
-
-    // ── Simplified setDateRange — no more blocking getAllEvents call ──
-    function setDateRange(preset) {
-      currentPreset = preset;
-      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`[data-preset="${preset}"]`)?.classList.add('active');
-      document.getElementById('dateRangeDisplay').textContent =
-        preset === 'prevweek' ? 'Loading Previous Period...' : 'Loading Active Period...';
-      document.getElementById('playerList').innerHTML = '<div class="loading">Loading...</div>';
-      loadDashboard();
-    }
-
-    // ── Main loader: single bundle call replaces 3-4 serial round-trips ──
-    function loadDashboard() {
-      const requestId = `dash-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      const bundlePayload = { action: 'getDashboardBundle', periodPreset: currentPreset };
-      if (window.perfDebug) window.perfDebug.mark('Dashboard Load');
-
-      fetch(window.GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bundlePayload)
-      })
-        .then(res => {
-          const edgeCache = res.headers.get('X-Cache') || 'N/A';
-          console.log('[PERF] Edge cache:', edgeCache);
-          return res.json().then(data => { data._edgeCache = edgeCache; return data; });
-        })
-        .then(bundle => {
-          console.log('[DEBUG] getDashboardBundle response keys:', Object.keys(bundle || {}),
-            'statsSummary:', !!bundle?.statsSummary,
-            'playerStats:', Array.isArray(bundle?.playerStats) ? bundle.playerStats.length : typeof bundle?.playerStats);
-
-          if (bundle && bundle.statsSummary && bundle.playerStats) {
-            // ── Bundle succeeded — single round-trip for everything ──
-
-            // 1. Apply period display (dates, countdown, name)
-            applyPeriodFromBundle_(bundle);
-
-            // 2. Apply point targets from bundle (unless user saved locally this session)
-            if (bundle.pointTargets && !pointTargetsDirty_) {
-              pointTargetsCache = { default: bundle.pointTargets.default || 7500, overrides: Array.isArray(bundle.pointTargets.overrides) ? bundle.pointTargets.overrides : [] };
-              try { localStorage.setItem(PT_KEY, JSON.stringify(pointTargetsCache)); } catch(e) {}
-            }
-
-            // 3. Build a case-insensitive lookup so troop categories can be shown beside names.
-            window.troopCategoriesByPlayer = {};
-            const troopRows = Array.isArray(bundle.troopCategories?.data) ? bundle.troopCategories.data : [];
-            troopRows.forEach(row => {
-              const name = String(row?.playerName || '').trim().toLowerCase();
-              if (name && row.category) window.troopCategoriesByPlayer[name] = row.category;
-            });
-
-            // 4. Render data
-            displaySummary(bundle.statsSummary);
-            window.currentSplits = bundle.splits || {};
-            displayPlayerStats(bundle.playerStats);
-
-            console.log('[INFO] Dashboard loaded via bundle (server: %dms, edge: %s)', bundle._timing ? bundle._timing.ms : '?', bundle._edgeCache || '?');
-            if (window.perfDebug) window.perfDebug.measure('Dashboard Load', 'render');
-            return;
-          }
-
-          // ── Bundle incomplete — fall back to events + individual calls ──
-          console.warn('[WARN] Bundle incomplete, falling back to legacy path');
-          resolveAndLoadLegacy_(requestId);
-        })
-        .catch(e => {
-          console.warn('[WARN] Bundle request failed, falling back:', e);
-          resolveAndLoadLegacy_(requestId);
+        .catch(() => {
+          display.innerHTML = 'Last Imported: <span class="no-date">Unknown</span>';
         });
+    } else {
+      display.textContent = 'Last Imported: ' + (formatTimestampWithAgo(timestampText) || timestampText);
     }
+  }
 
-    // ── Apply period display from a successful bundle response ──
-    function applyPeriodFromBundle_(bundle) {
-      const startInput = document.getElementById('startDate');
-      const endInput = document.getElementById('endDate');
-      const displayElement = document.getElementById('dateRangeDisplay');
+  // ===========================
+  // DASHBOARD LOADING
+  // ===========================
+  async function loadDashboard() {
+    try {
+      document.getElementById('loadingDiv').style.display = 'block';
+      document.getElementById('playerList').style.display = 'none';
 
-      const startDate = bundle.periodRange?.startDate || '';
-      const endDate   = bundle.periodRange?.endDate || '';
-      const periodName = bundle.periodEvent?.name || '';
-      const periodTarget = bundle.periodEvent?.targetPoints || null;
+      const [periodResult, statsResult, playerResult, splitsResult, troopCategoriesResult] = await Promise.all([
+        callFunction(currentPeriod === 'active' ? 'getActivePeriodDates' : 'getPreviousPeriodDates'),
+        callFunction('getStatsSummary', [currentPeriod]),
+        callFunction('getPlayerStats', [currentPeriod]),
+        callFunction('getSplits', [currentPeriod]),
+        callFunction('getTroopCategories')
+      ]);
 
-      startInput.value = startDate;
-      endInput.value   = endDate;
-      currentViewingStartDate    = startDate;
-      currentViewingPeriodName   = periodName || null;
-      currentPeriodTargetPoints  = periodTarget;
-
-      const label = currentPreset === 'prevweek' ? 'Previous Period' : 'Active Period';
-      const nameLabel = periodName ? ` (${periodName})` : '';
-      displayElement.textContent = `Viewing: ${label}${nameLabel}: ${formatDisplayDateStr_(startDate)} – ${formatDisplayDateStr_(endDate)}`;
-      updateRequiredPointsDisplay();
-
-      if (currentPreset !== 'prevweek' && endDate) {
-        updateCountdownTimer(endDate + 'T17:00:00Z');
-      }
-    }
-
-    // ── Fallback: fetch events for period info, then fire individual data calls ──
-    function resolveAndLoadLegacy_(requestId) {
-      // getAllEvents + getPointTargets in parallel (not serial like before)
-      Promise.all([
-        fetch(window.GAS_WEB_APP_URL, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getAllEvents' })
-        }).then(r => r.json()).catch(() => null),
-        fetch(window.GAS_WEB_APP_URL, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getPointTargets' })
-        }).then(r => r.json()).catch(() => null)
-      ]).then(([eventsResult, ptResult]) => {
-        // Apply point targets
-        if (ptResult && ptResult.success !== false) {
-          pointTargetsCache = { default: ptResult.default || 7500, overrides: Array.isArray(ptResult.overrides) ? ptResult.overrides : [] };
-          try { localStorage.setItem(PT_KEY, JSON.stringify(pointTargetsCache)); } catch(e) {}
+      // Update period info
+      if (periodResult) {
+        currentPeriodDates = periodResult;
+        targetPoints = periodResult.targetPoints || 3000;
+        document.getElementById('periodName').textContent = periodResult.source || 'Current Period';
+        document.getElementById('periodDates').textContent =
+          ` (${formatPeriodDate(periodResult.start)} → ${formatPeriodDate(periodResult.end)})`;
+        // Start countdown to period end (17:00 UTC on end date)
+        if (currentPeriod === 'active' && periodResult.end) {
+          updateCountdownTimer(periodResult.end);
+        } else {
+          document.getElementById('countdownPanel').style.display = 'none';
         }
-        // Determine period from events and update display
-        applyPeriodFromEvents_(eventsResult);
-        // Fire the 3 individual data calls (they resolve period server-side via periodPreset)
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        loadDashboardLegacy_(startDate, endDate, requestId);
+      }
+
+      // Fetch per-member custom targets for this period
+      playerTargets = {};
+      try {
+        const periodSource = (periodResult && periodResult.source) || '';
+        const ptResult = await callFunction('getPointTargets', [periodSource]);
+        if (ptResult && ptResult.success && ptResult.targets) {
+          playerTargets = ptResult.targets;
+        }
+      } catch (e) { console.warn('Could not load custom targets:', e); }
+
+      // Update stats
+      const customCount = Object.keys(playerTargets).length;
+      if (statsResult) {
+        document.getElementById('statChests').textContent = (statsResult.totalChests || 0).toLocaleString();
+        document.getElementById('statPoints').textContent = (statsResult.totalPoints || 0).toLocaleString();
+        document.getElementById('statRequired').textContent = targetPoints.toLocaleString() + (customCount > 0 ? '*' : '');
+        document.getElementById('customTargetNote').textContent = customCount > 0 ? `* ${customCount} custom target(s)` : '';
+        document.getElementById('statTotalMembers').textContent = statsResult.totalMembers || 0;
+        document.getElementById('statActiveMembers').textContent = statsResult.activeMembers || 0;
+        updateLastImportedDisplay(statsResult.lastImported || null);
+      }
+
+      // Store splits
+      currentSplits = splitsResult || {};
+      troopCategoriesByPlayer = {};
+      const troopRows = Array.isArray(troopCategoriesResult?.data) ? troopCategoriesResult.data : [];
+      troopRows.forEach(row => {
+        const name = String(row?.playerName || '').trim().toLowerCase();
+        if (name && row.category) troopCategoriesByPlayer[name] = row.category;
       });
-    }
 
-    // ── Extract period info from an events response (fallback path) ──
-    function applyPeriodFromEvents_(result) {
-      const startInput = document.getElementById('startDate');
-      const endInput   = document.getElementById('endDate');
-      const displayElement = document.getElementById('dateRangeDisplay');
-
-      if (!result || !result.success || !result.events || result.events.length === 0) {
-        applyFallbackPeriod_(); return;
+      // Update player table
+      if (playerResult && Array.isArray(playerResult)) {
+        playerData = playerResult;
+        displayPlayerStats(playerData);
       }
-      const periodEvents = (result.events || []).filter(e =>
-        e.eventType === 'Ruthless Slaughter' || e.participationMethod === 'period-marker'
-      );
-      if (periodEvents.length === 0) { applyFallbackPeriod_(); return; }
 
-      periodEvents.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-      const effectiveDate = getEffectiveDateUTC();
-      const todayStr = formatDateAsUTC(effectiveDate);
-
-      // Find active period
-      let activePeriod = null;
-      for (const event of periodEvents) {
-        if (event.startDate <= todayStr && event.endDate >= todayStr) { activePeriod = event; break; }
-      }
-      if (!activePeriod) {
-        for (let i = periodEvents.length - 1; i >= 0; i--) {
-          if (periodEvents[i].endDate < todayStr) { activePeriod = periodEvents[i]; break; }
-        }
-      }
-      if (!activePeriod) activePeriod = periodEvents[periodEvents.length - 1];
-
-      if (currentPreset === 'prevweek') {
-        // Find event before the active one
-        let previousPeriod = null;
-        if (activePeriod) {
-          for (let i = periodEvents.length - 1; i >= 0; i--) {
-            if (periodEvents[i] !== activePeriod && periodEvents[i].endDate <= activePeriod.startDate) {
-              previousPeriod = periodEvents[i]; break;
-            }
-          }
-        }
-        if (!previousPeriod) { applyFallbackPeriod_(); return; }
-        startInput.value = previousPeriod.startDate;
-        endInput.value   = previousPeriod.endDate;
-        currentViewingStartDate   = previousPeriod.startDate;
-        currentViewingPeriodName  = previousPeriod.eventName || null;
-        currentPeriodTargetPoints = previousPeriod.targetPoints || null;
-        displayElement.textContent = `Viewing: Previous Period (${previousPeriod.eventName}): ${formatDisplayDateStr_(previousPeriod.startDate)} – ${formatDisplayDateStr_(previousPeriod.endDate)}`;
-      } else {
-        startInput.value = activePeriod.startDate;
-        endInput.value   = activePeriod.endDate;
-        currentViewingStartDate   = activePeriod.startDate;
-        currentViewingPeriodName  = activePeriod.eventName || null;
-        currentPeriodTargetPoints = activePeriod.targetPoints || null;
-        displayElement.textContent = `Viewing: Active Period (${activePeriod.eventName}): ${formatDisplayDateStr_(activePeriod.startDate)} – ${formatDisplayDateStr_(activePeriod.endDate)}`;
-        updateCountdownTimer(activePeriod.endDate + 'T17:00:00Z');
-      }
-      updateRequiredPointsDisplay();
+      document.getElementById('loadingDiv').style.display = 'none';
+      document.getElementById('playerList').style.display = 'block';
+    } catch (error) {
+      console.error('Dashboard load error:', error);
+      document.getElementById('loadingDiv').innerHTML =
+        '<span style="color: var(--danger)">Failed to load data. Check your configuration.</span>';
     }
+  }
 
-    // ── Sunday-Saturday fallback when no events are found ──
-    function applyFallbackPeriod_() {
-      const startInput = document.getElementById('startDate');
-      const endInput   = document.getElementById('endDate');
-      const displayElement = document.getElementById('dateRangeDisplay');
-      const todayUTC = getTodayUTC();
-      const label = currentPreset === 'prevweek' ? 'Previous Period' : 'Active Period';
-      const start = new Date(todayUTC);
-      const dayOfWeekUTC = start.getUTCDay();
-      if (currentPreset === 'prevweek') {
-        start.setUTCDate(start.getUTCDate() - dayOfWeekUTC - 7);
-      } else {
-        start.setUTCDate(start.getUTCDate() - dayOfWeekUTC);
-      }
-      const end = new Date(start);
-      end.setUTCDate(end.getUTCDate() + 6);
-      startInput.value = formatDateAsUTC(start);
-      endInput.value   = formatDateAsUTC(end);
-      currentViewingStartDate   = formatDateAsUTC(start);
-      currentPeriodTargetPoints = null;
-      currentViewingPeriodName  = null;
-      displayElement.textContent = `Viewing: ${label} (Fallback): ${formatDisplayDateStr_(formatDateAsUTC(start))} – ${formatDisplayDateStr_(formatDateAsUTC(end))}`;
-      updateRequiredPointsDisplay();
-      if (currentPreset !== 'prevweek') {
-        updateCountdownTimer(formatDateAsUTC(end) + 'T17:00:00Z');
-      }
+  // ── Countdown Timer ──
+  let countdownInterval = null;
+  function updateCountdownTimer(endDateStr) {
+    if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+    const panel = document.getElementById('countdownPanel');
+    const parts = document.getElementById('countdownParts');
+    const subtitle = document.getElementById('countdownSubtitle');
+    if (!panel || !parts) return;
+
+    let endDate;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(endDateStr)) {
+      endDate = new Date(endDateStr + 'T17:00:00Z');
+    } else {
+      endDate = new Date(endDateStr);
     }
+    if (!endDateStr || isNaN(endDate.getTime())) { panel.style.display = 'none'; return; }
 
-    function loadDashboardLegacy_(startDate, endDate, requestId) {
-      let lastPlayerStats = null;
-      
-      // Use CORS proxy (Cloudflare Worker) for API calls
-      // 1. Get summary
-      const summaryPayload = { action: 'getStatsSummary', startDate, endDate, periodPreset: currentPreset };
-      console.log('[DEBUG] getStatsSummary request payload:', summaryPayload);
-      fetch(window.GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(summaryPayload)
-      })
-        .then(res => {
-          console.log('[DEBUG] getStatsSummary response status:', res.status, res.statusText);
-          return res.text();
-        })
-        .then(text => {
-          console.log('[DEBUG] getStatsSummary raw response:', text.substring(0, 500));
-          try {
-            return JSON.parse(text);
-          } catch (e) {
-            console.error('[DEBUG] getStatsSummary JSON parse error:', e, 'raw:', text.substring(0, 200));
-            return {};
-          }
-        })
-        .then(displaySummary)
-        .catch(e => console.error('Summary error:', e));
-
-      // 2. Get player stats
-      const playerStatsPayload = { action: 'getPlayerStats', startDate, endDate, periodPreset: currentPreset, requestId };
-      console.log('[DEBUG] getPlayerStats request payload:', playerStatsPayload);
-      fetch(window.GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(playerStatsPayload)
-      })
-        .then(res => res.json())
-        .then(stats => {
-          console.log('[DEBUG] getPlayerStats response meta:', {
-            requestId,
-            type: typeof stats,
-            isArray: Array.isArray(stats),
-            count: Array.isArray(stats) ? stats.length : null
-          });
-          lastPlayerStats = stats;
-          displayPlayerStats(stats);
-        })
-        .catch(e => {
-          console.error('Stats error:', e);
-          document.getElementById('playerList').innerHTML = '<div class="loading" style="color:#d93025;">Error loading player stats</div>';
-        });
-
-      // 3. Get chest splits
-      fetch(window.GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getSplits', startDate, endDate, periodPreset: currentPreset })
-      })
-        .then(res => res.json())
-        .then(splits => {
-          console.log('[DEBUG] getSplits response:', splits);
-          window.currentSplits = splits || {};
-          // Re-render player stats now that splits are available
-          if (lastPlayerStats) {
-            console.log('[DEBUG] Re-rendering player stats with splits data');
-            displayPlayerStats(lastPlayerStats);
-          }
-        })
-        .catch(e => console.error('Splits error:', e));
-    }
-    
-    function displaySummary(data) {
-      if (window.perfDebug) window.perfDebug.mark('Render Summary');
-      console.log('[DEBUG] displaySummary called with:', JSON.stringify(data));
-      console.log('[DEBUG] displaySummary data keys:', Object.keys(data || {}));
-      console.log('[DEBUG] displaySummary values: totalChests=%s, totalMembers=%s, totalPlayers=%s, totalPoints=%s, lastImportTimestamp=%s',
-        data.totalChests, data.totalMembers, data.totalPlayers, data.totalPoints, data.lastImportTimestamp);
-      document.getElementById('totalChests').textContent = data.totalChests ? data.totalChests.toLocaleString() : '0';
-      document.getElementById('totalMembers').textContent = data.totalMembers || '0';
-      document.getElementById('totalPlayers').textContent = data.totalPlayers || '0';
-      document.getElementById('totalPoints').textContent = data.totalPoints ? data.totalPoints.toLocaleString() : '0';
-      updateLastImportedDisplay(data.lastImportTimestamp || null);
-      if (window.perfDebug) window.perfDebug.measure('Render Summary', 'render');
-    }
-
-    function getEffectiveRequiredPoints() {
-      // Period-level custom target takes precedence over global default
-      if (currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0) {
-        return Number(currentPeriodTargetPoints);
-      }
-      return loadPointTargets().default || 7500;
-    }
-
-    function updateRequiredPointsDisplay() {
-      const display = document.getElementById('lastImportedDisplay');
-      if (!display) return;
-      const reqPts = getEffectiveRequiredPoints().toLocaleString();
-      const isCustom = currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0;
-      const label = isCustom ? 'Period Target' : 'Required Points';
-      // Preserve the existing "Last Imported:" portion
-      const existingHtml = display.innerHTML;
-      const importedMatch = existingHtml.match(/Last Imported:[^|]*/i);
-      const importedPart = importedMatch ? importedMatch[0].trim() : 'Last Imported: <span class="no-date">Loading...</span>';
-      display.innerHTML = `${importedPart} | ${label}: ${reqPts}`;
-    }
-
-    function formatTimestampWithAgo(timestampText) {
-      if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') return null;
-      // Any timestamp the server sends (e.g. "2026-04-18 14:30:00 UTC"), shown in the shared UTC format
-      const parsed = cccParse(String(timestampText).replace(/\s*\(.*\)\s*$/, ''));
-      if (!parsed) return timestampText;
-      timestampText = cccDateTime(parsed);
+    function render() {
       const now = new Date();
-      const diffMs = now - parsed;
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return timestampText + ' (just now)';
-      if (diffMins < 60) return timestampText + ` (${diffMins}m ago)`;
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return timestampText + ` (${diffHours}h ${diffMins % 60}m ago)`;
-      const diffDays = Math.floor(diffHours / 24);
-      return timestampText + ` (${diffDays}d ${diffHours % 24}h ago)`;
-    }
-
-    function updateLastImportedDisplay(timestampText) {
-      const display = document.getElementById('lastImportedDisplay');
-      if (!display) return;
-      const reqPts = getEffectiveRequiredPoints().toLocaleString();
-      const isCustom = currentPeriodTargetPoints != null && !isNaN(Number(currentPeriodTargetPoints)) && Number(currentPeriodTargetPoints) > 0;
-      const label = isCustom ? 'Period Target' : 'Required Points';
-      if (!timestampText || timestampText === 'Never' || timestampText === 'No imports yet') {
-        // Timestamp missing from summary response — fetch it directly as a fallback
-        fetch(window.GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getLastImportTimestamp' })
-        })
-          .then(res => res.json())
-          .then(result => {
-            // result may be a plain string or { value: '...' } depending on GAS version
-            const ts = (typeof result === 'string' && result) ||
-                       (result && typeof result.value === 'string' && result.value) ||
-                       (result && typeof result.lastImportTimestamp === 'string' && result.lastImportTimestamp) ||
-                       null;
-            if (ts && ts !== 'Never' && ts !== 'No imports yet') {
-              const formatted = formatTimestampWithAgo(ts);
-              display.innerHTML = `Last Imported: ${formatted || ts} | ${label}: ${reqPts}`;
-            } else {
-              display.innerHTML = `Last Imported: <span class="no-date">No date</span> | ${label}: ${reqPts}`;
-            }
-          })
-          .catch(() => {
-            display.innerHTML = `Last Imported: <span class="no-date">No date</span> | ${label}: ${reqPts}`;
-          });
-      } else {
-        const formatted = formatTimestampWithAgo(timestampText);
-        display.innerHTML = `Last Imported: ${formatted || timestampText} | ${label}: ${reqPts}`;
-      }
-    }
-    
-    function displayPlayerStats(stats) {
-      if (window.perfDebug) window.perfDebug.mark('Render Player Table');
-      const container = document.getElementById('playerList');
-      console.log('[DEBUG] displayPlayerStats received:', stats, 'type:', typeof stats, 'isArray:', Array.isArray(stats));
-      
-      // Normalize response format
-      const norm = normalizeResponse(stats);
-      let playerArray = norm.data || norm.playerStats || stats;
-      
-      // If it's an object with summary data (totalChests, totalMembers), ignore it - wrong handler
-      if (playerArray && typeof playerArray === 'object' && !Array.isArray(playerArray) && ('totalChests' in playerArray || 'totalMembers' in playerArray)) {
-        console.warn('[DEBUG] displayPlayerStats ignoring summary data (wrong handler called)');
+      const timeLeft = endDate - now;
+      if (timeLeft <= 0) {
+        panel.style.display = 'block';
+        subtitle.textContent = 'Period has ended.';
+        parts.innerHTML = ['Days','Hours','Minutes','Seconds'].map(l =>
+          `<div class="countdown-part"><span class="countdown-value">00</span><span class="countdown-label">${l}</span></div>`
+        ).join('');
+        clearInterval(countdownInterval); countdownInterval = null;
         return;
       }
-      
-      // Ensure we have an array
-      if (!Array.isArray(playerArray)) playerArray = [];
+      panel.style.display = 'block';
+      subtitle.textContent = '';
+      let s = Math.floor(timeLeft / 1000);
+      const d = Math.floor(s / 86400); s %= 86400;
+      const h = Math.floor(s / 3600); s %= 3600;
+      const m = Math.floor(s / 60); s %= 60;
+      parts.innerHTML =
+        `<div class="countdown-part"><span class="countdown-value">${String(d).padStart(2,'0')}</span><span class="countdown-label">Days</span></div>` +
+        `<div class="countdown-part"><span class="countdown-value">${String(h).padStart(2,'0')}</span><span class="countdown-label">Hours</span></div>` +
+        `<div class="countdown-part"><span class="countdown-value">${String(m).padStart(2,'0')}</span><span class="countdown-label">Minutes</span></div>` +
+        `<div class="countdown-part"><span class="countdown-value">${String(s).padStart(2,'0')}</span><span class="countdown-label">Seconds</span></div>`;
+    }
+    render();
+    countdownInterval = setInterval(render, 1000);
+  }
 
-      // Hide masked members from guests
-      playerArray = applyMemberMask(playerArray);
+  function selectPeriod(period, btn) {
+    currentPeriod = period;
+    document.querySelectorAll('.period-selector button:not(.ref-btn)').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadDashboard();
+  }
 
-      if (playerArray.length === 0) { container.innerHTML = '<div class="loading">No data found</div>'; return; }
-      
-      // Merge chest splits data into player stats (if available)
-      if (window.currentSplits && typeof window.currentSplits === 'object') {
-        playerArray = playerArray.map(player => {
-          const splits = window.currentSplits[player.player];
-          if (splits) {
-            // Merge splits data into player object
-            return {
-              ...player,
-              pointChests: splits.pointChests || 0,
-              eventChests: splits.eventChests || 0,
-              chestsByType: splits.chestsByType || {},
-              chestsByTypeGrouped: splits.chestsByTypeGrouped || player.chestsByTypeGrouped || {}
-            };
-          }
-          return player;
+  // ===========================
+  // PLAYER TABLE (Expandable Chest Types)
+  // ===========================
+  function displayPlayerStats(stats) {
+    const container = document.getElementById('playerList');
+    let playerArray = Array.isArray(stats) ? stats : [];
+
+    if (playerArray.length === 0) {
+      container.innerHTML = '<div class="loading">No data found</div>';
+      return;
+    }
+
+    // Merge splits data into player stats
+    playerArray = playerArray.map(player => {
+      const playerName = player.name || player.player;
+      const splits = currentSplits[playerName];
+      if (splits) {
+        return {
+          ...player,
+          chestsByTypeGrouped: splits.chestsByTypeGrouped || {}
+        };
+      }
+      return player;
+    });
+
+    // Sort by total points descending
+    playerArray.sort((a, b) => (b.totalPoints || 0) - (a.totalPoints || 0));
+
+    // Collect all chest types and levels across all players
+    const typeData = {};
+    playerArray.forEach(player => {
+      if (player.chestsByTypeGrouped) {
+        Object.entries(player.chestsByTypeGrouped).forEach(([type, data]) => {
+          if (!typeData[type]) typeData[type] = { levels: new Set(), total: 0 };
+          if (data.levels) Object.keys(data.levels).forEach(level => typeData[type].levels.add(level));
+          typeData[type].total += data.total || 0;
         });
       }
-      const typeData = {};
-      playerArray.forEach(player => {
-        if (player.chestsByTypeGrouped) {
-          Object.entries(player.chestsByTypeGrouped).forEach(([type,data]) => {
-            if (!typeData[type]) typeData[type] = { levels:new Set(), total:0 };
-            if (data.levels) Object.keys(data.levels).forEach(level => typeData[type].levels.add(level));
-            typeData[type].total += data.total || 0;
-          });
-        }
-      });
-      const sortedTypes = Object.entries(typeData).sort((a,b)=>{
-        // Fixed display order: Epic Crypt, Rare Crypt, Common Crypt first, then others alphabetically
+    });
+    const sortedTypes = Object.entries(typeData)
+      .sort((a, b) => {
         const CHEST_ORDER = ['Epic Crypt', 'Rare Crypt', 'Common Crypt', 'Epic Squad'];
         const idxA = CHEST_ORDER.indexOf(a[0]);
         const idxB = CHEST_ORDER.indexOf(b[0]);
         const orderA = idxA >= 0 ? idxA : CHEST_ORDER.length;
         const orderB = idxB >= 0 ? idxB : CHEST_ORDER.length;
         if (orderA !== orderB) return orderA - orderB;
-        // Both are non-priority types: sort alphabetically
         return a[0].localeCompare(b[0]);
-      }).map(([name,data])=>({ name, levels: Array.from(data.levels).map(String).sort((a,b)=>{ const aNum = Number(a); const bNum = Number(b); if (Number.isFinite(aNum) && Number.isFinite(bNum)) return aNum-bNum; if (Number.isFinite(aNum)) return -1; if (Number.isFinite(bNum)) return 1; return a.localeCompare(b); }) }));
-      let headerHtml = '<div class="table-header">';
-      // Add sort icons and tooltips to sortable headers
-      const sortIcon = (col, dir) => `<span class="sort-icon" style="font-size:13px;vertical-align:middle;user-select:none;">${dir === 'asc' ? '▲' : dir === 'desc' ? '▼' : '▲▼'}</span>`;
-      headerHtml += `<div class="header-cell rank-col sortable" data-sort="rank">Rank ${sortIcon('rank')}</div>`;
-      headerHtml += `<div class="header-cell sortable" data-sort="player">Player ${sortIcon('player')}</div>`;
-      headerHtml += `<div class="header-cell sortable" data-sort="pts">Pts ${sortIcon('pts')}</div>`;
-      headerHtml += `<div class="header-cell sortable" data-sort="total">Total ${sortIcon('total')}</div>`;
-      const expandableTypes = new Set(['Epic Crypt', 'Rare Crypt', 'Common Crypt', 'Epic Squad']);
-      let chestCellIndex = 4;
-      sortedTypes.forEach(type => {
-        const isExpandable = expandableTypes.has(type.name);
-        const toggleIcon = isExpandable ? `<span class="toggle-icon" onclick="event.stopPropagation(); toggleType('${type.name}')">▶</span>` : '';
-        headerHtml += `<div class="header-cell type-total-header sortable" data-sort="chest-${chestCellIndex}" data-type="${type.name}">${toggleIcon}${type.name} ${sortIcon(`chest-${chestCellIndex}`)}</div>`;
+      })
+      .map(([name, data]) => ({
+        name,
+        levels: Array.from(data.levels).map(String).sort((a, b) => { const aNum = Number(a); const bNum = Number(b); if (Number.isFinite(aNum) && Number.isFinite(bNum)) return aNum - bNum; if (Number.isFinite(aNum)) return -1; if (Number.isFinite(bNum)) return 1; return a.localeCompare(b); })
+      }));
+
+    // Build header
+    let headerHtml = '<div class="table-header">';
+    const sortIcon = () => '<span class="sort-icon" style="font-size:11px;vertical-align:middle;user-select:none;margin-left:2px;">▲▼</span>';
+    headerHtml += `<div class="header-cell rank-col sortable" data-sort="rank"># ${sortIcon()}</div>`;
+    headerHtml += `<div class="header-cell sortable" data-sort="player">Player ${sortIcon()}</div>`;
+    headerHtml += `<div class="header-cell sortable" data-sort="pts">Pts ${sortIcon()}</div>`;
+    headerHtml += `<div class="header-cell sortable" data-sort="total">Total ${sortIcon()}</div>`;
+    const expandableTypes = new Set(['Epic Crypt', 'Rare Crypt', 'Common Crypt', 'Epic Squad']);
+    let chestCellIndex = 4;
+    sortedTypes.forEach(type => {
+      const isExpandable = expandableTypes.has(type.name);
+      const toggleIcon = isExpandable ? `<span class="toggle-icon" onclick="event.stopPropagation(); toggleType('${escapeHtml(type.name)}')">▶</span>` : '';
+      headerHtml += `<div class="header-cell type-total-header sortable" data-sort="chest-${chestCellIndex}" data-type="${escapeHtml(type.name)}">${toggleIcon}${escapeHtml(type.name)} ${sortIcon()}</div>`;
+      chestCellIndex++;
+      type.levels.forEach(level => {
+        const levelLabel = /^\d+$/.test(String(level)) ? `Lvl ${level}` : level;
+        headerHtml += `<div class="header-cell level-header sortable${expandedTypes.has(type.name) ? ' visible' : ''}" data-sort="chest-${chestCellIndex}" data-type="${escapeHtml(type.name)}" data-level="${escapeHtml(String(level))}">${escapeHtml(String(levelLabel))} ${sortIcon()}</div>`;
         chestCellIndex++;
-        type.levels.forEach(level => {
-          const levelLabel = /^\d+$/.test(String(level)) ? `Lvl ${level}` : level;
-          headerHtml += `<div class="header-cell level-header sortable" data-sort="chest-${chestCellIndex}" data-type="${type.name}" data-level="${level}">${levelLabel} ${sortIcon(`chest-${chestCellIndex}`)}</div>`;
-          chestCellIndex++;
-        });
       });
-      headerHtml += '</div>';
-      let rowsHtml = '';
-      playerArray.forEach((player,idx)=>{
-        const commonCryptInfo = player.chestsByTypeGrouped?.['Common Crypt'];
-        const totalPointsVal = player.totalPoints || 0;
-        const playerTarget = getPlayerTarget(player.player, currentViewingPeriodName, currentPeriodTargetPoints);
-        const pointsClass = totalPointsVal >= playerTarget ? 'player-green' : (totalPointsVal >= playerTarget * 0.9 ? 'player-orange' : 'player-red');
-        
-        // Check if member joined during or after the current viewing period start
-        let isNewMember = false;
-        let joinDateLabel = '';
-        if (player.joinDate && currentViewingStartDate) {
-          // Normalize joinDate — may be "2026-06-10", "2026-06-10T00:00:00.000Z", or Date
-          const jdStr = String(player.joinDate).substring(0, 10); // extract yyyy-MM-dd
-          const joinDate = new Date(jdStr + 'T00:00:00Z');
-          const viewStartDate = new Date(currentViewingStartDate + 'T00:00:00Z');
-          isNewMember = joinDate >= viewStartDate;
-          if (isNewMember) {
-            const now = new Date();
-            const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-            const daysAgo = Math.floor((todayUtc - joinDate.getTime()) / (1000 * 60 * 60 * 24));
-            const daysLabel = daysAgo <= 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
-            joinDateLabel = ` <span style="font-size:10px;opacity:0.8;">(Joined: ${daysLabel})</span>`;
-          }
-        }
-
-        const defaultTarget = getEffectiveRequiredPoints();
-        const troopCategory = window.troopCategoriesByPlayer?.[String(player.player || '').trim().toLowerCase()];
-        const troopLabel = troopCategory
-          ? ` <span class="troop-category cat-${escapeHtmlDash(troopCategory)}">${escapeHtmlDash(troopCategory)}</span>`
-          : '';
-        const targetLabel = playerTarget !== defaultTarget
-          ? ` <span class="penalty-target">(◎ ${playerTarget.toLocaleString()})</span>`
-          : '';
-
-        const rowClass = isNewMember ? 'player-row new-member-row' : 'player-row';
-        rowsHtml += `<div class="${rowClass}">`;
-        rowsHtml += `<div class="cell rank-col">${idx+1}</div><div class="cell ${pointsClass}">${escapeHtmlDash(player.player)}${troopLabel}${targetLabel}${joinDateLabel}</div><div class="cell">${totalPointsVal || '-'}</div>`;
-        // Calculate total chests: use totalChests if available, otherwise sum from chestsByTypeGrouped (don't double-count eventChests!)
-        let totalChests = player.totalChests || 0;
-        if (totalChests === 0 && player.chestsByTypeGrouped) {
-          Object.values(player.chestsByTypeGrouped).forEach(t=>{ totalChests += t.total || 0; });
-        }
-        rowsHtml += `<div class="cell">${totalChests||'-'}</div>`;
-        sortedTypes.forEach((type, typeIndex)=>{
-          const typeInfo = player.chestsByTypeGrouped?.[type.name]; const totalCount = typeInfo?.total || 0;
-          const totalClass = (type.name === 'Common Crypt' && ((commonCryptInfo?.levels?.['5']||0)>0 || (commonCryptInfo?.levels?.['10']||0)>0)) ? 'player-red' : '';
-          rowsHtml += `<div class="cell" data-type="${type.name}"><span class="${totalCount===0?'count-zero':''} ${totalClass}">${totalCount||'-'}</span></div>`;
-          type.levels.forEach(level=>{
-            const levelCount = typeInfo?.levels?.[level] || 0;
-            const levelNumber = parseInt(level, 10);
-            const badCrypt = (type.name === 'Common Crypt' && (levelNumber === 5 || levelNumber === 10) && levelCount > 0) ? 'player-red' : '';
-            rowsHtml += `<div class="cell level-cell" data-type="${type.name}" data-level="${level}"><span class="${levelCount===0?'count-zero':''} ${badCrypt}">${levelCount||'-'}</span></div>`;
-          });
-        });
-        rowsHtml += '</div>';
-      });
-      container.innerHTML = `<div class="chest-table" id="playerTable">${headerHtml}${rowsHtml}</div>`;
-      // Add sort event listeners
-      addPlayerTableSortHandlers();
-      // After rendering, apply filter if any
-      filterPlayerTable();
-      if (window.perfDebug) window.perfDebug.measure('Render Player Table', 'render');
-
-// Add sorting to player table columns
-function addPlayerTableSortHandlers() {
-  const table = document.getElementById('playerTable');
-  if (!table) return;
-  const headers = table.querySelectorAll('.header-cell.sortable');
-  headers.forEach(header => {
-    header.style.cursor = 'pointer';
-    header.onclick = function() {
-      const sortKey = header.getAttribute('data-sort');
-      let dir = header.getAttribute('data-dir') || 'desc';
-      dir = dir === 'desc' ? 'asc' : 'desc';
-      headers.forEach(h => h.removeAttribute('data-dir'));
-      header.setAttribute('data-dir', dir);
-      sortPlayerTable(sortKey, dir);
-      // Update sort icons
-      headers.forEach(h => {
-        const icon = h.querySelector('.sort-icon');
-        if (icon) icon.textContent = '▲▼';
-      });
-      const icon = header.querySelector('.sort-icon');
-      if (icon) icon.textContent = dir === 'asc' ? '▲' : '▼';
-    };
-  });
-}
-
-// Sort player table rows by column
-function sortPlayerTable(key, dir) {
-  const table = document.getElementById('playerTable');
-  if (!table) return;
-  const rows = Array.from(table.querySelectorAll('.player-row'));
-  let idx;
-  if (key === 'rank') idx = 0;
-  else if (key === 'player') idx = 1;
-  else if (key === 'pts') idx = 2;
-  else if (key === 'total') idx = 3;
-  else if (/^chest-\d+$/.test(key)) idx = parseInt(key.substring(6), 10);
-  else return;
-  rows.sort((a, b) => {
-    let va = a.querySelectorAll('.cell')[idx]?.textContent.trim();
-    let vb = b.querySelectorAll('.cell')[idx]?.textContent.trim();
-    if (key === 'rank' || key === 'pts' || key === 'total' || /^chest-\d+$/.test(key)) {
-      va = parseInt(va.replace(/[^\d]/g, '')) || 0;
-      vb = parseInt(vb.replace(/[^\d]/g, '')) || 0;
-    } else {
-      va = va.toLowerCase();
-      vb = vb.toLowerCase();
-    }
-    if (va < vb) return dir === 'asc' ? -1 : 1;
-    if (va > vb) return dir === 'asc' ? 1 : -1;
-    return 0;
-  });
-  rows.forEach(row => table.appendChild(row));
-  rows.forEach((row, index) => {
-    const rankCell = row.querySelector('.cell.rank-col');
-    if (rankCell) rankCell.textContent = index + 1;
-  });
-}
-
-// Filter player table rows by member name
-function filterPlayerTable() {
-  const input = document.getElementById('playerFilterInput');
-  const filter = input ? input.value.trim().toLowerCase() : '';
-  const table = document.getElementById('playerTable');
-  if (!table) return;
-  const rows = table.querySelectorAll('.player-row');
-  rows.forEach(row => {
-    const nameCell = row.querySelector('.cell:nth-child(2)');
-    if (!nameCell) return;
-    const name = nameCell.textContent.trim().toLowerCase();
-    if (!filter || name.includes(filter)) {
-      row.style.display = '';
-    } else {
-      row.style.display = 'none';
-    }
-  });
-}
-    }
-
-    // ===========================
-    // CHEST POINTS REFERENCE
-    // ===========================
-    let chestRefData = [];
-
-    async function openChestPointsRef() {
-      document.getElementById('chestRefModal').classList.add('active');
-      if (chestRefData.length === 0) {
-        document.getElementById('chestRefLoading').style.display = 'block';
-        try {
-          const res = await fetch(window.GAS_WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getChestPointsReference' })
-          });
-          const result = await res.json();
-          if (result && result.success) {
-            chestRefData = result.data;
-            renderChestRef(chestRefData);
-          }
-        } catch (err) {
-          console.error('Chest ref load error:', err);
-        }
-        document.getElementById('chestRefLoading').style.display = 'none';
-      }
-    }
-
-    function closeChestPointsRef() {
-      document.getElementById('chestRefModal').classList.remove('active');
-    }
-
-    // Chest types opened by the user (kept while searching / reopening)
-    const expandedChestRefTypes = new Set();
-
-    // Same groups, order and level labels as the chest splits in the player table:
-    // the database sends each entry's split group (group) and split column label
-    // (levelLabel, e.g. "Basilisk" for an Epic Squad); Apps Script answers without
-    // them fall back to the chest type and level.
-    const CHEST_REF_ORDER = ['Epic Crypt', 'Rare Crypt', 'Common Crypt', 'Epic Squad'];
-    const chestRefLevelSort = (a, b) => {
-      const na = parseFloat(a), nb = parseFloat(b);
-      if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
-      if (Number.isFinite(na) && !Number.isFinite(nb)) return -1;
-      if (!Number.isFinite(na) && Number.isFinite(nb)) return 1;
-      return String(a).localeCompare(String(b));
-    };
-    const chestRefLevelText = (lvl) => {
-      if (/^\d+$/.test(lvl)) return 'Lv ' + lvl;
-      const m = lvl.match(/^(\d+)\s*[-–]\s*(\d+)$/);
-      return m ? 'Lv ' + m[1] + '–' + m[2] : lvl;
-    };
-
-    // One line per chest type (levels and points range); click it to show every level.
-    // While searching, the matching types open by themselves.
-    function renderChestRef(data, autoExpand) {
-      const body = document.getElementById('chestRefBody');
-      const groups = [];
-      const byType = {};
-      data.forEach(chest => {
-        const name = String(chest.group || chest.type || '').trim() || 'Other';
-        if (!byType[name]) { byType[name] = { type: name, levels: [] }; groups.push(byType[name]); }
-        byType[name].levels.push({ label: String(chest.levelLabel !== undefined ? chest.levelLabel : (chest.level || '')).trim(), points: chest.points });
-      });
-      if (!groups.length) { body.innerHTML = '<div class="chest-ref-empty">No chests found.</div>'; return; }
-      groups.sort((a, b) => {
-        const ia = CHEST_REF_ORDER.indexOf(a.type), ib = CHEST_REF_ORDER.indexOf(b.type);
-        const oa = ia >= 0 ? ia : CHEST_REF_ORDER.length, ob = ib >= 0 ? ib : CHEST_REF_ORDER.length;
-        return oa !== ob ? oa - ob : a.type.localeCompare(b.type);
-      });
-      body.innerHTML = groups.map(g => {
-        g.levels.sort((a, b) => chestRefLevelSort(a.label, b.label));
-        const pts = g.levels.map(l => Number(l.points) || 0);
-        const min = Math.min.apply(null, pts), max = Math.max.apply(null, pts);
-        const range = min === max ? String(min) : min + '–' + max;
-        const attr = escapeHtmlDash(g.type).replace(/"/g, '&quot;');
-        if (g.levels.length === 1) {
-          // One level only: nothing to open, the points are on the line itself
-          const only = g.levels[0].label;
-          const extra = only && only.toLowerCase() !== g.type.toLowerCase() ? escapeHtmlDash(chestRefLevelText(only)) + ' · ' : '';
-          return '<div class="chest-ref-group single" data-type="' + attr + '"><div class="chest-ref-type">' +
-            '<span class="toggle-icon"></span><span class="name">' + escapeHtmlDash(g.type) + '</span>' +
-            '<span class="summary">' + extra + range + ' pts</span></div></div>';
-        }
-        const open = autoExpand || expandedChestRefTypes.has(g.type);
-        const chips = g.levels.map(l =>
-          '<span class="chest-ref-level">' + (l.label ? escapeHtmlDash(chestRefLevelText(l.label)) : '—') + '<b>' + l.points + '</b></span>').join('');
-        return '<div class="chest-ref-group' + (open ? ' expanded' : '') + '" data-type="' + attr + '">' +
-          '<button type="button" class="chest-ref-type" onclick="toggleChestRefType(this)">' +
-          '<span class="toggle-icon">▶</span><span class="name">' + escapeHtmlDash(g.type) + '</span>' +
-          '<span class="summary">' + g.levels.length + ' levels · ' + range + ' pts</span></button>' +
-          '<div class="chest-ref-levels">' + chips + '</div></div>';
-      }).join('');
-    }
-
-    function toggleChestRefType(btn) {
-      const group = btn.parentElement;
-      const type = group.getAttribute('data-type');
-      group.classList.toggle('expanded');
-      if (group.classList.contains('expanded')) expandedChestRefTypes.add(type); else expandedChestRefTypes.delete(type);
-    }
-
-    function filterChestRef() {
-      const query = document.getElementById('chestRefSearch').value.toLowerCase().trim();
-      const filtered = chestRefData.filter(c =>
-        String(c.group || c.type || '').toLowerCase().includes(query) ||
-        String(c.type || '').toLowerCase().includes(query) ||
-        String(c.level).toLowerCase().includes(query) ||
-        String(c.levelLabel || '').toLowerCase().includes(query)
-      );
-      renderChestRef(filtered, query.length > 0);
-    }
-
-    // Close modal on overlay click
-    document.getElementById('chestRefModal').addEventListener('click', function(e) {
-      if (e.target === this) closeChestPointsRef();
     });
-    
-    function toggleType(typeName) {
-      const header = document.querySelector(`.type-total-header[data-type="${typeName}"]`);
-      const isExpanded = expandedTypes.has(typeName);
-      if (isExpanded) { expandedTypes.delete(typeName); header.classList.remove('expanded'); } else { expandedTypes.add(typeName); header.classList.add('expanded'); }
-      document.querySelectorAll(`[data-type="${typeName}"]`).forEach(el=>{ if (el.classList.contains('level-header')||el.classList.contains('level-cell')) el.classList.toggle('visible'); });
-    }
+    headerHtml += '</div>';
 
-  </script>
-</body>
-</div>
-<script>
-// Hamburger menu toggle for mobile navigation
-document.addEventListener('DOMContentLoaded', function() {
-  const hamburger = document.getElementById('navHamburger');
-  const navTabs = document.getElementById('navTabs');
-  if (hamburger && navTabs) {
-    hamburger.addEventListener('click', function(e) {
-      e.stopPropagation();
-      navTabs.classList.toggle('open');
+    // Build rows
+    let rowsHtml = '';
+    playerArray.forEach((player, idx) => {
+      const playerName = player.name || player.player;
+      const totalPointsVal = player.totalPoints || 0;
+      const effectiveTarget = (playerTargets[playerName] != null && playerTargets[playerName] > 0) ? playerTargets[playerName] : targetPoints;
+      const pointsClass = totalPointsVal >= effectiveTarget ? 'player-green' : (totalPointsVal >= effectiveTarget * 0.9 ? 'player-orange' : 'player-red');
+
+      // Check if member joined after the current viewing period start
+      let isNewMember = false;
+      let joinDateLabel = '';
+      if (player.joinDate && currentPeriodDates && currentPeriodDates.start) {
+        const joinDateStr = String(player.joinDate).substring(0, 10);
+        const joinDate = new Date(joinDateStr + 'T00:00:00Z');
+        const viewStartDate = new Date(currentPeriodDates.start + 'T00:00:00Z');
+        isNewMember = joinDate > viewStartDate;
+        if (isNewMember) {
+          const now = new Date();
+          const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+          const daysAgo = Math.floor((todayUtc - joinDate.getTime()) / (1000 * 60 * 60 * 24));
+          const daysLabel = daysAgo <= 0 ? 'today' : daysAgo === 1 ? '1 day ago' : `${daysAgo} days ago`;
+          joinDateLabel = ` <span style="font-size:10px;opacity:0.8;">(Joined: ${daysLabel})</span>`;
+        }
+      }
+
+      let totalChests = player.chestCount || 0;
+      if (totalChests === 0 && player.chestsByTypeGrouped) {
+        Object.values(player.chestsByTypeGrouped).forEach(t => { totalChests += t.total || 0; });
+      }
+
+      const rowClass = isNewMember ? 'player-row new-member-row' : 'player-row';
+      const troopCategory = troopCategoriesByPlayer[String(playerName || '').trim().toLowerCase()];
+      const troopLabel = troopCategory
+        ? ` <span class="troop-category cat-${escapeHtml(troopCategory)}">${escapeHtml(troopCategory)}</span>`
+        : '';
+      const customTargetLabel = (effectiveTarget !== targetPoints) ? ` <span title="Custom target: ${effectiveTarget.toLocaleString()}" style="font-size:10px;opacity:0.7;">🎯${effectiveTarget.toLocaleString()}</span>` : '';
+      rowsHtml += `<div class="${rowClass}">`;
+      rowsHtml += `<div class="cell rank-col">${idx + 1}</div>`;
+      rowsHtml += `<div class="cell ${pointsClass}">${escapeHtml(playerName)}${troopLabel}${customTargetLabel}${joinDateLabel}</div>`;
+      rowsHtml += `<div class="cell">${totalPointsVal.toLocaleString()}</div>`;
+      rowsHtml += `<div class="cell">${totalChests || '-'}</div>`;
+
+      sortedTypes.forEach((type, typeIndex) => {
+        const typeInfo = player.chestsByTypeGrouped?.[type.name];
+        const totalCount = typeInfo?.total || 0;
+        rowsHtml += `<div class="cell" data-type="${escapeHtml(type.name)}"><span class="${totalCount === 0 ? 'count-zero' : ''}">${totalCount || '-'}</span></div>`;
+        type.levels.forEach(level => {
+          const levelCount = typeInfo?.levels?.[level] || 0;
+          rowsHtml += `<div class="cell level-cell${expandedTypes.has(type.name) ? ' visible' : ''}" data-type="${escapeHtml(type.name)}" data-level="${level}"><span class="${levelCount === 0 ? 'count-zero' : ''}">${levelCount || '-'}</span></div>`;
+        });
+      });
+      rowsHtml += '</div>';
+    });
+
+    container.innerHTML = `<div class="chest-table" id="playerTable">${headerHtml}${rowsHtml}</div>`;
+    addPlayerTableSortHandlers();
+    filterPlayerTable();
+  }
+
+  function toggleType(typeName) {
+    const header = document.querySelector(`.type-total-header[data-type="${typeName}"]`);
+    const isExpanded = expandedTypes.has(typeName);
+    if (isExpanded) {
+      expandedTypes.delete(typeName);
+      header.classList.remove('expanded');
+    } else {
+      expandedTypes.add(typeName);
+      header.classList.add('expanded');
+    }
+    document.querySelectorAll(`[data-type="${typeName}"]`).forEach(el => {
+      if (el.classList.contains('level-header') || el.classList.contains('level-cell')) {
+        el.classList.toggle('visible');
+      }
     });
   }
-  // Optional: close menu when clicking outside
-  document.addEventListener('click', function(e) {
-    if (navTabs.classList.contains('open') && !navTabs.contains(e.target) && !hamburger.contains(e.target)) {
-      navTabs.classList.remove('open');
+
+  // ===========================
+  // SORT & FILTER
+  // ===========================
+  function addPlayerTableSortHandlers() {
+    const table = document.getElementById('playerTable');
+    if (!table) return;
+    const headers = table.querySelectorAll('.header-cell.sortable');
+    headers.forEach(header => {
+      header.style.cursor = 'pointer';
+      header.onclick = function() {
+        const sortKey = header.getAttribute('data-sort');
+        let dir = header.getAttribute('data-dir') || 'desc';
+        dir = dir === 'desc' ? 'asc' : 'desc';
+        headers.forEach(h => h.removeAttribute('data-dir'));
+        header.setAttribute('data-dir', dir);
+        sortPlayerTable(sortKey, dir);
+        headers.forEach(h => {
+          const icon = h.querySelector('.sort-icon');
+          if (icon) icon.textContent = '▲▼';
+        });
+        const icon = header.querySelector('.sort-icon');
+        if (icon) icon.textContent = dir === 'asc' ? '▲' : '▼';
+      };
+    });
+  }
+
+  function sortPlayerTable(key, dir) {
+    const table = document.getElementById('playerTable');
+    if (!table) return;
+    const rows = Array.from(table.querySelectorAll('.player-row'));
+    let idx;
+    if (key === 'rank') idx = 0;
+    else if (key === 'player') idx = 1;
+    else if (key === 'pts') idx = 2;
+    else if (key === 'total') idx = 3;
+    else if (/^chest-\d+$/.test(key)) idx = parseInt(key.substring(6), 10);
+    else return;
+    rows.sort((a, b) => {
+      let va = a.querySelectorAll('.cell')[idx]?.textContent.trim();
+      let vb = b.querySelectorAll('.cell')[idx]?.textContent.trim();
+      if (key === 'rank' || key === 'pts' || key === 'total' || /^chest-\d+$/.test(key)) {
+        va = parseInt(va.replace(/[^\d]/g, '')) || 0;
+        vb = parseInt(vb.replace(/[^\d]/g, '')) || 0;
+      } else {
+        va = va.toLowerCase();
+        vb = vb.toLowerCase();
+      }
+      if (va < vb) return dir === 'asc' ? -1 : 1;
+      if (va > vb) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    rows.forEach(row => table.appendChild(row));
+    rows.forEach((row, index) => {
+      const rankCell = row.querySelector('.cell.rank-col');
+      if (rankCell) rankCell.textContent = index + 1;
+    });
+  }
+
+  function filterPlayerTable() {
+    const input = document.getElementById('playerFilterInput');
+    const filter = input ? input.value.trim().toLowerCase() : '';
+    const table = document.getElementById('playerTable');
+    if (!table) return;
+    const rows = table.querySelectorAll('.player-row');
+    rows.forEach(row => {
+      const nameCell = row.querySelector('.cell:nth-child(2)');
+      if (!nameCell) return;
+      const name = nameCell.textContent.trim().toLowerCase();
+      row.style.display = (!filter || name.includes(filter)) ? '' : 'none';
+    });
+  }
+
+  // ===========================
+  // CHEST POINTS REFERENCE
+  // ===========================
+  async function openChestPointsRef() {
+    document.getElementById('chestRefModal').classList.add('active');
+
+    if (chestRefData.length === 0) {
+      document.getElementById('chestRefLoading').style.display = 'block';
+      try {
+        const result = await callFunction('getChestPointsReference');
+        if (result && result.success) {
+          chestRefData = result.data;
+          renderChestRef(chestRefData);
+        }
+      } catch (err) {
+        console.error('Chest ref load error:', err);
+      }
+      document.getElementById('chestRefLoading').style.display = 'none';
     }
+  }
+
+  function closeChestPointsRef() {
+    document.getElementById('chestRefModal').classList.remove('active');
+  }
+
+  let chestRefSortField = 'type';
+  let chestRefSortAsc = true;
+  function sortChestRef(field) {
+    if (chestRefSortField === field) chestRefSortAsc = !chestRefSortAsc;
+    else { chestRefSortField = field; chestRefSortAsc = true; }
+    const query = document.getElementById('chestRefSearch').value.toLowerCase();
+    let data = chestRefData;
+    if (query) data = data.filter(c => c.type.toLowerCase().includes(query) || String(c.level).toLowerCase().includes(query));
+    data = [...data].sort((a, b) => {
+      let va = a[field], vb = b[field];
+      if (field === 'level' || field === 'points') { va = Number(va) || 0; vb = Number(vb) || 0; return chestRefSortAsc ? va - vb : vb - va; }
+      return chestRefSortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+    });
+    renderChestRef(data);
+  }
+
+  function renderChestRef(data) {
+    const tbody = document.getElementById('chestRefBody');
+    tbody.innerHTML = '';
+    data.forEach(chest => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(chest.type)}</td>
+        <td>${escapeHtml(String(chest.level))}</td>
+        <td style="font-weight:600; color: var(--primary)">${chest.points}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filterChestRef() {
+    const query = document.getElementById('chestRefSearch').value.toLowerCase();
+    const filtered = chestRefData.filter(c =>
+      c.type.toLowerCase().includes(query) ||
+      String(c.level).toLowerCase().includes(query)
+    );
+    renderChestRef(filtered);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('chestRefModal').addEventListener('click', function(e) {
+    if (e.target === this) closeChestPointsRef();
   });
-});
+
+  // ===========================
+  // UTILITIES
+  // ===========================
+  function formatPeriodDate(dateStr) {
+    if (!dateStr) return '?';
+    const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00Z');
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + (type || '');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
 </script>
+</body>
 </html>

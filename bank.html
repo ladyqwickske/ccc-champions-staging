@@ -1,1407 +1,784 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cCc Champions - Bank</title>
-  <link rel="icon" href="favicon.png" type="image/png">
+  <title>cCc Legends - Bank</title>
+  <link rel="icon" type="image/png" href="logo.png">
   <script src="perf-debug.js"></script>
   <script src="config.js"></script>
-  <script src="ccc-dates.js"></script>
+  <script src="site-config.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #1fc1e6;
+      --primary-soft: #55d9f3;
+      --primary-hover: #076b88;
+      --accent: #ffd24d;
+      --accent-light: #fff49a;
+      --accent-deep: #c57a00;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --bg-card-soft: #dff6ff;
+      --bg-page: #dff6ff;
+      --bg-page-alt: #ffffff;
+      --text: #0b3d59;
+      --text-muted: #076b88;
+      --success: #0ea5c6;
+      --danger: #8a5b00;
+      --debt: #c62828;
+      --border: #55d9f3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #232526 0%, #414345 100%);
-      color: #f3f3f3;
-      text-align: center;
-      padding: 32px 16px 60px 16px;
-      min-height: 100vh;
-      background-attachment: fixed;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-page-alt) 0%, var(--bg-page) 55%, var(--accent-light) 100%);
+      color: var(--text); min-height: 100vh;
+      background-attachment: fixed; padding: 60px 8px 80px 8px;
     }
-
     .tab-nav {
-      background: rgba(30, 34, 40, 0.95);
-      border-bottom: 1px solid #444;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      position: sticky;
-      top: 0;
-      z-index: 9999;
-      width: 100%;
-      left: 0;
-      right: 0;
-      overflow: visible;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; justify-content: center; gap: 0;
+      background: rgba(255,255,255,0.96); border-bottom: 2px solid var(--primary-soft);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 0;
     }
-    .tab-nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      overflow: visible;
-      flex-wrap: wrap;
+    .tab-nav a {
+      color: var(--text-muted); text-decoration: none;
+      padding: 12px 18px; font-size: 0.95em; font-weight: 500;
+      border-bottom: 3px solid transparent; transition: all 0.2s;
     }
-    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px #000a; }
-    .nav-brand img { height: 32px; width: auto; }
-    .tab-buttons {
-      display: flex;
-      gap: 4px;
-      flex: 1;
-      overflow-x: auto;
-      overflow-y: hidden;
-      align-items: center;
-      height: 100px;
+    .tab-nav a:hover { color: var(--primary); }
+    .tab-nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .nav-icon { width: 18px; height: 18px; vertical-align: middle; margin-right: 4px; }
+    .login-bar {
+      position: fixed; top: 0; right: 8px; z-index: 1001;
+      display: flex; align-items: center; gap: 8px; padding: 8px;
     }
-    .tab-btn {
-      padding: 12px 16px;
-      background: none;
-      border: none;
-      color: #e0e0e0;
-      font-size: 28px;
-      font-weight: 500;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-      white-space: nowrap;
-      text-decoration: none;
-      display: block;
-      cursor: pointer;
-      position: relative;
+    .login-bar .user-email { font-size: 0.8em; color: var(--primary); }
+    .login-bar button {
+      background: var(--primary); color: #ffffff; border: none; border-radius: 6px;
+      padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em;
     }
-    .tab-btn:hover { color: #ffb300; background: #232526; }
-    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
-    .tab-btn[title]:hover::after {
-      content: attr(title);
-      position: absolute;
-      top: -42px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #232526;
-      color: #ffb300;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      white-space: nowrap;
-      z-index: 1001;
-      border: 1px solid #444;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    .login-bar button:hover { background: var(--primary-hover); }
+    .login-bar .logout-btn { background: var(--accent-light); color: var(--accent-deep); }
+    .nav-links { display: flex; }
+    .hamburger {
+      display: none; background: none; border: none; cursor: pointer; padding: 8px;
+      flex-direction: column; gap: 4px;
     }
-    .tab-btn .tab-icon {
-      display: block;
-      margin: 0 auto;
-      height: 40px;
-      width: auto;
-      font-size: 16px;
-      line-height: 1.2;
-      font-weight: 500;
-      white-space: nowrap;
-      filter: drop-shadow(0 2px 8px #000a);
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--primary); border-radius: 2px; }
+    .container {
+      max-width: 1200px; margin: 0 auto; background: var(--bg-card);
+      border-radius: 16px; box-shadow: 0 12px 30px rgba(11,61,89,0.12);
+      padding: 24px 16px; border: 1px solid rgba(85,217,243,0.45);
     }
-
-    .tab-content { display: none; padding: 16px; max-width: 1400px; margin: 0 auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
-    .tab-content.active { display: block; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; text-shadow: 0 2px 8px #000a; }
-    h2 { font-size: 18px; font-weight: 500; margin-top: 24px; margin-bottom: 12px; color: #e0e0e0; }
-
-    .bank-form-wrap {
-      max-width: 1120px;
-      width: 100%;
-      margin: 0 auto;
-      background: #232526;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 20px;
-      text-align: left;
+    h1 { color: var(--primary); text-align: center; margin-bottom: 4px; font-size: 1.8em; }
+    h2 { color: var(--primary); font-size: 1.05em; margin-bottom: 10px; }
+    .site-logo { width: 64px; height: 64px; display: block; margin: 0 auto 8px auto; }
+    .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 16px; font-size: 0.9em; }
+    .grid { display: grid; grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr); gap: 14px; align-items: start; }
+    .panel {
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg-card-soft) 100%);
+      border: 1px solid var(--border); border-radius: 12px; padding: 16px;
     }
-    .form-row { margin-bottom: 14px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #ffb300; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-row { margin-bottom: 12px; }
+    label { display: block; font-size: 0.75em; font-weight: 700; color: var(--primary-hover); margin-bottom: 4px; text-transform: uppercase; }
     input, select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #444;
-      border-radius: 6px;
-      font-size: 14px;
-      background: #1a1b1c;
-      color: #e0e0e0;
-      font-family: inherit;
+      width: 100%; padding: 9px 11px; background: #ffffff; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 0.9em;
     }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #ffb300;
-      box-shadow: 0 0 0 3px rgba(255,179,0,0.15);
-    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(31,193,230,0.18); }
+    small { display: block; color: var(--text-muted); font-size: 0.72em; margin-top: 3px; }
     .btn {
-      padding: 10px 16px;
-      background: #ffb300;
-      color: #232526;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    body { top: 0 !important; }
-    .goog-te-banner-frame.skiptranslate { display: none !important; }
-    .goog-te-balloon-frame { display: none !important; }
-    html, body { margin-top: 0 !important; top: 0 !important; }
-    body.translated-ltr, body.translated-rtl { margin-top: 0 !important; top: 0 !important; }
-    .goog-te-banner-frame, iframe.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; height: 0 !important; }
-    #goog-gt-tt, .goog-te-balloon-frame { display: none !important; visibility: hidden !important; }
-    .goog-text-highlight { background: transparent !important; box-shadow: none !important; }
-    #google_translate_element, #translateToggleBtn { top: auto !important; right: 8px !important; bottom: 8px !important; }
-      transition: all 0.2s;
+      background: var(--primary); color: #fff; border: none; border-radius: 8px;
+      padding: 9px 16px; cursor: pointer; font-weight: 700; font-size: 0.9em;
     }
-    .btn:hover { background: #ffc933; }
-    .btn-secondary {
-      padding: 6px 10px;
-      background: #1a1b1c;
-      color: #ffb300;
-      border: 1px solid #ffb300;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
+    .btn:hover { background: var(--primary-hover); }
+    .btn.secondary { background: var(--accent-light); color: var(--accent-deep); }
+    .overview-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .metric {
+      flex: 1; min-width: 170px; background: #fff; border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; text-align: center;
     }
-    .btn-secondary:hover { background: #2a2b2c; }
-    .success { color: #81c784; margin-top: 12px; }
-    .error { color: #ef5350; margin-top: 12px; }
-
-    .transactions-wrap {
-      margin-top: 18px;
-      border-top: 1px solid #444;
-      padding-top: 14px;
-    }
-    .bank-total-balance {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border: 1px solid #444;
-      border-radius: 8px;
-      background: #1a1b1c;
-      margin-bottom: 12px;
-      color: #e0e0e0;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .bank-total-balance .value {
-      color: #8bc34a;
-      font-size: 15px;
-      font-weight: 600;
-    }
-    .bank-subtabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
+    .metric .label { color: var(--text-muted); font-size: 0.78em; margin-bottom: 4px; }
+    .metric .value { color: var(--primary); font-size: 1.35em; font-weight: 800; }
+    .metric .value.debt { color: var(--debt); }
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
     .subtab-btn {
-      padding: 8px 12px;
-      border: 1px solid #444;
-      border-radius: 6px;
-      background: #1a1b1c;
-      color: #e0e0e0;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      transition: all 0.2s;
+      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
+      background: #fff; color: var(--text-muted); cursor: pointer; font-weight: 700;
     }
-    .subtab-btn.active {
-      background: #ffb300;
-      color: #232526;
-      border-color: #ffb300;
-    }
+    .subtab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     .subtab-panel { display: none; }
     .subtab-panel.active { display: block; }
-    .transactions-title {
-      font-size: 15px;
-      color: #ffb300;
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    .transactions-table-wrap {
-      border: 1px solid #444;
-      border-radius: 8px;
-      overflow: auto;
-      background: #1a1b1c;
-      max-height: 320px;
-    }
-    .transactions-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 560px;
-    }
-    .transactions-table th,
-    .transactions-table td {
-      padding: 10px 8px;
-      font-size: 12px;
-      border-bottom: 1px solid #333;
-      text-align: left;
-      color: #e0e0e0;
-    }
-    .transactions-table th {
-      position: sticky;
-      top: 0;
-      background: #232526;
-      color: #ffb300;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      font-size: 11px;
-      z-index: 1;
-    }
+    .filters { display: grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 8px; margin-bottom: 8px; }
+    .table-wrap { overflow: auto; max-height: 58vh; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+    table { width: 100%; border-collapse: collapse; min-width: 680px; font-size: 0.86em; }
+    th { position: sticky; top: 0; background: var(--bg-card-soft); color: var(--primary-hover); padding: 9px 8px; text-align: left; border-bottom: 2px solid var(--accent); z-index: 1; }
     .sort-header { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-transform: inherit; letter-spacing: inherit; cursor: pointer; text-align: left; }
-    .sort-header:hover { color: #ffb300; }
-    .last-transaction-col {
-      min-width: 220px;
-      width: 220px;
-      white-space: nowrap;
+    .sort-header:hover { color: var(--primary); }
+    td { padding: 8px; border-bottom: 1px solid #e8eef2; }
+    tr:hover { background: rgba(85,217,243,0.14); }
+    .status-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75em; font-weight: 800; }
+    .status-active { background: #e0f7fa; color: #006978; }
+    .status-former { background: #fff4cc; color: #8a5b00; }
+    .status-external { background: #eceff1; color: #455a64; }
+    .positive { color: var(--success); font-weight: 700; }
+    .negative { color: var(--debt); font-weight: 700; }
+    .empty { color: var(--text-muted); font-size: 0.85em; padding: 12px 4px; }
+    .status { margin-top: 8px; padding: 8px 12px; border-radius: 6px; font-size: 0.85em; min-height: 1.5em; }
+    .status.ok { background: #e8f5e9; color: #2e7d32; }
+    .status.err { background: #ffebee; color: #c62828; }
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; z-index: 3000;
+      background: #fff; color: var(--text); padding: 12px 20px;
+      border-radius: 8px; font-size: 0.9em; display: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.12);
     }
-    .transactions-empty {
-      color: #bdbdbd;
-      font-size: 12px;
-      padding: 10px 4px;
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+    @media (max-width: 850px) {
+      .grid { grid-template-columns: 1fr; }
+      table { min-width: 620px; }
     }
-
-    .filter-row {
-      background: #1a1b1c !important;
-    }
-
-    .header-filter,
-    .header-filter-clear {
-      width: 100%;
-      padding: 6px 4px;
-      background: #0a0b0c;
-      border: 1px solid #333;
-      border-radius: 4px;
-      color: #e0e0e0;
-      font-size: 11px;
-      font-family: inherit;
-      box-sizing: border-box;
-    }
-
-    .header-filter::placeholder {
-      color: #666;
-    }
-
-    .header-filter:focus {
-      outline: none;
-      border-color: #ffb300;
-      box-shadow: 0 0 0 2px rgba(255, 179, 0, 0.15);
-    }
-
-    .header-filter-clear {
-      cursor: pointer;
-      padding: 6px 8px;
-      background: #c62828;
-      color: #fff;
-      border: 1px solid #a01818;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-
-    .header-filter-clear:hover {
-      background: #d32f2f;
-    }
-
-    .read-only-mode input,
-    .read-only-mode select,
-    .read-only-mode textarea,
-    .read-only-mode button[type="submit"] {
-      pointer-events: none !important;
-      background: #f5f5f5 !important;
-      color: #666 !important;
-      cursor: not-allowed !important;
-      opacity: 0.7 !important;
-      border-color: #ddd !important;
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
-    }
-    .hamburger span {
-      display: block;
-      width: 24px;
-      height: 3px;
-      background: #ffb300;
-      border-radius: 2px;
-      transition: all 0.2s;
-    }
-
-    .tab-label.mobile-only { display: none; }
-    .tab-icon.desktop-only { display: block; margin: 0 auto; height: 40px; width: auto; }
-
-    .login-bar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-    .login-bar .user-email { color: #ffb300; font-size: 13px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .login-bar button { padding: 6px 14px; border: 1px solid #444; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    #loginBtn { background: #1a1b1c; color: #ffb300; }
-    #loginBtn:hover { background: #2a2b2c; }
-    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
-    #logoutBtn:hover { background: #e53935; }
-
-    @media (max-width: 800px) {
-      .tab-nav {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-      }
-      .tab-nav-container {
-        flex-wrap: wrap;
-        padding: 8px;
-      }
-      .nav-brand {
-        flex: 1;
-        margin-right: 8px;
-        font-size: 16px;
-        padding: 8px 0;
-      }
-      .nav-brand img {
-        height: 24px;
-        width: 24px;
-      }
-      .hamburger {
-        display: flex;
-        order: 2;
-      }
-      .tab-buttons {
-        flex-direction: column;
-        align-items: stretch;
-        max-height: 60vh;
-        overflow-y: auto;
-        background: #232526;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        width: 100%;
-        z-index: 10000;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-        display: none;
-        order: 10;
-        height: auto;
-      }
-      .tab-buttons.open {
-        display: flex;
-      }
-      .tab-btn {
-        font-size: 18px;
-        padding: 18px 24px;
-        border-bottom: 1px solid #444;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        background: none;
-        height: auto;
-      }
-      .tab-btn:last-child { border-bottom: none; }
-      .tab-label.mobile-only { display: inline; }
-      .tab-icon.desktop-only { display: none; }
-      .login-bar { margin-left: 0; margin-top: 8px; justify-content: center; }
-      .bank-form-wrap {
-        padding: 14px;
-        max-width: 100%;
-      }
-      .form-row { margin-bottom: 10px; }
-      .btn { width: 100%; }
-      body { padding-top: 100px; }
+    @media (max-width: 600px) {
+      body { padding: 50px 4px 70px 4px; }
+      .tab-nav { flex-wrap: wrap; padding: 0 8px; align-items: center; }
+      .hamburger { display: flex; }
+      .login-bar { position: static; flex: 1; justify-content: flex-end; padding: 4px 0; gap: 6px; }
+      .nav-links { display: none; width: 100%; flex-direction: column; order: 10; }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 10px 12px; font-size: 0.9em; border-bottom: 1px solid var(--border); }
+      .filters { grid-template-columns: 1fr; }
     }
   </style>
-
-  <script>
-    let isLoggedIn = false;
-    let currentUser = null;
-    const AUTH_KEY = 'ccc_portal_google_auth';
-    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
-
-    function checkLoginState() {
-      try {
-        const token = localStorage.getItem(AUTH_KEY);
-        const email = localStorage.getItem(AUTH_EMAIL_KEY);
-        if (token && email) {
-          isLoggedIn = true;
-          currentUser = email;
-        }
-      } catch (e) {}
-      updateLoginUI();
-    }
-
-    function handleLogin() {
-      const loginBtn = document.getElementById('loginBtn');
-      if (loginBtn) { loginBtn.disabled = true; loginBtn.textContent = 'Loading...'; }
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.onload = () => initGoogleLogin();
-      script.onerror = () => {
-        showToast('Failed to load Google Sign-In', true);
-        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '🔑 Login'; }
-      };
-      document.head.appendChild(script);
-    }
-
-    function initGoogleLogin() {
-      try {
-        google.accounts.id.initialize({
-          client_id: '47674606892-0m90hd0cd01kijo69ssuqtn1j3igp32i.apps.googleusercontent.com',
-          callback: handleGoogleCallback,
-          auto_select: false,
-          ux_mode: 'popup'
-        });
-        google.accounts.id.prompt();
-      } catch (e) {
-        showToast('Google Sign-In error', true);
-        const loginBtn = document.getElementById('loginBtn');
-        if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '🔑 Login'; }
-      }
-    }
-
-    async function handleGoogleCallback(response) {
-      const idToken = response.credential;
-      try {
-        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
-        const tokenRes = await fetch(cfWorkerUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken })
-        });
-        const tokenData = await tokenRes.json();
-        if (!tokenData.success || !tokenData.token_verified) throw new Error(tokenData.error || 'Token verification failed');
-        const email = tokenData.email;
-        const res = await fetch(window.GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'verifyUserPermission', email })
-        });
-        const data = await res.json();
-        if (data.isAllowedEditor) {
-          try { localStorage.setItem(AUTH_KEY, idToken); } catch (e) {}
-          try { localStorage.setItem(AUTH_EMAIL_KEY, email); } catch (e) {}
-          isLoggedIn = true;
-          currentUser = email;
-          updateLoginUI();
-          showToast('Signed in as ' + email);
-        } else {
-          showToast('Your account does not have editor access', true);
-        }
-      } catch (error) {
-        console.error('Sign-in error:', error);
-        showToast('Sign-in failed: ' + error.message, true);
-      }
-      const loginBtn = document.getElementById('loginBtn');
-      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = '🔑 Login'; }
-    }
-
-    function handleLogout() {
-      try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
-      try { localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
-      isLoggedIn = false;
-      currentUser = null;
-      updateLoginUI();
-      showToast('Logged out');
-    }
-
-    function updateLoginUI() {
-      const userEmail = document.getElementById('userEmail');
-      const loginBtn = document.getElementById('loginBtn');
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (userEmail) userEmail.textContent = isLoggedIn ? currentUser : '';
-      if (loginBtn) loginBtn.style.display = isLoggedIn ? 'none' : '';
-      if (logoutBtn) logoutBtn.style.display = isLoggedIn ? '' : 'none';
-      const restrictedTabs = ['events.html', 'members.html', 'warnings.html', 'profiling.html', 'resources.html'];
-      restrictedTabs.forEach(href => {
-        document.querySelectorAll(`.tab-buttons .tab-btn[href="${href}"]`).forEach(link => {
-          link.style.display = isLoggedIn ? '' : 'none';
-        });
-      });
-      const bankTab = document.getElementById('bankTabBtn');
-      if (bankTab) bankTab.style.display = isLoggedIn ? 'flex' : 'none';
-    }
-
-    function showToast(msg, isError) {
-      const t = document.createElement('div');
-      t.textContent = msg;
-      t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;color:#fff;background:' + (isError ? '#c62828' : '#2e7d32');
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      checkLoginState();
-
-      const navHamburger = document.getElementById('navHamburger');
-      const navTabs = document.getElementById('navTabs');
-      if (navHamburger && navTabs) {
-        navHamburger.addEventListener('click', function(e) {
-          e.stopPropagation();
-          navTabs.classList.toggle('open');
-        });
-        document.addEventListener('click', function(e) {
-          if (navTabs.classList.contains('open') && !navTabs.contains(e.target) && !navHamburger.contains(e.target)) {
-            navTabs.classList.remove('open');
-          }
-        });
-      }
-
-      const form = document.getElementById('bankForm');
-      const result = document.getElementById('result');
-
-      function runGASFunction(functionName, ...args) {
-        return new Promise((resolve, reject) => {
-          google.script.run
-            .withSuccessHandler(resolve)
-            .withFailureHandler(reject)[functionName](...args);
-        });
-      }
-
-      function escapeHtml(text) {
-        return String(text || '')
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/\"/g, '&quot;')
-          .replace(/'/g, '&#039;');
-      }
-
-      function formatTimestamp(value) {
-        if (!value) return '-';
-        return cccDateTime(value); // shared UTC format (ccc-dates.js)
-      }
-
-      const OTHER_MEMBER_VALUE = '__other__';
-
-      function toggleCustomMemberRow() {
-        const memberSelect = document.getElementById('memberName');
-        const customRow = document.getElementById('customMemberRow');
-        const customInput = document.getElementById('customMemberName');
-        if (!memberSelect || !customRow) return;
-        const isOther = memberSelect.value === OTHER_MEMBER_VALUE;
-        if (exportNegativeBalancesBtn) {
-          exportNegativeBalancesBtn.addEventListener('click', async function () {
-            exportNegativeBalancesBtn.disabled = true;
-            try {
-              const csv = await runGASFunction('exportBankNegativeBalancesCsv');
-              if (!csv || csv.split('\n').length <= 1) {
-                showToast('No members currently owe the bank.', false);
-                return;
-              }
-              const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = 'members-owing-bank.csv';
-              link.click();
-              URL.revokeObjectURL(url);
-            } catch (error) {
-              showToast('Could not export bank debts: ' + error.message, true);
-            } finally {
-              exportNegativeBalancesBtn.disabled = false;
-            }
-          });
-        }
-        customRow.style.display = isOther ? 'block' : 'none';
-        if (isOther) { if (customInput) customInput.focus(); }
-        else if (customInput) customInput.value = '';
-      }
-
-      function resolveMemberName() {
-        const memberSelect = document.getElementById('memberName');
-        if (!memberSelect) return '';
-        if (memberSelect.value !== OTHER_MEMBER_VALUE) return memberSelect.value;
-        return (document.getElementById('customMemberName')?.value || '').trim();
-      }
-
-      function toggleCustomRecipientRow() {
-        const recipientSelect = document.getElementById('recipient');
-        const customRow = document.getElementById('customRecipientRow');
-        const customInput = document.getElementById('customRecipientName');
-        if (!recipientSelect || !customRow) return;
-        const isOther = recipientSelect.value === OTHER_MEMBER_VALUE;
-        customRow.style.display = isOther ? 'block' : 'none';
-        if (isOther) { if (customInput) customInput.focus(); }
-        else if (customInput) customInput.value = '';
-      }
-
-      function resolveRecipientName() {
-        const recipientSelect = document.getElementById('recipient');
-        if (!recipientSelect) return '';
-        if (recipientSelect.value !== OTHER_MEMBER_VALUE) return recipientSelect.value;
-        return (document.getElementById('customRecipientName')?.value || '').trim();
-      }
-
-      async function loadMemberOptions() {
-        const memberSelect = document.getElementById('memberName');
-        const recipientSelect = document.getElementById('recipient');
-        if (!memberSelect) return;
-
-        memberSelect.innerHTML = '<option value="">Loading members...</option>';
-        memberSelect.disabled = true;
-        if (recipientSelect) {
-          recipientSelect.innerHTML = '<option value="">Loading members...</option>';
-          recipientSelect.disabled = true;
-        }
-
-        const optionsHtml = (names) => names
-          .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
-          .join('');
-
-        try {
-          const result = await runGASFunction('getBankMemberOptions');
-          const active = Array.isArray(result?.active) ? result.active : [];
-          const former = Array.isArray(result?.former) ? result.former : [];
-          const external = Array.isArray(result?.external) ? result.external : [];
-
-          let html = '<option value="">Select member...</option>';
-          if (active.length) html += `<optgroup label="Clan members">${optionsHtml(active)}</optgroup>`;
-          if (former.length) html += `<optgroup label="Former members">${optionsHtml(former)}</optgroup>`;
-          if (external.length) html += `<optgroup label="External / other clans">${optionsHtml(external)}</optgroup>`;
-          html += `<option value="${OTHER_MEMBER_VALUE}">➕ Other name (type it in)...</option>`;
-
-          memberSelect.innerHTML = html;
-          memberSelect.disabled = false;
-          if (recipientSelect) {
-            recipientSelect.innerHTML = html;
-            recipientSelect.disabled = false;
-          }
-          toggleCustomMemberRow();
-          toggleCustomRecipientRow();
-        } catch (error) {
-          // Still allow a free-text entry when the directory cannot be loaded
-          memberSelect.innerHTML = '<option value="">Failed to load members</option>'
-            + `<option value="${OTHER_MEMBER_VALUE}">➕ Other name (type it in)...</option>`;
-          memberSelect.disabled = false;
-          if (recipientSelect) {
-            recipientSelect.innerHTML = '<option value="">Failed to load members</option>'
-              + `<option value="${OTHER_MEMBER_VALUE}">➕ Other name (type it in)...</option>`;
-            recipientSelect.disabled = false;
-          }
-          console.error('Failed to load members:', error);
-        }
-      }
-
-      let allTransactionsData = [];
-      let editingSheetRow = null;
-
-      function parseFormattedNumber(value) {
-        const rawValue = String(value || '').trim();
-        const hasComma = rawValue.includes(',');
-        const hasPeriod = rawValue.includes('.');
-        const decimalIndex = hasComma && hasPeriod
-          ? Math.max(rawValue.lastIndexOf(','), rawValue.lastIndexOf('.'))
-          : -1;
-        const wholePart = decimalIndex === -1 ? rawValue : rawValue.substring(0, decimalIndex);
-        const decimalPart = decimalIndex === -1 ? '' : rawValue.substring(decimalIndex + 1);
-        const normalizedValue = wholePart.replace(/[\s,\.]/g, '')
-          + (decimalIndex === -1 ? '' : '.' + decimalPart.replace(/[\s,\.]/g, ''));
-        return parseFloat(normalizedValue);
-      }
-
-      function formatAmountInput() {
-        const amountInput = document.getElementById('amount');
-        if (!amountInput) return;
-        const amount = parseFormattedNumber(amountInput.value);
-        if (!isNaN(amount)) amountInput.value = amount.toLocaleString('en-US', { maximumFractionDigits: 2 });
-      }
-
-      function resetTransactionForm() {
-        editingSheetRow = null;
-        form.reset();
-        document.getElementById('submitTransactionBtn').textContent = 'Submit Transaction';
-        updateTransactionFields();
-        toggleCustomMemberRow();
-        toggleCustomRecipientRow();
-      }
-
-      function editTransaction(sheetRow) {
-        const transaction = allTransactionsData.find(tx => Number(tx.sheetRow) === Number(sheetRow));
-        if (!transaction) return;
-        if (String(transaction.reference || '').indexOf('Event Penalty:') === 0) {
-          showToast('Event penalty transactions must be changed from the event.', true);
-          return;
-        }
-
-        editingSheetRow = transaction.sheetRow;
-        const memberSelect = document.getElementById('memberName');
-        memberSelect.value = transaction.memberName;
-        if (memberSelect.value !== transaction.memberName) {
-          memberSelect.value = OTHER_MEMBER_VALUE;
-          document.getElementById('customMemberName').value = transaction.memberName;
-        }
-        toggleCustomMemberRow();
-        document.getElementById('transactionType').value = transaction.transactionType;
-        document.getElementById('amount').value = Number(transaction.amount || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
-        document.getElementById('fee').value = transaction.fee || 0;
-        document.getElementById('depositedBy').value = transaction.depositedBy || '';
-        const recipientSelect = document.getElementById('recipient');
-        recipientSelect.value = transaction.recipient || '';
-        if (recipientSelect.value !== (transaction.recipient || '')) {
-          recipientSelect.value = OTHER_MEMBER_VALUE;
-          document.getElementById('customRecipientName').value = transaction.recipient || '';
-        }
-        toggleCustomRecipientRow();
-        document.getElementById('remarks').value = transaction.remarks || '';
-        document.getElementById('transactionDate').value = transaction.timestamp ? cccDate(transaction.timestamp, '') : '';
-        document.getElementById('submitTransactionBtn').textContent = 'Update Transaction';
-        updateTransactionFields();
-        result.innerHTML = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      async function loadTransactions() {
-        const transactionsBody = document.getElementById('transactionsBody');
-        const emptyEl = document.getElementById('transactionsEmpty');
-        if (!transactionsBody || !emptyEl) return;
-
-        transactionsBody.innerHTML = '';
-        emptyEl.textContent = 'Loading transactions...';
-
-        try {
-          const transactions = await runGASFunction('getBankTransactions', 500);
-          allTransactionsData = Array.isArray(transactions) ? transactions : [];
-          renderTransactions(allTransactionsData);
-        } catch (error) {
-          console.error('Failed to load transactions:', error);
-          emptyEl.textContent = 'Failed to load bank transactions.';
-        }
-      }
-
-      function renderTransactions(items) {
-        const transactionsBody = document.getElementById('transactionsBody');
-        const emptyEl = document.getElementById('transactionsEmpty');
-        if (!transactionsBody || !emptyEl) return;
-
-        if (!items.length) {
-          transactionsBody.innerHTML = '';
-          emptyEl.textContent = 'No transactions found.';
-          return;
-        }
-
-        emptyEl.textContent = '';
-        transactionsBody.innerHTML = items.map(tx => {
-          const type = String(tx.transactionType || '').toLowerCase();
-          const typeColor = type === 'penalty' ? '#ef5350' : (type === 'withdrawal' ? '#ffb300' : (type === 'transfer' ? '#64b5f6' : '#81c784'));
-          return `
-          <tr>
-            <td>${escapeHtml(tx.memberName || '-')}</td>
-            <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
-            <td style="color:${typeColor};font-weight:600;">${escapeHtml(tx.transactionType || '-')}</td>
-            <td>${Number(tx.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-            <td>${Number(tx.fee || 0).toFixed(2)}%</td>
-            <td>${Number(tx.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-            <td>${escapeHtml(tx.depositedBy || '-')}</td>
-            <td>${escapeHtml(tx.recipient || '-')}</td>
-            <td>${escapeHtml(tx.reference || '-')}</td>
-            <td>${escapeHtml(tx.remarks || '-')}</td>
-            <td>${String(tx.reference || '').indexOf('Event Penalty:') === 0 ? '-' : `<button type="button" class="btn-secondary edit-transaction-btn" data-sheet-row="${Number(tx.sheetRow)}">Edit</button>`}</td>
-          </tr>
-        `;
-        }).join('');
-      }
-
-      function filterTransactions() {
-        const filterMember = (document.getElementById('transactionsFilterMember')?.value || '').toLowerCase().trim();
-        const filterType = (document.getElementById('transactionsFilterType')?.value || '').toLowerCase().trim();
-
-        let filtered = allTransactionsData;
-
-        if (filterMember) {
-          filtered = filtered.filter(tx => {
-            const memberName = (tx.memberName || '').toLowerCase();
-            const depositedBy = (tx.depositedBy || '').toLowerCase();
-            const recipient = (tx.recipient || '').toLowerCase();
-            return memberName.includes(filterMember) || 
-                   depositedBy.includes(filterMember) || 
-                   recipient.includes(filterMember);
-          });
-        }
-
-        if (filterType) {
-          filtered = filtered.filter(tx => {
-            const txType = (tx.transactionType || '').toLowerCase();
-            return txType === filterType;
-          });
-        }
-
-        renderTransactions(filtered);
-      }
-
-      let allBalancesData = [];
-      let balanceSort = { key: 'totalBalance', direction: 'desc' };
-
-      async function loadMemberBalances() {
-        const balancesBody = document.getElementById('balancesBody');
-        const emptyEl = document.getElementById('balancesEmpty');
-        const totalBalanceEl = document.getElementById('bankTotalBalanceValue');
-        if (!balancesBody || !emptyEl) return;
-
-        balancesBody.innerHTML = '';
-        emptyEl.textContent = 'Loading member balances...';
-        if (totalBalanceEl) totalBalanceEl.textContent = 'Loading...';
-
-        try {
-          const balances = await runGASFunction('getBankMemberBalances');
-          allBalancesData = Array.isArray(balances) ? balances : [];
-          renderBalances(allBalancesData);
-        } catch (error) {
-          console.error('Failed to load member balances:', error);
-          emptyEl.textContent = 'Failed to load member balances.';
-        }
-      }
-
-      function renderBalances(items) {
-        const balancesBody = document.getElementById('balancesBody');
-        const emptyEl = document.getElementById('balancesEmpty');
-        const totalBalanceEl = document.getElementById('bankTotalBalanceValue');
-        const totalOwedEl = document.getElementById('bankTotalOwedValue');
-        if (!balancesBody || !emptyEl) return;
-
-        const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const overallTotal = items.reduce((sum, item) => sum + (Number(item.totalBalance) || 0), 0);
-        const overallOwed = items.reduce((sum, item) => sum + (Number(item.amountOwed) || 0), 0);
-        if (totalBalanceEl) totalBalanceEl.textContent = fmt(overallTotal);
-        if (totalOwedEl) totalOwedEl.textContent = fmt(overallOwed);
-
-        if (!items.length) {
-          balancesBody.innerHTML = '';
-          emptyEl.textContent = 'No member balances found.';
-          return;
-        }
-
-        emptyEl.textContent = '';
-        balancesBody.innerHTML = sortBalanceItems(items).map(item => {
-          const balance = Number(item.totalBalance) || 0;
-          const owes = balance < 0;
-          const balanceCell = owes
-            ? `<span style="color:#ef5350;font-weight:600;" title="Owes the bank">-${fmt(Math.abs(balance))}</span>`
-            : `<span style="color:#8bc34a;">${fmt(balance)}</span>`;
-          const penalties = Number(item.penaltiesTotal) || 0;
-          const status = item.status || 'active';
-          const statusStyles = {
-            active: 'background:#1b5e20;color:#c8e6c9;',
-            former: 'background:#5d4037;color:#ffccbc;',
-            external: 'background:#37474f;color:#cfd8dc;'
-          };
-          const statusLabels = { active: 'Active', former: 'Former', external: 'External' };
-          const statusBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;${statusStyles[status] || statusStyles.external}">${statusLabels[status] || status}</span>`;
-          return `
-          <tr>
-            <td>${escapeHtml(item.memberName || '-')}</td>
-            <td>${statusBadge}</td>
-            <td>${balanceCell}</td>
-            <td>${penalties > 0 ? `<span style="color:#ef5350;">${fmt(penalties)}</span>` : fmt(0)}</td>
-            <td>${Number(item.transactionCount || 0)}</td>
-            <td class="last-transaction-col">${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
-          </tr>
-        `;
-        }).join('');
-      }
-
-      function sortBalanceItems(items) {
-        const direction = balanceSort.direction === 'asc' ? 1 : -1;
-        return items.slice().sort((left, right) => {
-          let leftValue = left[balanceSort.key];
-          let rightValue = right[balanceSort.key];
-          if (balanceSort.key === 'status') {
-            leftValue = String(leftValue || 'external').toLowerCase();
-            rightValue = String(rightValue || 'external').toLowerCase();
-          } else if (balanceSort.key === 'lastTimestamp') {
-            leftValue = leftValue ? new Date(leftValue).getTime() : 0;
-            rightValue = rightValue ? new Date(rightValue).getTime() : 0;
-          } else if (balanceSort.key !== 'memberName') {
-            leftValue = Number(leftValue) || 0;
-            rightValue = Number(rightValue) || 0;
-          } else {
-            leftValue = String(leftValue || '').toLowerCase();
-            rightValue = String(rightValue || '').toLowerCase();
-          }
-          if (leftValue < rightValue) return -1 * direction;
-          if (leftValue > rightValue) return 1 * direction;
-          return String(left.memberName || '').localeCompare(String(right.memberName || ''));
-        });
-      }
-
-      function sortBalances(key) {
-        if (balanceSort.key === key) {
-          balanceSort.direction = balanceSort.direction === 'asc' ? 'desc' : 'asc';
-        } else {
-          balanceSort = { key: key, direction: key === 'memberName' || key === 'status' ? 'asc' : 'desc' };
-        }
-        updateBalanceSortIndicators();
-        filterBalances();
-      }
-
-      function updateBalanceSortIndicators() {
-        document.querySelectorAll('[data-balance-sort]').forEach(button => {
-          const baseLabel = button.dataset.balanceLabel;
-          button.textContent = baseLabel + (button.dataset.balanceSort === balanceSort.key
-            ? (balanceSort.direction === 'asc' ? ' ▲' : ' ▼') : '');
-        });
-      }
-
-      function filterBalances() {
-        const filterText = (document.getElementById('balancesFilterMember')?.value || '').toLowerCase().trim();
-        const filterStatus = document.getElementById('balancesFilterStatus')?.value || '';
-
-        let filtered = allBalancesData;
-        if (filterText) {
-          filtered = filtered.filter(item => (item.memberName || '').toLowerCase().includes(filterText));
-        }
-        if (filterStatus) {
-          filtered = filtered.filter(item => (item.status || 'active') === filterStatus);
-        }
-
-        renderBalances(filtered);
-      }
-
-      function switchBankSubtab(tabName) {
-        const balancesBtn = document.getElementById('subtabBalancesBtn');
-        const transactionsBtn = document.getElementById('subtabTransactionsBtn');
-        const balancesPanel = document.getElementById('bankBalancesPanel');
-        const transactionsPanel = document.getElementById('bankTransactionsPanel');
-        if (!balancesBtn || !transactionsBtn || !balancesPanel || !transactionsPanel) return;
-
-        if (tabName === 'transactions') {
-          transactionsBtn.classList.add('active');
-          balancesBtn.classList.remove('active');
-          transactionsPanel.classList.add('active');
-          balancesPanel.classList.remove('active');
-        } else {
-          balancesBtn.classList.add('active');
-          transactionsBtn.classList.remove('active');
-          balancesPanel.classList.add('active');
-          transactionsPanel.classList.remove('active');
-        }
-      }
-
-      // Toggle deposited by / recipient fields based on transaction type
-      const transactionTypeSelect = document.getElementById('transactionType');
-      const depositedByRow = document.getElementById('depositedByRow');
-      const recipientRow = document.getElementById('recipientRow');
-      
-      function updateTransactionFields() {
-        const transactionType = transactionTypeSelect.value;
-        const recipientLabel = document.getElementById('recipientLabel');
-        const recipientInput = document.getElementById('recipient');
-        const customRecipientRow = document.getElementById('customRecipientRow');
-        const feeRow = document.getElementById('feeRow');
-        const feeInput = document.getElementById('fee');
-        if (feeRow) feeRow.style.display = transactionType === 'penalty' ? 'none' : 'block';
-        if (transactionType === 'penalty' && feeInput) feeInput.value = '0';
-        if (transactionType === 'deposit') {
-          depositedByRow.style.display = 'block';
-          recipientRow.style.display = 'none';
-          if (customRecipientRow) customRecipientRow.style.display = 'none';
-        } else if (transactionType === 'transfer') {
-          depositedByRow.style.display = 'none';
-          recipientRow.style.display = 'block';
-          document.getElementById('depositedBy').value = '';
-          if (recipientLabel) recipientLabel.textContent = 'Recipient (required)';
-          if (recipientInput) recipientInput.placeholder = 'Who receives the funds';
-          toggleCustomRecipientRow();
-        } else if (transactionType === 'withdrawal') {
-          depositedByRow.style.display = 'none';
-          recipientRow.style.display = 'block';
-          document.getElementById('depositedBy').value = '';
-          if (recipientLabel) recipientLabel.textContent = 'Recipient (optional)';
-          if (recipientInput) recipientInput.placeholder = 'Who received the funds (if different)';
-          toggleCustomRecipientRow();
-        } else if (transactionType === 'penalty') {
-          depositedByRow.style.display = 'none';
-          recipientRow.style.display = 'none';
-          document.getElementById('depositedBy').value = '';
-          if (recipientInput) recipientInput.value = '';
-          if (customRecipientRow) customRecipientRow.style.display = 'none';
-        }
-      }
-      
-      if (transactionTypeSelect) {
-        transactionTypeSelect.addEventListener('change', updateTransactionFields);
-        updateTransactionFields(); // Initialize on load
-      }
-
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-
-          if (document.documentElement.classList.contains('read-only-mode')) {
-            if (result) result.innerHTML = '<div class="error">Sign in to submit bank transactions.</div>';
-            return;
-          }
-
-          const memberName = resolveMemberName();
-          const transactionType = document.getElementById('transactionType').value;
-          const amount = parseFormattedNumber(document.getElementById('amount').value);
-          const fee = parseFloat(document.getElementById('fee').value);
-          const depositedBy = document.getElementById('depositedBy').value.trim();
-          const recipient = resolveRecipientName();
-          const remarks = (document.getElementById('remarks')?.value || '').trim();
-          const dateInput = document.getElementById('transactionDate').value;
-          var timestamp;
-          if (dateInput) {
-            timestamp = dateInput + 'T00:00:00.000Z';
-          } else {
-            timestamp = new Date().toISOString();
-          }
-
-          if (!memberName) {
-            if (result) result.innerHTML = '<div class="error">Please select a member or type a name.</div>';
-            return;
-          }
-          if (!(amount > 0)) {
-            if (result) result.innerHTML = '<div class="error">Amount must be greater than 0.</div>';
-            return;
-          }
-          if (transactionType === 'transfer' && !recipient) {
-            if (result) result.innerHTML = '<div class="error">Please select or enter a recipient for the transfer.</div>';
-            return;
-          }
-
-          const feeAmount = amount * ((fee || 0) / 100);
-          const calculatedBalance = transactionType === 'deposit' ? (amount - feeAmount) : amount;
-
-          google.script.run
-            .withSuccessHandler(function(msg) {
-              if (result) result.innerHTML = '<div class="success">' + msg + '</div>';
-              resetTransactionForm();
-              loadTransactions();
-              loadMemberBalances();
-            })
-            .withFailureHandler(function(err) {
-              if (result) result.innerHTML = '<div class="error">' + (err && err.message ? err.message : 'Failed to save transaction') + '</div>';
-            })
-            [editingSheetRow ? 'updateBankTransaction' : 'addBankTransaction']({
-              sheetRow: editingSheetRow,
-              memberName,
-              timestamp,
-              transactionType,
-              amount,
-              fee,
-              balance: calculatedBalance,
-              depositedBy: depositedBy || '',
-              recipient: recipient || '',
-              remarks: remarks || ''
-            });
-        });
-      }
-
-      const amountInput = document.getElementById('amount');
-      if (amountInput) amountInput.addEventListener('blur', formatAmountInput);
-
-      const transactionsBody = document.getElementById('transactionsBody');
-      if (transactionsBody) {
-        transactionsBody.addEventListener('click', function(event) {
-          const editButton = event.target.closest('.edit-transaction-btn');
-          if (editButton) editTransaction(editButton.dataset.sheetRow);
-        });
-      }
-
-      const balancesBtn = document.getElementById('subtabBalancesBtn');
-      const transactionsBtn = document.getElementById('subtabTransactionsBtn');
-      if (balancesBtn) balancesBtn.addEventListener('click', () => switchBankSubtab('balances'));
-      if (transactionsBtn) transactionsBtn.addEventListener('click', () => switchBankSubtab('transactions'));
-      switchBankSubtab('balances');
-
-      // Filter event listeners for balances
-      const balancesFilterMember = document.getElementById('balancesFilterMember');
-      if (balancesFilterMember) {
-        balancesFilterMember.addEventListener('input', filterBalances);
-      }
-      const balancesFilterStatus = document.getElementById('balancesFilterStatus');
-      if (balancesFilterStatus) {
-        balancesFilterStatus.addEventListener('change', filterBalances);
-      }
-      document.querySelectorAll('[data-balance-sort]').forEach(button => {
-        button.addEventListener('click', () => sortBalances(button.dataset.balanceSort));
-      });
-
-      const memberSelectEl = document.getElementById('memberName');
-      if (memberSelectEl) {
-        memberSelectEl.addEventListener('change', toggleCustomMemberRow);
-      }
-      const recipientSelectEl = document.getElementById('recipient');
-      if (recipientSelectEl) {
-        recipientSelectEl.addEventListener('change', toggleCustomRecipientRow);
-      }
-
-      // Filter event listeners for transactions
-      const transactionsFilterMember = document.getElementById('transactionsFilterMember');
-      const transactionsFilterType = document.getElementById('transactionsFilterType');
-      
-      if (transactionsFilterMember) {
-        transactionsFilterMember.addEventListener('input', filterTransactions);
-      }
-      if (transactionsFilterType) {
-        transactionsFilterType.addEventListener('change', filterTransactions);
-      }
-
-      loadMemberOptions();
-      loadTransactions();
-      loadMemberBalances();
-    });
-  </script>
 </head>
 <body>
-  <!-- Google Translate Widget -->
-  <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
-  <style>
-    @media (max-width: 800px) {
-      #google_translate_element {
-        max-width: 0;
-        overflow: hidden;
-        opacity: 0;
-        pointer-events: none;
-        transition: max-width 0.2s ease, opacity 0.2s ease;
-      }
-      body.translate-open #google_translate_element {
-        max-width: 260px;
-        opacity: 1;
-        pointer-events: auto;
-      }
-      #translateToggleBtn { display: inline-flex !important; }
-    }
-    @media (min-width: 801px) {
-      #translateToggleBtn { display: none !important; }
-    }
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const translateToggleBtn = document.getElementById('translateToggleBtn');
-      const translateWidget = document.getElementById('google_translate_element');
-      if (!translateToggleBtn || !translateWidget) return;
-      translateToggleBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        document.body.classList.toggle('translate-open');
-      });
-      document.addEventListener('click', function (e) {
-        if (!document.body.classList.contains('translate-open')) return;
-        if (translateWidget.contains(e.target) || translateToggleBtn.contains(e.target)) return;
-        document.body.classList.remove('translate-open');
-      });
-    });
-  </script>
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-  <nav class="tab-nav">
-    <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
-      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <div class="tab-buttons" id="navTabs">
-        <a href="dashboard.html" class="tab-btn" title="Dashboard">
-          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Dashboard</span>
-        </a>
-        <a href="events.html" class="tab-btn" title="Events">
-          <img src="events.png" alt="Events" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Events</span>
-        </a>
-        <a href="members.html" class="tab-btn" title="Members">
-          <img src="members.png" alt="Members" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Members</span>
-        </a>
-        <a href="profiling.html" class="tab-btn" title="Profiling">
-          <img src="profiling.png" alt="Profiling" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Profiling</span>
-        </a>
-        <a href="warnings.html" class="tab-btn" title="Warnings">
-          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Warnings</span>
-        </a>
-        <a href="resources.html" class="tab-btn" title="Resources">
-          <img src="resources.png" alt="Resources" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Resources</span>
-        </a>
-        <a href="competition.html" class="tab-btn" title="Competition">
-          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Competition</span>
-        </a>
-        <a href="calendar.html" class="tab-btn" title="Calendar">
-          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Calendar</span>
-        </a>
-        <a href="bank.html" class="tab-btn active" id="bankTabBtn" title="Bank" style="display:none;">
-          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Bank</span>
-        </a>
-      </div>
-      <div class="login-bar">
-        <span id="userEmail" class="user-email"></span>
-        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
-        <button id="logoutBtn" onclick="handleLogout()" style="display:none;">Logout</button>
-      </div>
-    </div>
-  </nav>
+<nav class="tab-nav">
+  <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></button>
+  <div class="login-bar" id="loginBar">
+    <span class="user-email" id="userEmail" style="display:none"></span>
+    <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
+    <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="dashboard.html"><img src="chest.png" class="nav-icon" alt=""> Dashboard</a>
+    <a href="events.html"><img src="events.png" class="nav-icon" alt=""> Events</a>
+    <a href="members.html"><img src="members.png" class="nav-icon" alt=""> Members</a>
+    <a href="profiling.html"><img src="profiling.png" class="nav-icon" alt=""> Profiling</a>
+    <a href="warnings.html"><img src="warning.png" class="nav-icon" alt=""> Warnings</a>
+    <a href="calendar.html"><img src="calendar.png" class="nav-icon" alt=""> Calendar</a>
+    <a href="bank.html" class="active"><img src="bank.png" class="nav-icon" alt=""> Bank</a>
+  </div>
+</nav>
 
-  <div id="bank" class="tab-content active">
-    <h1><img src="bank.png" alt="" style="height: 64px; vertical-align: middle; margin-right: 8px;"> Bank Transactions</h1>
-    <div class="bank-form-wrap">
+<div class="login-gate" id="loginGate" style="max-width:500px;margin:80px auto;text-align:center;background:var(--bg-card);border-radius:16px;padding:40px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+  <h2 style="color:var(--primary);margin-bottom:12px;">🔒 Login Required</h2>
+  <p style="color:var(--text-muted);margin-bottom:20px;">You need to be logged in to view the Bank page.</p>
+  <button class="btn" onclick="handleLogin()" style="padding:12px 32px;font-size:1em;">🔑 Login</button>
+</div>
+
+<div class="container" id="mainContent" style="display:none">
+  <img src="bank.png" alt="cCc Legends" class="site-logo">
+  <h1>Bank</h1>
+  <p class="subtitle">Member balances and transaction ledger</p>
+
+  <div class="overview-row">
+    <div class="metric"><div class="label">Total Bank Balance</div><div id="totalBalance" class="value">-</div></div>
+    <div class="metric"><div class="label">Outstanding Debts</div><div id="totalOwed" class="value debt">-</div></div>
+    <button type="button" id="exportNegativeBalancesBtn" class="btn secondary">Export Members Owing Silver (CSV)</button>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
       <h2>Transaction Entry</h2>
       <form id="bankForm">
         <div class="form-row">
           <label for="memberName">Member Name</label>
-          <select id="memberName" name="memberName" required>
-            <option value="">Loading members...</option>
-          </select>
+          <select id="memberName" required><option value="">Loading members...</option></select>
         </div>
-
-        <div class="form-row" id="customMemberRow" style="display: none;">
+        <div class="form-row" id="customMemberRow" style="display:none">
           <label for="customMemberName">Other Name</label>
-          <input type="text" id="customMemberName" name="customMemberName" placeholder="Former member or someone from another clan">
-          <small style="color:#999;font-size:11px;margin-top:2px;">Used as-is; keep the spelling consistent so their balance stays on one row.</small>
+          <input type="text" id="customMemberName" placeholder="Former member or someone from another clan">
+          <small>Used as-is; keep spelling consistent so the balance stays on one row.</small>
         </div>
-
         <div class="form-row">
           <label for="transactionType">Transaction Type</label>
-          <select id="transactionType" name="transactionType" required>
+          <select id="transactionType" required>
             <option value="deposit">Deposit</option>
             <option value="withdrawal">Withdrawal</option>
             <option value="transfer">Transfer to member</option>
             <option value="penalty">Penalty</option>
           </select>
         </div>
-
-        <div class="form-row" id="depositedByRow" style="display: none;">
-          <label for="depositedBy">Deposited By (optional)</label>
-          <input type="text" id="depositedBy" name="depositedBy" placeholder="Who actually deposited (if different)">
+        <div class="form-row" id="depositedByRow">
+          <label for="depositedBy">Deposited By</label>
+          <input type="text" id="depositedBy" placeholder="Who actually deposited, if different">
         </div>
-
-        <div class="form-row" id="recipientRow" style="display: none;">
-          <label for="recipient" id="recipientLabel">Recipient (optional)</label>
-          <select id="recipient" name="recipient">
-            <option value="">Loading members...</option>
-          </select>
+        <div class="form-row" id="recipientRow" style="display:none">
+          <label for="recipient" id="recipientLabel">Recipient</label>
+          <select id="recipient"><option value="">Loading members...</option></select>
         </div>
-
-        <div class="form-row" id="customRecipientRow" style="display: none;">
+        <div class="form-row" id="customRecipientRow" style="display:none">
           <label for="customRecipientName">Other Recipient</label>
-          <input type="text" id="customRecipientName" name="customRecipientName" placeholder="Former member or someone from another clan">
-          <small style="color:#999;font-size:11px;margin-top:2px;">Used as-is; keep the spelling consistent so their balance stays on one row.</small>
+          <input type="text" id="customRecipientName" placeholder="Former member or someone from another clan">
+          <small>Used as-is; keep spelling consistent so the balance stays on one row.</small>
         </div>
-
         <div class="form-row" id="feeRow">
           <label for="fee">Percentage Fee (%)</label>
-          <input type="number" id="fee" name="fee" min="0" max="100" step="0.01" required>
+          <input type="number" id="fee" min="0" max="100" step="0.01" value="0" required>
         </div>
-
         <div class="form-row">
           <label for="amount">Amount</label>
-          <input type="text" id="amount" name="amount" inputmode="decimal" autocomplete="off" placeholder="1,000,000,000" required>
+          <input type="text" id="amount" inputmode="decimal" autocomplete="off" placeholder="1,000,000,000" required>
         </div>
-
         <div class="form-row">
           <label for="transactionDate">Transaction Date</label>
-          <input type="date" id="transactionDate" name="transactionDate">
-          <small style="color:#999;font-size:11px;margin-top:2px;">Leave empty to use today's date</small>
+          <input type="date" id="transactionDate">
+          <small>Leave empty to use today's date.</small>
         </div>
-
         <div class="form-row">
-          <label for="remarks">Remarks (optional)</label>
-          <input type="text" id="remarks" name="remarks" placeholder="e.g. loan for T9 upgrade, partial penalty repayment">
+          <label for="remarks">Remarks</label>
+          <input type="text" id="remarks" placeholder="e.g. loan, repayment, event transfer">
         </div>
-
-        <button type="submit" id="submitTransactionBtn" class="btn">Submit Transaction</button>
+        <button type="submit" class="btn">Submit Transaction</button>
       </form>
-      <div id="result"></div>
+      <div id="formStatus" class="status"></div>
+    </section>
 
-      <div class="transactions-wrap">
-        <div class="transactions-title">Bank Overview</div>
-        <div class="bank-total-balance">
-          <span>Total Bank Balance</span>
-          <span id="bankTotalBalanceValue" class="value">-</span>
-        </div>
-        <div class="bank-total-balance" style="margin-left:8px;">
-          <span>Outstanding Debts</span>
-          <span id="bankTotalOwedValue" class="value" style="color:#ef5350;">-</span>
-        </div>
-        <button type="button" id="exportNegativeBalancesBtn" class="btn-secondary">Export Members Owing Silver (CSV)</button>
-        <div class="bank-subtabs">
-          <button type="button" id="subtabBalancesBtn" class="subtab-btn active">Members' Balances</button>
-          <button type="button" id="subtabTransactionsBtn" class="subtab-btn">Transaction History</button>
-        </div>
-
-        <div id="bankBalancesPanel" class="subtab-panel active">
-          <div class="transactions-table-wrap">
-            <table class="transactions-table">
-              <thead>
-                <tr>
-                  <th><input type="text" id="balancesFilterMember" placeholder="Filter by member..." class="header-filter"></th>
-                  <th><select id="balancesFilterStatus" class="header-filter">
-                    <option value="">All</option>
-                    <option value="active">Active</option>
-                    <option value="former">Former</option>
-                    <option value="external">External</option>
-                  </select></th>
-                  <th colspan="4" style="text-align: center; padding: 0;"></th>
-                </tr>
-                <tr>
-                  <th><button type="button" class="sort-header" data-balance-sort="memberName" data-balance-label="Member">Member</button></th>
-                  <th><button type="button" class="sort-header" data-balance-sort="status" data-balance-label="Status">Status</button></th>
-                  <th><button type="button" class="sort-header" data-balance-sort="totalBalance" data-balance-label="Balance">Balance</button></th>
-                  <th><button type="button" class="sort-header" data-balance-sort="penaltiesTotal" data-balance-label="Penalties">Penalties</button></th>
-                  <th><button type="button" class="sort-header" data-balance-sort="transactionCount" data-balance-label="Transactions">Transactions</button></th>
-                  <th class="last-transaction-col"><button type="button" class="sort-header" data-balance-sort="lastTimestamp" data-balance-label="Last Transaction">Last Transaction</button></th>
-                </tr>
-              </thead>
-              <tbody id="balancesBody"></tbody>
-            </table>
-          </div>
-          <div id="balancesEmpty" class="transactions-empty">No member balances available yet.</div>
-        </div>
-
-        <div id="bankTransactionsPanel" class="subtab-panel">
-          <div class="transactions-table-wrap">
-            <table class="transactions-table">
-              <thead>
-                <tr class="filter-row">
-                  <th><input type="text" id="transactionsFilterMember" placeholder="Filter by member..." class="header-filter"></th>
-                  <th></th>
-                  <th><select id="transactionsFilterType" class="header-filter">
-                    <option value="">All Types</option>
-                    <option value="deposit">Deposits</option>
-                    <option value="withdrawal">Withdrawals</option>
-                    <option value="transfer">Transfers</option>
-                    <option value="penalty">Penalties</option>
-                    <option value="penalty">Penalties</option>
-                  </select></th>
-                  <th colspan="6" style="text-align: center; padding: 0;"></th>
-                </tr>
-                <tr>
-                  <th>Member</th>
-                  <th>Timestamp (UTC)</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Fee</th>
-                  <th>Balance</th>
-                  <th>Deposited By</th>
-                  <th>Recipient</th>
-                  <th>Reference</th>
-                  <th>Remarks</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="transactionsBody"></tbody>
-            </table>
-          </div>
-          <div id="transactionsEmpty" class="transactions-empty">No bank transactions available yet.</div>
-        </div>
+    <section class="panel">
+      <div class="tabs">
+        <button type="button" id="balancesTabBtn" class="subtab-btn active" onclick="switchBankSubtab('balances')">Members' Balances</button>
+        <button type="button" id="transactionsTabBtn" class="subtab-btn" onclick="switchBankSubtab('transactions')">Transaction History</button>
+        <button type="button" class="subtab-btn" onclick="refreshBankData(true)">Refresh</button>
       </div>
-    </div>
+
+      <div id="balancesPanel" class="subtab-panel active">
+        <div class="filters">
+          <input type="text" id="balancesFilterMember" placeholder="Filter members...">
+          <select id="balancesFilterStatus">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="former">Former</option>
+            <option value="external">External</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th><button type="button" class="sort-header" data-balance-sort="memberName">Member</button></th>
+              <th><button type="button" class="sort-header" data-balance-sort="status">Status</button></th>
+              <th><button type="button" class="sort-header" data-balance-sort="totalBalance">Balance</button></th>
+              <th><button type="button" class="sort-header" data-balance-sort="penaltiesTotal">Penalties</button></th>
+              <th><button type="button" class="sort-header" data-balance-sort="transactionCount">Rows</button></th>
+              <th><button type="button" class="sort-header" data-balance-sort="lastTimestamp">Last Transaction</button></th>
+            </tr></thead>
+            <tbody id="balancesBody"></tbody>
+          </table>
+        </div>
+        <div id="balancesEmpty" class="empty">Loading member balances...</div>
+      </div>
+
+      <div id="transactionsPanel" class="subtab-panel">
+        <div class="filters">
+          <input type="text" id="transactionsFilterMember" placeholder="Filter names...">
+          <select id="transactionsFilterType">
+            <option value="">All transaction types</option>
+            <option value="deposit">Deposit</option>
+            <option value="withdrawal">Withdrawal</option>
+            <option value="transfer">Transfer</option>
+            <option value="penalty">Penalty</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Member</th><th>Timestamp</th><th>Type</th><th>Amount</th><th>Fee</th><th>Balance</th><th>Deposited By</th><th>Recipient</th><th>Reference</th><th>Remarks</th><th>Actions</th></tr></thead>
+            <tbody id="transactionsBody"></tbody>
+          </table>
+        </div>
+        <div id="transactionsEmpty" class="empty">Loading transactions...</div>
+      </div>
+    </section>
   </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let isLoggedIn = false;
+  let currentUser = null;
+  let allTransactionsData = [];
+  let allBalancesData = [];
+  let editingSheetRow = null;
+  let balanceSort = { key: 'totalBalance', direction: 'desc' };
+  const OTHER_MEMBER_VALUE = '__other__';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkLoginState();
+    bindBankUi();
+    updateTransactionFields();
+    if (isLoggedIn) refreshBankData();
+  });
+
+  function checkLoginState() {
+    const stored = localStorage.getItem('leg_auth');
+    if (stored) {
+      try {
+        currentUser = JSON.parse(stored);
+        isLoggedIn = !!(currentUser && currentUser.email);
+      } catch (e) {}
+    }
+    updateLoginUI();
+  }
+
+  function handleLogin() {
+    if (!document.getElementById('gsi-script')) {
+      const script = document.createElement('script');
+      script.id = 'gsi-script';
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = () => initGoogleLogin();
+      document.head.appendChild(script);
+    } else { initGoogleLogin(); }
+  }
+
+  function initGoogleLogin() {
+    google.accounts.id.initialize({ client_id: SITE_CONFIG.googleClientId, callback: handleGoogleCallback });
+    google.accounts.id.prompt();
+  }
+
+  async function handleGoogleCallback(response) {
+    try {
+      const res = await fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: response.credential })
+      });
+      const data = await res.json();
+      if (data.success && data.email) {
+        const verifyRes = await fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'api', fn: 'verifyGoogleLogin', args: [{ email: data.email }] })
+        });
+        const verify = await verifyRes.json();
+        const allowed = verify && verify.ok && verify.data && verify.data.success;
+        if (allowed) {
+          currentUser = { email: data.email };
+          isLoggedIn = true;
+          localStorage.setItem('leg_auth', JSON.stringify(currentUser));
+          updateLoginUI();
+          refreshBankData(true);
+          showToast('Logged in as ' + data.email, 'success');
+        } else { showToast('Access denied', 'error'); }
+      }
+    } catch (err) { showToast('Login error: ' + err.message, 'error'); }
+  }
+
+  function handleLogout() {
+    isLoggedIn = false; currentUser = null;
+    localStorage.removeItem('leg_auth');
+    updateLoginUI();
+  }
+
+  function updateLoginUI() {
+    document.getElementById('userEmail').textContent = isLoggedIn && currentUser ? currentUser.email : '';
+    document.getElementById('userEmail').style.display = isLoggedIn ? 'inline' : 'none';
+    document.getElementById('loginBtn').style.display = isLoggedIn ? 'none' : 'inline';
+    document.getElementById('logoutBtn').style.display = isLoggedIn ? 'inline' : 'none';
+    document.getElementById('loginGate').style.display = isLoggedIn ? 'none' : 'block';
+    document.getElementById('mainContent').style.display = isLoggedIn ? 'block' : 'none';
+  }
+
+  function bindBankUi() {
+    document.getElementById('transactionType').addEventListener('change', updateTransactionFields);
+    document.getElementById('memberName').addEventListener('change', toggleCustomMemberRow);
+    document.getElementById('recipient').addEventListener('change', toggleCustomRecipientRow);
+    document.getElementById('amount').addEventListener('blur', formatAmountInput);
+    document.getElementById('balancesFilterMember').addEventListener('input', filterBalances);
+    document.getElementById('balancesFilterStatus').addEventListener('change', filterBalances);
+    document.getElementById('transactionsFilterMember').addEventListener('input', filterTransactions);
+    document.getElementById('transactionsFilterType').addEventListener('change', filterTransactions);
+    document.getElementById('bankForm').addEventListener('submit', submitTransaction);
+    document.getElementById('exportNegativeBalancesBtn').addEventListener('click', exportNegativeBalancesCsv);
+    document.querySelectorAll('[data-balance-sort]').forEach(button => {
+      button.addEventListener('click', () => sortBalances(button.dataset.balanceSort));
+    });
+  }
+
+  function updateTransactionFields() {
+    const type = document.getElementById('transactionType').value;
+    const recipientRow = document.getElementById('recipientRow');
+    const customRecipientRow = document.getElementById('customRecipientRow');
+    const feeRow = document.getElementById('feeRow');
+    const fee = document.getElementById('fee');
+    document.getElementById('depositedByRow').style.display = type === 'deposit' ? 'block' : 'none';
+    recipientRow.style.display = (type === 'withdrawal' || type === 'transfer') ? 'block' : 'none';
+    if (customRecipientRow && type !== 'withdrawal' && type !== 'transfer') customRecipientRow.style.display = 'none';
+    if (feeRow) feeRow.style.display = type === 'penalty' ? 'none' : 'block';
+    if (type === 'penalty' && fee) fee.value = '0';
+    if (type === 'deposit' || type === 'penalty') document.getElementById('recipient').value = '';
+    if (type !== 'deposit') document.getElementById('depositedBy').value = '';
+    const label = document.getElementById('recipientLabel');
+    if (label) label.textContent = type === 'transfer' ? 'Recipient (required)' : 'Recipient (optional)';
+    toggleCustomRecipientRow();
+  }
+
+  function toggleCustomMemberRow() {
+    const isOther = document.getElementById('memberName').value === OTHER_MEMBER_VALUE;
+    document.getElementById('customMemberRow').style.display = isOther ? 'block' : 'none';
+    if (isOther) document.getElementById('customMemberName').focus();
+    else document.getElementById('customMemberName').value = '';
+  }
+
+  function resolveMemberName() {
+    const selected = document.getElementById('memberName').value;
+    return selected === OTHER_MEMBER_VALUE ? document.getElementById('customMemberName').value.trim() : selected;
+  }
+
+  function toggleCustomRecipientRow() {
+    const select = document.getElementById('recipient');
+    const row = document.getElementById('customRecipientRow');
+    if (!select || !row) return;
+    const isOther = select.value === OTHER_MEMBER_VALUE;
+    row.style.display = isOther ? 'block' : 'none';
+    if (isOther) document.getElementById('customRecipientName').focus();
+    else document.getElementById('customRecipientName').value = '';
+  }
+
+  function resolveRecipientName() {
+    const selected = document.getElementById('recipient').value;
+    return selected === OTHER_MEMBER_VALUE ? document.getElementById('customRecipientName').value.trim() : selected;
+  }
+
+  function parseFormattedNumber(value) {
+    const raw = String(value || '').trim();
+    const hasComma = raw.includes(',');
+    const hasPeriod = raw.includes('.');
+    const decimalIndex = hasComma && hasPeriod ? Math.max(raw.lastIndexOf(','), raw.lastIndexOf('.')) : -1;
+    const whole = decimalIndex === -1 ? raw : raw.substring(0, decimalIndex);
+    const decimal = decimalIndex === -1 ? '' : raw.substring(decimalIndex + 1);
+    return parseFloat(whole.replace(/[\s,.]/g, '') + (decimalIndex === -1 ? '' : '.' + decimal.replace(/[\s,.]/g, '')));
+  }
+
+  function formatAmountInput() {
+    const input = document.getElementById('amount');
+    const amount = parseFormattedNumber(input.value);
+    if (!isNaN(amount)) input.value = amount.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }
+
+  async function refreshBankData(showNotice) {
+    if (!isLoggedIn) return;
+    await Promise.all([loadMemberOptions(), loadTransactions(), loadMemberBalances()]);
+    if (showNotice) showToast('Bank data refreshed', 'success');
+  }
+
+  async function exportNegativeBalancesCsv() {
+    const button = document.getElementById('exportNegativeBalancesBtn');
+    button.disabled = true;
+    try {
+      const csv = await callFunction('exportBankNegativeBalancesCsv');
+      if (!csv || csv.split('\n').length <= 1) {
+        showToast('No members currently owe the bank.', '');
+        return;
+      }
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'members-owing-bank.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showToast('Could not export bank debts: ' + error.message, 'error');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function loadMemberOptions() {
+    const select = document.getElementById('memberName');
+    const recipient = document.getElementById('recipient');
+    select.innerHTML = '<option value="">Loading members...</option>';
+    select.disabled = true;
+    recipient.innerHTML = '<option value="">Loading members...</option>';
+    recipient.disabled = true;
+    try {
+      const result = await callFunction('getBankMemberOptions');
+      const active = Array.isArray(result?.active) ? result.active : [];
+      const former = Array.isArray(result?.former) ? result.former : [];
+      const external = Array.isArray(result?.external) ? result.external : [];
+      let html = '<option value="">Select member...</option>';
+      if (active.length) html += '<optgroup label="Clan members">' + active.map(optionHtml).join('') + '</optgroup>';
+      if (former.length) html += '<optgroup label="Former members">' + former.map(optionHtml).join('') + '</optgroup>';
+      if (external.length) html += '<optgroup label="External / other clans">' + external.map(optionHtml).join('') + '</optgroup>';
+      html += `<option value="${OTHER_MEMBER_VALUE}">➕ Other name (type it in)...</option>`;
+      select.innerHTML = html;
+      recipient.innerHTML = html;
+    } catch (err) {
+      select.innerHTML = `<option value="${OTHER_MEMBER_VALUE}">➕ Other name (type it in)...</option>`;
+      recipient.innerHTML = `<option value="${OTHER_MEMBER_VALUE}">➕ Other name (type it in)...</option>`;
+      console.error(err);
+    }
+    select.disabled = false;
+    recipient.disabled = false;
+    toggleCustomMemberRow();
+    toggleCustomRecipientRow();
+  }
+
+  async function loadTransactions() {
+    document.getElementById('transactionsEmpty').textContent = 'Loading transactions...';
+    try {
+      const result = await callFunction('getBankTransactions', [500]);
+      allTransactionsData = Array.isArray(result) ? result : [];
+      renderTransactions(allTransactionsData);
+    } catch (err) {
+      allTransactionsData = [];
+      document.getElementById('transactionsEmpty').textContent = 'Failed to load bank transactions.';
+      console.error(err);
+    }
+  }
+
+  async function loadMemberBalances() {
+    document.getElementById('balancesEmpty').textContent = 'Loading member balances...';
+    try {
+      const result = await callFunction('getBankMemberBalances');
+      allBalancesData = Array.isArray(result) ? result : [];
+      renderBalances(allBalancesData);
+    } catch (err) {
+      allBalancesData = [];
+      document.getElementById('balancesEmpty').textContent = 'Failed to load member balances.';
+      console.error(err);
+    }
+  }
+
+  async function submitTransaction(event) {
+    event.preventDefault();
+    const status = document.getElementById('formStatus');
+    status.textContent = ''; status.className = 'status';
+
+    const memberName = resolveMemberName();
+    const transactionType = document.getElementById('transactionType').value;
+    const amount = parseFormattedNumber(document.getElementById('amount').value);
+    const fee = Number(document.getElementById('fee').value) || 0;
+    const dateInput = document.getElementById('transactionDate').value;
+    const timestamp = dateInput ? dateInput + 'T00:00:00.000Z' : new Date().toISOString();
+
+    if (!memberName) { status.textContent = 'Please select a member or type a name.'; status.className = 'status err'; return; }
+    if (!(amount > 0)) { status.textContent = 'Amount must be greater than 0.'; status.className = 'status err'; return; }
+    const recipient = resolveRecipientName();
+    if (transactionType === 'transfer' && !recipient) { status.textContent = 'Please select or enter a recipient for the transfer.'; status.className = 'status err'; return; }
+
+    status.textContent = 'Saving...';
+    try {
+      const result = await callFunction(editingSheetRow ? 'updateBankTransaction' : 'addBankTransaction', [{
+        sheetRow: editingSheetRow,
+        memberName, timestamp, transactionType, amount, fee,
+        depositedBy: document.getElementById('depositedBy').value.trim(),
+        recipient,
+        remarks: document.getElementById('remarks').value.trim()
+      }]);
+      status.textContent = typeof result === 'string' ? result : 'Transaction recorded successfully.';
+      status.className = 'status ok';
+      document.getElementById('bankForm').reset();
+      editingSheetRow = null;
+      document.querySelector('#bankForm button[type="submit"]').textContent = 'Submit Transaction';
+      document.getElementById('fee').value = '0';
+      updateTransactionFields();
+      await Promise.all([loadTransactions(), loadMemberBalances()]);
+    } catch (err) {
+      status.textContent = 'Error: ' + err.message;
+      status.className = 'status err';
+    }
+  }
+
+  function switchBankSubtab(tabName) {
+    const showTransactions = tabName === 'transactions';
+    document.getElementById('transactionsTabBtn').classList.toggle('active', showTransactions);
+    document.getElementById('balancesTabBtn').classList.toggle('active', !showTransactions);
+    document.getElementById('transactionsPanel').classList.toggle('active', showTransactions);
+    document.getElementById('balancesPanel').classList.toggle('active', !showTransactions);
+  }
+
+  function renderBalances(items) {
+    const tbody = document.getElementById('balancesBody');
+    const empty = document.getElementById('balancesEmpty');
+    const totalBalance = items.reduce((sum, item) => sum + (Number(item.totalBalance) || 0), 0);
+    const totalOwed = items.reduce((sum, item) => sum + (Number(item.amountOwed) || 0), 0);
+    document.getElementById('totalBalance').textContent = formatNumber(totalBalance);
+    document.getElementById('totalOwed').textContent = formatNumber(totalOwed);
+    if (!items.length) {
+      tbody.innerHTML = '';
+      empty.textContent = 'No member balances found.';
+      return;
+    }
+    empty.textContent = '';
+    tbody.innerHTML = sortBalanceItems(items).map(item => {
+      const balance = Number(item.totalBalance) || 0;
+      const status = item.status || 'external';
+      return `<tr>
+        <td>${escapeHtml(item.memberName)}</td>
+        <td><span class="status-badge status-${escapeAttr(status)}">${escapeHtml(statusLabel(status))}</span></td>
+        <td class="${balance < 0 ? 'negative' : 'positive'}">${formatNumber(balance)}</td>
+        <td class="${Number(item.penaltiesTotal) > 0 ? 'negative' : ''}">${formatNumber(item.penaltiesTotal)}</td>
+        <td>${Number(item.transactionCount || 0)}</td>
+        <td>${escapeHtml(formatTimestamp(item.lastTimestamp))}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function sortBalanceItems(items) {
+    const direction = balanceSort.direction === 'asc' ? 1 : -1;
+    return items.slice().sort((left, right) => {
+      let leftValue = left[balanceSort.key];
+      let rightValue = right[balanceSort.key];
+      if (balanceSort.key === 'status') {
+        leftValue = statusLabel(leftValue || 'external');
+        rightValue = statusLabel(rightValue || 'external');
+      } else if (balanceSort.key === 'lastTimestamp') {
+        leftValue = leftValue ? new Date(leftValue).getTime() : 0;
+        rightValue = rightValue ? new Date(rightValue).getTime() : 0;
+      } else if (balanceSort.key !== 'memberName') {
+        leftValue = Number(leftValue) || 0;
+        rightValue = Number(rightValue) || 0;
+      } else {
+        leftValue = String(leftValue || '').toLowerCase();
+        rightValue = String(rightValue || '').toLowerCase();
+      }
+      if (leftValue < rightValue) return -1 * direction;
+      if (leftValue > rightValue) return 1 * direction;
+      return String(left.memberName || '').localeCompare(String(right.memberName || ''));
+    });
+  }
+
+  function sortBalances(key) {
+    if (balanceSort.key === key) {
+      balanceSort.direction = balanceSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      balanceSort = { key: key, direction: key === 'memberName' || key === 'status' ? 'asc' : 'desc' };
+    }
+    updateBalanceSortIndicators();
+    filterBalances();
+  }
+
+  function updateBalanceSortIndicators() {
+    document.querySelectorAll('[data-balance-sort]').forEach(button => {
+      const isActive = button.dataset.balanceSort === balanceSort.key;
+      button.textContent = button.textContent.replace(/ [▲▼]$/, '')
+        + (isActive ? (balanceSort.direction === 'asc' ? ' ▲' : ' ▼') : '');
+    });
+  }
+
+  function renderTransactions(items) {
+    const tbody = document.getElementById('transactionsBody');
+    const empty = document.getElementById('transactionsEmpty');
+    if (!items.length) {
+      tbody.innerHTML = '';
+      empty.textContent = 'No transactions found.';
+      return;
+    }
+    empty.textContent = '';
+    tbody.innerHTML = items.map(tx => {
+      const type = String(tx.transactionType || '').toLowerCase();
+      const typeClass = type === 'penalty' || type === 'withdrawal' ? 'negative' : 'positive';
+      return `<tr>
+        <td>${escapeHtml(tx.memberName)}</td>
+        <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
+        <td class="${typeClass}">${escapeHtml(type || '-')}</td>
+        <td>${formatNumber(tx.amount)}</td>
+        <td>${Number(tx.fee || 0).toFixed(2)}%</td>
+        <td>${formatNumber(tx.balance)}</td>
+        <td>${escapeHtml(tx.depositedBy || '-')}</td>
+        <td>${escapeHtml(tx.recipient || '-')}</td>
+        <td>${escapeHtml(tx.reference || '-')}</td>
+        <td>${escapeHtml(tx.remarks || '-')}</td>
+        <td>${String(tx.reference || '').indexOf('Event Penalty:') === 0 ? '-' : `<button type="button" class="btn secondary edit-transaction-btn" data-sheet-row="${Number(tx.sheetRow)}">Edit</button>`}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterBalances() {
+    const text = document.getElementById('balancesFilterMember').value.toLowerCase().trim();
+    const status = document.getElementById('balancesFilterStatus').value;
+    let filtered = allBalancesData;
+    if (text) filtered = filtered.filter(item => (item.memberName || '').toLowerCase().includes(text));
+    if (status) filtered = filtered.filter(item => (item.status || 'external') === status);
+    renderBalances(filtered);
+  }
+
+  function filterTransactions() {
+    const text = document.getElementById('transactionsFilterMember').value.toLowerCase().trim();
+    const type = document.getElementById('transactionsFilterType').value;
+    let filtered = allTransactionsData;
+    if (text) {
+      filtered = filtered.filter(tx =>
+        (tx.memberName || '').toLowerCase().includes(text) ||
+        (tx.depositedBy || '').toLowerCase().includes(text) ||
+        (tx.recipient || '').toLowerCase().includes(text)
+      );
+    }
+    if (type) filtered = filtered.filter(tx => (tx.transactionType || '').toLowerCase() === type);
+    renderTransactions(filtered);
+  }
+
+  function editTransaction(sheetRow) {
+    const tx = allTransactionsData.find(item => Number(item.sheetRow) === Number(sheetRow));
+    if (!tx) return;
+    if (String(tx.reference || '').indexOf('Event Penalty:') === 0) {
+      showToast('Event penalty transactions must be changed from the event.', 'error');
+      return;
+    }
+    editingSheetRow = tx.sheetRow;
+    const memberSelect = document.getElementById('memberName');
+    memberSelect.value = tx.memberName || '';
+    if (memberSelect.value !== (tx.memberName || '')) {
+      memberSelect.value = OTHER_MEMBER_VALUE;
+      document.getElementById('customMemberName').value = tx.memberName || '';
+    }
+    toggleCustomMemberRow();
+    document.getElementById('transactionType').value = tx.transactionType || 'deposit';
+    document.getElementById('amount').value = Number(tx.amount || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    document.getElementById('fee').value = tx.fee || 0;
+    document.getElementById('depositedBy').value = tx.depositedBy || '';
+    const recipient = document.getElementById('recipient');
+    recipient.value = tx.recipient || '';
+    if (recipient.value !== (tx.recipient || '')) {
+      recipient.value = OTHER_MEMBER_VALUE;
+      document.getElementById('customRecipientName').value = tx.recipient || '';
+    }
+    document.getElementById('remarks').value = tx.remarks || '';
+    document.getElementById('transactionDate').value = tx.timestamp ? String(tx.timestamp).substring(0, 10) : '';
+    document.querySelector('#bankForm button[type="submit"]').textContent = 'Update Transaction';
+    updateTransactionFields();
+    toggleCustomRecipientRow();
+    document.getElementById('formStatus').textContent = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function optionHtml(name) { return `<option value="${escapeAttr(name)}">${escapeHtml(name)}</option>`; }
+  function statusLabel(status) { return status === 'active' ? 'Active' : (status === 'former' ? 'Former' : 'External'); }
+  function formatNumber(value) { return Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function formatTimestamp(value) {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (isNaN(parsed.getTime())) return String(value);
+    return parsed.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+  }
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+  function escapeAttr(str) { return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + (type || '');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest('.edit-transaction-btn');
+    if (button) editTransaction(button.dataset.sheetRow);
+  });
+</script>
 </body>
 </html>

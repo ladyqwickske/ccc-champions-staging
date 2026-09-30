@@ -1,575 +1,407 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cCc Champions - My Profile</title>
-  <link rel="icon" href="favicon.png" type="image/png">
-  <script src="site-config.js"></script>
+  <title>cCc Legends - My Profile</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="perf-debug.js"></script>
   <script src="config.js"></script>
-  <script src="ccc-dates.js"></script>
+  <script src="site-config.js"></script>
   <script src="portal-shim.js"></script>
   <script src="portal-auth.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #1fc1e6;
+      --primary-soft: #55d9f3;
+      --primary-hover: #076b88;
+      --accent: #ffd24d;
+      --accent-light: #fff49a;
+      --accent-deep: #c57a00;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --bg-card-soft: #dff6ff;
+      --bg-page: #dff6ff;
+      --bg-page-alt: #ffffff;
+      --text: #0b3d59;
+      --text-muted: #076b88;
+      --success: #0ea5c6;
+      --danger: #8a5b00;
+      --debt: #c62828;
+      --border: #55d9f3;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
-      background: linear-gradient(135deg, #232526 0%, #414345 100%);
-      color: #f3f3f3;
-      padding: 32px 16px 60px 16px;
-      min-height: 100vh;
-      background-attachment: fixed;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg-page-alt) 0%, var(--bg-page) 55%, var(--accent-light) 100%);
+      color: var(--text); min-height: 100vh; background-attachment: fixed; padding: 60px 8px 80px 8px;
     }
-
-    .tab-nav { background: rgba(30, 34, 40, 0.95); border-bottom: 1px solid #444; box-shadow: 0 2px 8px rgba(0,0,0,0.25); position: sticky; top: 0; z-index: 1000; }
-    .tab-nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; padding: 0 16px; flex-wrap: wrap; }
-    .nav-brand { font-size: 20px; font-weight: 700; color: #ffb300; padding: 16px 0; margin-right: 32px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-    .tab-buttons { display: flex; gap: 4px; flex: 1; overflow-x: auto; align-items: center; height: 100px; }
-    .tab-btn { padding: 12px 16px; background: none; border: none; color: #e0e0e0; font-size: 28px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; text-decoration: none; display: block; cursor: pointer; position: relative; }
-    .tab-btn:hover { color: #ffb300; background: #232526; }
-    .tab-btn.active { color: #ffb300; border-bottom-color: #ffb300; }
-    .tab-btn .tab-icon { display: block; margin: 0 auto; height: 40px; width: auto; filter: drop-shadow(0 2px 8px #000a); }
-    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
-    .hamburger span { display: block; width: 24px; height: 3px; background: #ffb300; border-radius: 3px; }
-    .login-bar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-    .login-bar .user-email { font-size: 0.8em; color: #ffb300; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .login-bar button { padding: 6px 14px; border: 1px solid #444; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    #loginBtn { background: #1a1b1c; color: #ffb300; }
-    #logoutBtn { background: #c62828; color: #fff; border-color: #c62828; }
-
-    .page-content { max-width: 1000px; margin: 24px auto; background: rgba(30, 34, 40, 0.95); border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.25); padding: 24px; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #ffb300; }
-    h2 { font-size: 16px; font-weight: 600; margin-top: 24px; margin-bottom: 12px; color: #ffb300; }
-
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
-    .card { background: #232526; border-radius: 10px; padding: 16px; border: 1px solid #444; }
-    .card .label { font-size: 11px; color: #b0b0b0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .card .value { font-size: 22px; font-weight: 700; color: #e0e0e0; }
-    .card .sub { font-size: 11px; color: #888; margin-top: 4px; }
-
-    .headline { border-radius: 12px; padding: 20px; margin: 16px 0; border: 1px solid #444; }
-    .headline .caption { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-    .headline .amount { font-size: 34px; font-weight: 700; overflow-wrap: anywhere; }
-    .headline.savings { background: rgba(76,175,80,0.12); border-color: #2e7d32; }
-    .headline.savings .caption, .headline.savings .amount { color: #8bc34a; }
-    .headline.debt { background: rgba(244,67,54,0.12); border-color: #c62828; }
-    .headline.debt .caption, .headline.debt .amount { color: #ef5350; }
-    .headline.neutral { background: rgba(158,158,158,0.1); }
-    .headline.neutral .caption, .headline.neutral .amount { color: #b0b0b0; }
-
-    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #444; margin-top: 8px; }
-    table { width: 100%; border-collapse: collapse; background: #232526; }
-    th { padding: 10px 8px; font-size: 11px; color: #ffb300; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #444; text-align: left; background: #1a1b1c; }
-    td { padding: 10px 8px; border-bottom: 1px solid #333; font-size: 13px; color: #e0e0e0; }
-    tr:hover { background: #2a2b2c; }
-
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-deposit { background: rgba(76,175,80,0.2); color: #8bc34a; }
-    .badge-withdrawal { background: rgba(255,179,0,0.2); color: #ffb300; }
-    .badge-penalty { background: rgba(244,67,54,0.2); color: #ef5350; }
-    .badge-transfer { background: rgba(66,165,245,0.2); color: #42a5f5; }
-
-    .loading { text-align: center; padding: 40px; color: #e0e0e0; }
-    .spinner { border: 4px solid #444; border-top: 4px solid #ffb300; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .empty-state { text-align: center; padding: 40px; color: #888; font-size: 14px; }
-    .note { font-size: 12px; color: #888; margin-top: 8px; }
-    #google_translate_element, #translateToggleBtn { top: auto !important; right: 8px !important; bottom: 8px !important; }
-    @media (max-width: 800px) {
-      #google_translate_element {
-        max-width: 0;
-        overflow: hidden;
-        opacity: 0;
-        pointer-events: none;
-        transition: max-width 0.2s ease, opacity 0.2s ease;
-      }
-      body.translate-open #google_translate_element {
-        max-width: 260px;
-        opacity: 1;
-        pointer-events: auto;
-      }
-      #translateToggleBtn { display: inline-flex !important; }
+    .tab-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; justify-content: center; gap: 0;
+      background: rgba(255,255,255,0.96); border-bottom: 2px solid var(--primary-soft);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 0;
     }
-    @media (min-width: 801px) {
-      #translateToggleBtn { display: none !important; }
-    }
-
-    @media (max-width: 800px) {
-      body { padding: 16px 10px 48px 10px; }
-      .tab-nav-container { flex-wrap: wrap; padding: 8px; }
-      .nav-brand { flex: 1; margin-right: 8px; font-size: 16px; padding: 8px 0; }
-      .nav-brand img { height: 24px; width: 24px; }
-      .hamburger { display: flex; order: 2; }
-      .tab-buttons { flex-direction: column; align-items: stretch; max-height: 60vh; overflow-y: auto; background: #232526; position: absolute; top: 60px; left: 0; right: 0; width: 100%; z-index: 10000; box-shadow: 0 8px 24px rgba(0,0,0,0.25); display: none; order: 10; height: auto; }
-      .tab-buttons.open { display: flex; }
-      .tab-btn { font-size: 18px; padding: 18px 24px; border-bottom: 1px solid #444; display: flex; align-items: center; justify-content: flex-start; height: auto; }
-      .tab-label.mobile-only { display: inline; }
-      .tab-icon.desktop-only { display: none; }
-      .login-bar { order: 3; margin-left: auto; gap: 6px; }
-      .login-bar .user-email { font-size: 0.7em; max-width: 110px; }
-      .login-bar button { font-size: 11px; padding: 5px 10px; }
-
-      .page-content { margin: 12px auto; padding: 16px 12px; border-radius: 12px; }
-      h1 { font-size: 19px; display: flex; align-items: center; gap: 8px; }
-      h1 img { height: 32px !important; margin-right: 0 !important; }
-      h2 { margin-top: 20px; }
-      .cards { grid-template-columns: 1fr 1fr; gap: 8px; }
-      .card { padding: 12px; }
-      .card .value { font-size: 18px; }
-      .headline { padding: 16px; }
-      .headline .amount { font-size: 26px; }
-      /* Let wide tables scroll instead of squashing into unreadable columns */
-      .table-wrap table { min-width: 520px; }
-      #accountSelect { width: 100%; }
-    }
-    @media (max-width: 420px) {
-      .cards { grid-template-columns: 1fr; }
-    }
-    @media (min-width: 801px) {
-      .tab-label.mobile-only { display: none; }
-      .tab-icon.desktop-only { display: block; }
-      .hamburger { display: none; }
+    .tab-nav a { color: var(--text-muted); text-decoration: none; padding: 12px 18px; font-size: 0.95em; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; }
+    .tab-nav a:hover { color: var(--primary); }
+    .tab-nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .nav-icon { width: 18px; height: 18px; vertical-align: middle; margin-right: 4px; }
+    .login-bar { position: fixed; top: 0; right: 8px; z-index: 1001; display: flex; align-items: center; gap: 8px; padding: 8px; }
+    .login-bar .user-email { font-size: 0.8em; color: var(--primary); }
+    .login-bar button { background: var(--primary); color: #ffffff; border: none; border-radius: 6px; padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 0.85em; }
+    .login-bar button:hover { background: var(--primary-hover); }
+    .login-bar .logout-btn { background: var(--accent-light); color: var(--accent-deep); }
+    .nav-links { display: flex; }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--primary); border-radius: 2px; }
+    .container { max-width: 1040px; margin: 0 auto; background: var(--bg-card); border-radius: 16px; box-shadow: 0 12px 30px rgba(11,61,89,0.12); padding: 24px 16px; border: 1px solid rgba(85,217,243,0.45); }
+    h1 { color: var(--primary); text-align: center; margin-bottom: 4px; font-size: 1.8em; }
+    h2 { color: var(--primary); font-size: 1.05em; margin: 18px 0 10px; }
+    .site-logo { width: 64px; height: 64px; display: block; margin: 0 auto 8px auto; }
+    .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 16px; font-size: 0.9em; }
+    .account-picker { display: none; max-width: 360px; margin: 0 auto 16px; }
+    label { display: block; font-size: 0.75em; font-weight: 700; color: var(--primary-hover); margin-bottom: 4px; text-transform: uppercase; }
+    select { width: 100%; padding: 9px 11px; background: #ffffff; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.9em; }
+    .headline { border-radius: 12px; padding: 18px; margin: 16px 0; border: 1px solid var(--border); background: #fff; }
+    .headline .caption { font-size: 0.78em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+    .headline .amount { font-size: 2.1em; font-weight: 800; overflow-wrap: anywhere; }
+    .headline.savings { background: #e8f8f9; border-color: var(--primary-soft); }
+    .headline.savings .amount { color: var(--success); }
+    .headline.debt { background: #ffebee; border-color: #ffcdd2; }
+    .headline.debt .amount { color: var(--debt); }
+    .headline.neutral .amount { color: var(--text-muted); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 12px 0; }
+    .card { background: linear-gradient(180deg, #ffffff 0%, var(--bg-card-soft) 100%); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .card .label { color: var(--text-muted); font-size: 0.75em; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .card .value { color: var(--text); font-size: 1.25em; font-weight: 800; }
+    .card .sub { color: var(--text-muted); font-size: 0.75em; margin-top: 4px; }
+    .progress-track { height: 10px; background: #e8eef2; border-radius: 5px; overflow: hidden; margin: 4px 0 8px; }
+    .progress-fill { height: 100%; background: var(--primary); }
+    .table-wrap { overflow: auto; max-height: 48vh; border: 1px solid var(--border); border-radius: 8px; background: #fff; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 0.86em; }
+    th { position: sticky; top: 0; background: var(--bg-card-soft); color: var(--primary-hover); padding: 9px 8px; text-align: left; border-bottom: 2px solid var(--accent); z-index: 1; }
+    td { padding: 8px; border-bottom: 1px solid #e8eef2; }
+    tr:hover { background: rgba(85,217,243,0.14); }
+    .positive { color: var(--success); font-weight: 700; }
+    .negative { color: var(--debt); font-weight: 700; }
+    .note, .empty { color: var(--text-muted); font-size: 0.86em; padding: 8px 0; }
+    .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .toast { position: fixed; bottom: 20px; right: 20px; z-index: 3000; background: #fff; color: var(--text); padding: 12px 20px; border-radius: 8px; font-size: 0.9em; display: none; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--danger); }
+    @media (max-width: 600px) {
+      body { padding: 50px 4px 70px 4px; }
+      .tab-nav { flex-wrap: wrap; padding: 0 8px; align-items: center; }
+      .hamburger { display: flex; }
+      .login-bar { position: static; flex: 1; justify-content: flex-end; padding: 4px 0; gap: 6px; }
+      .nav-links { display: none; width: 100%; flex-direction: column; order: 10; }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 10px 12px; font-size: 0.9em; border-bottom: 1px solid var(--border); }
+      table { min-width: 560px; }
     }
   </style>
 </head>
 <body>
-  <div id="google_translate_element" style="position:fixed;bottom:8px;right:8px;z-index:7000;"></div>
-  <button id="translateToggleBtn" type="button" aria-label="Toggle translation" style="position:fixed;bottom:8px;right:8px;z-index:7001;display:none;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid #444;border-radius:8px;background:#232526;color:#ffb300;font-size:18px;cursor:pointer;">🌐</button>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const translateToggleBtn = document.getElementById('translateToggleBtn');
-      const translateWidget = document.getElementById('google_translate_element');
-      if (!translateToggleBtn || !translateWidget) return;
-      translateToggleBtn.addEventListener('click', function (event) {
-        event.stopPropagation();
-        document.body.classList.toggle('translate-open');
-      });
-      document.addEventListener('click', function (event) {
-        if (!document.body.classList.contains('translate-open')) return;
-        if (translateWidget.contains(event.target) || translateToggleBtn.contains(event.target)) return;
-        document.body.classList.remove('translate-open');
-      });
-    });
-  </script>
-  <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
-    }
-  </script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-  <script>
-    // --- Auth (same contract as the other portal pages) ---
-    const AUTH_KEY = 'ccc_portal_google_auth';
-    const AUTH_EMAIL_KEY = 'ccc_portal_google_email';
-    let isLoggedIn = false;
-    let currentUser = null;
 
-    function checkLoginState() {
-      try {
-        const authed = localStorage.getItem(AUTH_KEY) === '1';
-        const email = localStorage.getItem(AUTH_EMAIL_KEY);
-        if (authed && email) { isLoggedIn = true; currentUser = { email }; }
-      } catch (e) {}
-      updateLoginUI();
-    }
+<nav class="tab-nav">
+  <button class="hamburger" id="hamburgerBtn" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></button>
+  <div class="login-bar" id="loginBar">
+    <span class="user-email" id="userEmail" style="display:none"></span>
+    <button id="loginBtn" onclick="handleLogin()">Login</button>
+    <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
+  </div>
+  <div class="nav-links" id="navLinks">
+    <a href="dashboard.html"><img src="chest.png" class="nav-icon" alt=""> Dashboard</a>
+    <a href="events.html"><img src="events.png" class="nav-icon" alt=""> Events</a>
+    <a href="members.html"><img src="members.png" class="nav-icon" alt=""> Members</a>
+    <a href="profiling.html"><img src="profiling.png" class="nav-icon" alt=""> Profiling</a>
+    <a href="warnings.html"><img src="warning.png" class="nav-icon" alt=""> Warnings</a>
+    <a href="calendar.html"><img src="calendar.png" class="nav-icon" alt=""> Calendar</a>
+    <a href="bank.html"><img src="bank.png" class="nav-icon" alt=""> Bank</a>
+    <a href="myprofile.html" class="active" id="myProfileTabBtn"><img src="member_profile.png" class="nav-icon" alt=""> My Profile</a>
+  </div>
+</nav>
 
-    function handleLogin() {
-      if (!document.getElementById('gsi-script')) {
-        const s = document.createElement('script'); s.id = 'gsi-script';
-        s.src = 'https://accounts.google.com/gsi/client';
-        s.onload = () => initGoogleLogin(); document.head.appendChild(s);
-      } else { initGoogleLogin(); }
-    }
+<div class="container">
+  <img src="member_profile.png" alt="cCc Legends" class="site-logo">
+  <h1>My Profile</h1>
+  <p class="subtitle">Your bank balance, target progress, and recent activity</p>
 
-    function initGoogleLogin() {
-      google.accounts.id.initialize({ client_id: SITE_CONFIG.googleClientId, callback: handleGoogleCallback });
-      google.accounts.id.prompt();
-    }
-
-    async function handleGoogleCallback(response) {
-      try {
-        const cfWorkerUrl = window.CLOUDFLARE_WORKER_URL || window.GAS_WEB_APP_URL;
-        const tokenRes = await fetch(cfWorkerUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: response.credential }) });
-        const tokenData = await tokenRes.json();
-        if (!tokenData.success || !tokenData.email) { showToast('Login failed', 'error'); return; }
-        const email = tokenData.email;
-        const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
-        const data = await res.json();
-        if (data.success && data.allowed) {
-          isLoggedIn = true; currentUser = { email };
-          localStorage.setItem(AUTH_KEY, '1'); localStorage.setItem(AUTH_EMAIL_KEY, email);
-          updateLoginUI(); showToast('Logged in as ' + email, 'success');
-          loadProfile();
-        } else { showToast(data.message || ('Access denied for ' + email), 'error'); }
-      } catch (err) { showToast('Login error: ' + err.message, 'error'); }
-    }
-
-    function handleLogout() {
-      isLoggedIn = false; currentUser = null;
-      try { localStorage.removeItem(AUTH_KEY); localStorage.removeItem(AUTH_EMAIL_KEY); } catch (e) {}
-      updateLoginUI(); showToast('Logged out', 'success');
-      renderSignedOut();
-    }
-
-    function updateLoginUI() {
-      const emailEl = document.getElementById('userEmail');
-      const loginBtn = document.getElementById('loginBtn');
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (isLoggedIn && currentUser) {
-        emailEl.textContent = currentUser.email; emailEl.style.display = 'inline';
-        loginBtn.style.display = 'none'; logoutBtn.style.display = 'inline';
-      } else {
-        emailEl.style.display = 'none'; loginBtn.style.display = 'inline'; logoutBtn.style.display = 'none';
-      }
-    }
-
-    function showToast(msg, type) {
-      let t = document.getElementById('toast');
-      if (!t) { t = document.createElement('div'); t.id = 'toast'; t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:3000;background:#232526;color:#f3f3f3;padding:12px 20px;border-radius:8px;font-size:0.9em;display:none;box-shadow:0 2px 12px rgba(0,0,0,0.3);'; document.body.appendChild(t); }
-      t.textContent = msg;
-      t.style.borderLeft = type === 'success' ? '4px solid #27ae60' : type === 'error' ? '4px solid #c62828' : '4px solid #ffb300';
-      t.style.display = 'block';
-      setTimeout(() => { t.style.display = 'none'; }, 3000);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => checkLoginState());
-  </script>
-
-  <nav class="tab-nav">
-    <div class="tab-nav-container">
-      <div class="nav-brand" id="navBrand"><img src="favicon.png" alt="" style="height: 32px; width: 32px; vertical-align: middle; margin-right: 8px;"> cCc Champions</div>
-      <button class="hamburger" id="navHamburger" aria-label="Toggle navigation">
-        <span></span><span></span><span></span>
-      </button>
-      <div class="tab-buttons" id="navTabs">
-        <a href="dashboard.html" class="tab-btn" title="Dashboard">
-          <img src="chests.png" alt="Dashboard" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Dashboard</span>
-        </a>
-        <a href="events.html" class="tab-btn" title="Events">
-          <img src="events.png" alt="Events" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Events</span>
-        </a>
-        <a href="members.html" class="tab-btn" title="Members">
-          <img src="members.png" alt="Members" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Members</span>
-        </a>
-        <a href="profiling.html" class="tab-btn" title="Profiling">
-          <img src="profiling.png" alt="Profiling" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Profiling</span>
-        </a>
-        <a href="warnings.html" class="tab-btn" title="Warnings">
-          <img src="warning.png" alt="Warnings" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Warnings</span>
-        </a>
-        <a href="resources.html" class="tab-btn" title="Resources">
-          <img src="resources.png" alt="Resources" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Resources</span>
-        </a>
-        <a href="competition.html" class="tab-btn" title="Competition">
-          <img src="competition.png" alt="Competition" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Competition</span>
-        </a>
-        <a href="calendar.html" class="tab-btn" title="Calendar">
-          <img src="calendar.png" alt="Calendar" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Calendar</span>
-        </a>
-        <a href="bank.html" class="tab-btn" id="bankTabBtn" title="Bank" style="display:none;">
-          <img src="bank.png" alt="Bank" class="tab-icon desktop-only">
-          <span class="tab-label mobile-only">Bank</span>
-        </a>
-      </div>
-      <div class="login-bar">
-        <span class="user-email" id="userEmail" style="display:none"></span>
-        <button id="loginBtn" onclick="handleLogin()">🔑 Login</button>
-        <button id="logoutBtn" class="logout-btn" style="display:none" onclick="handleLogout()">Logout</button>
-      </div>
-    </div>
-  </nav>
-
-  <div class="page-content">
-    <h1><img src="member_profile.png" alt="" style="height: 48px; vertical-align: middle; margin-right: 8px;"> My Profile</h1>
-    <p style="font-size:13px;color:#b0b0b0;margin-bottom:16px;">Your personal bank position, point targets and chest progress.</p>
-    <div id="accountPicker" style="display:none; margin-bottom:16px;">
-      <label id="accountPickerLabel" for="accountSelect" style="display:block; font-size:12px; font-weight:600; color:#ffb300; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Linked accounts</label>
-      <select id="accountSelect" onchange="onAccountChange()" style="width:100%; max-width:320px; padding:10px 12px; border:1px solid #444; border-radius:6px; font-size:14px; background:#232526; color:#e0e0e0;"></select>
-    </div>
-    <div id="profileContent">
-      <div class="loading"><div class="spinner"></div><p>Loading your profile...</p></div>
-    </div>
+  <div class="account-picker" id="accountPicker">
+    <label id="accountPickerLabel" for="accountSelect">Linked Member</label>
+    <select id="accountSelect" onchange="onAccountChange()"></select>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const hamburger = document.getElementById('navHamburger');
-      const navTabs = document.getElementById('navTabs');
-      if (hamburger && navTabs) {
-        hamburger.addEventListener('click', (e) => { e.stopPropagation(); navTabs.classList.toggle('open'); });
-        document.addEventListener('click', (e) => {
-          if (!hamburger.contains(e.target) && !navTabs.contains(e.target)) navTabs.classList.remove('open');
-        });
-      }
-      loadProfile();
-    });
+  <div id="profileContent"><div class="loading"><div class="spinner"></div><br>Loading profile...</div></div>
+</div>
 
-    const fmt = (n) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmtInt = (n) => Number(n || 0).toLocaleString();
-    function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t == null ? '' : t; return d.innerHTML; }
-    function formatTimestamp(value) {
-      if (!value) return '-';
-      return cccDateTime(value); // shared UTC format (ccc-dates.js)
-    }
+<div class="toast" id="toast"></div>
 
-    function renderSignedOut() {
-      document.getElementById('accountPicker').style.display = 'none';
-      document.getElementById('profileContent').innerHTML =
-        '<div class="empty-state"><p>Sign in with the Google account linked to your clan name to see your balance.</p>'
-        + '<br><button onclick="handleLogin()" style="padding:10px 20px;background:#ffb300;color:#1a1b1c;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">🔑 Login</button></div>';
-    }
+<script>
+  let isLoggedIn = false;
+  let currentUser = null;
+  let selectedMember = '';
 
-    let selectedMember = '';
+  document.addEventListener('DOMContentLoaded', () => {
+    checkLoginState();
+    loadProfile();
+  });
 
-    function onAccountChange() {
-      selectedMember = document.getElementById('accountSelect').value || '';
-      loadProfile();
-    }
-
-    function renderAccountPicker(names, current, linkedNames) {
-      const picker = document.getElementById('accountPicker');
-      const select = document.getElementById('accountSelect');
-      const label = document.getElementById('accountPickerLabel');
-      if (!picker || !select) return;
-      if (!names || names.length < 2) { picker.style.display = 'none'; return; }
-      const linked = Array.isArray(linkedNames) ? linkedNames : [];
-      const linkedKeys = new Set(linked.map(name => String(name).toLowerCase()));
-      const otherNames = names.filter(name => !linkedKeys.has(String(name).toLowerCase()));
-      const option = n => `<option value="${escapeHtml(n)}"${n === current ? ' selected' : ''}>${escapeHtml(n)}</option>`;
-      if (label) label.textContent = linked.length > 0 ? 'Profiles' : 'Linked accounts';
-      select.innerHTML = linked.length > 0 && otherNames.length > 0
-        ? '<optgroup label="My linked accounts">' + linked.map(option).join('') + '</optgroup>'
-          + '<optgroup label="Other active members">' + otherNames.map(option).join('') + '</optgroup>'
-        : names.map(option).join('');
-      picker.style.display = 'block';
-    }
-
-    async function loadProfile() {
-      const container = document.getElementById('profileContent');
-      let email = '';
-      try { email = localStorage.getItem('ccc_portal_google_email') || ''; } catch (e) {}
-      if (!email) { renderSignedOut(); return; }
-
-      container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading your profile...</p></div>';
+  function checkLoginState() {
+    const stored = localStorage.getItem('leg_auth');
+    if (stored) {
       try {
-        const res = await fetch(window.GAS_WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'getMyProfile', email, memberName: selectedMember })
+        currentUser = JSON.parse(stored);
+        isLoggedIn = !!(currentUser && currentUser.email && currentUser.allowed !== false);
+      } catch (e) {}
+    }
+    updateLoginUI();
+  }
+
+  function handleLogin() {
+    if (!document.getElementById('gsi-script')) {
+      const script = document.createElement('script');
+      script.id = 'gsi-script';
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.onload = () => initGoogleLogin();
+      document.head.appendChild(script);
+    } else { initGoogleLogin(); }
+  }
+
+  function initGoogleLogin() {
+    google.accounts.id.initialize({ client_id: SITE_CONFIG.googleClientId, callback: handleGoogleCallback });
+    google.accounts.id.prompt();
+  }
+
+  async function handleGoogleCallback(response) {
+    try {
+      const res = await fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: response.credential })
+      });
+      const data = await res.json();
+      if (data.success && data.email) {
+        const verifyRes = await fetch(window.GAS_WEB_APP_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'api', fn: 'verifyGoogleLogin', args: [{ email: data.email }] })
         });
-        const data = await res.json();
-        if (!data || !data.success) {
-          renderAccountPicker(data && data.memberNames, selectedMember, data && data.linkedMemberNames);
-          container.innerHTML = '<div class="empty-state"><p>' + escapeHtml(data && data.message ? data.message : 'Could not load your profile.') + '</p></div>';
-          return;
-        }
-        selectedMember = data.memberName;
-        renderAccountPicker(data.memberNames, data.memberName, data.linkedMemberNames);
-        renderProfile(data);
-      } catch (error) {
-        container.innerHTML = '<div class="empty-state"><p>Error: ' + escapeHtml(error.message) + '</p></div>';
+        const verifyData = await verifyRes.json();
+        const auth = (verifyData && verifyData.data) ? verifyData.data : verifyData;
+        if (auth && auth.success && auth.allowed) {
+          isLoggedIn = true;
+          currentUser = { email: data.email, allowed: true, role: auth.role, memberName: auth.memberName, memberNames: auth.memberNames || [] };
+          localStorage.setItem('leg_auth', JSON.stringify(currentUser));
+          updateLoginUI();
+          showToast('Logged in as ' + data.email, 'success');
+          loadProfile();
+        } else { showToast((auth && (auth.message || auth.debug)) || 'Access denied', 'error'); }
       }
+    } catch (err) { showToast('Login error: ' + err.message, 'error'); }
+  }
+
+  function handleLogout() {
+    isLoggedIn = false; currentUser = null;
+    localStorage.removeItem('leg_auth');
+    localStorage.removeItem('leg_portal_role');
+    localStorage.removeItem('leg_portal_member');
+    updateLoginUI();
+    renderSignedOut();
+  }
+
+  function updateLoginUI() {
+    document.getElementById('userEmail').textContent = isLoggedIn && currentUser ? currentUser.email : '';
+    document.getElementById('userEmail').style.display = isLoggedIn ? 'inline' : 'none';
+    document.getElementById('loginBtn').style.display = isLoggedIn ? 'none' : 'inline';
+    document.getElementById('logoutBtn').style.display = isLoggedIn ? 'inline' : 'none';
+  }
+
+  function renderSignedOut() {
+    document.getElementById('accountPicker').style.display = 'none';
+    document.getElementById('profileContent').innerHTML = '<div class="empty" style="text-align:center;padding:36px 8px;">Sign in with the Google account linked to your clan name to view your profile.<br><br><button class="btn" onclick="handleLogin()" style="background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-weight:700;cursor:pointer;">Login</button></div>';
+  }
+
+  function onAccountChange() {
+    selectedMember = document.getElementById('accountSelect').value || '';
+    loadProfile();
+  }
+
+  function renderAccountPicker(names, current, linkedNames) {
+    const picker = document.getElementById('accountPicker');
+    const select = document.getElementById('accountSelect');
+    if (!names || names.length < 2) { picker.style.display = 'none'; return; }
+    const linked = Array.isArray(linkedNames) ? linkedNames : [];
+    const linkedKeys = new Set(linked.map(name => String(name).toLowerCase()));
+    const otherNames = names.filter(name => !linkedKeys.has(String(name).toLowerCase()));
+    const option = name => `<option value="${escapeAttr(name)}"${name === current ? ' selected' : ''}>${escapeHtml(name)}</option>`;
+    document.getElementById('accountPickerLabel').textContent = linked.length > 0 ? 'Profiles' : 'Linked Member';
+    select.innerHTML = linked.length > 0 && otherNames.length > 0
+      ? '<optgroup label="My linked accounts">' + linked.map(option).join('') + '</optgroup>'
+        + '<optgroup label="Other active members">' + otherNames.map(option).join('') + '</optgroup>'
+      : names.map(option).join('');
+    picker.style.display = 'block';
+  }
+
+  async function loadProfile() {
+    const container = document.getElementById('profileContent');
+    if (!isLoggedIn || !currentUser || !currentUser.email) { renderSignedOut(); return; }
+
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading profile...</div>';
+    try {
+      const res = await fetch(window.GAS_WEB_APP_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getMyProfile', email: currentUser.email, memberName: selectedMember })
+      });
+      const payload = await res.json();
+      const data = payload && payload.ok ? payload.data : payload;
+      if (!data || !data.success) {
+        renderAccountPicker(data && data.memberNames, selectedMember, data && data.linkedMemberNames);
+        container.innerHTML = '<div class="empty" style="text-align:center;padding:36px 8px;">' + escapeHtml(data && data.message ? data.message : 'Could not load your profile.') + '</div>';
+        return;
+      }
+      selectedMember = data.memberName;
+      renderAccountPicker(data.memberNames, data.memberName, data.linkedMemberNames);
+      renderProfile(data);
+    } catch (err) {
+      container.innerHTML = '<div class="empty" style="text-align:center;padding:36px 8px;">Error: ' + escapeHtml(err.message) + '</div>';
+    }
+  }
+
+  function renderProfile(data) {
+    const bank = data.bank || {};
+    const balance = Number(bank.totalBalance) || 0;
+    const state = balance > 0 ? 'savings' : (balance < 0 ? 'debt' : 'neutral');
+    const caption = balance > 0 ? 'Silver saved in the bank' : (balance < 0 ? 'Silver owed to the bank' : 'Bank balance');
+
+    let html = '<h2>' + escapeHtml(data.memberName) + '</h2>';
+    html += '<div class="headline ' + state + '"><div class="caption">' + caption + '</div><div class="amount">' + formatNumber(Math.abs(balance)) + '</div></div>';
+    html += '<div class="cards">'
+      + card('Total Deposits', formatNumber(bank.depositsTotal))
+      + card('Total Withdrawals', formatNumber(bank.withdrawalsTotal))
+      + card('Penalties Charged', formatNumber(bank.penaltiesTotal))
+      + card('Transactions', formatInt(bank.transactionCount), bank.lastTimestamp ? 'Last: ' + formatTimestamp(bank.lastTimestamp) : '')
+      + '</div>';
+
+    const active = data.activePeriod;
+    if (active) {
+      const percent = active.percentComplete == null ? 0 : active.percentComplete;
+      html += '<h2>Current Period</h2><div class="cards">'
+        + card('Period', escapeHtml(active.periodName || 'Current period'), active.startDate + ' to ' + active.endDate)
+        + card('Points Earned', formatInt(active.earnedPoints), formatInt(active.chestCount) + ' chests opened')
+        + card('Target', formatInt(active.target), active.penaltyPoints > 0 ? 'Includes +' + formatInt(active.penaltyPoints) + ' extra points' : 'Standard target')
+        + card('Still Needed', formatInt(active.remaining), percent + '% complete')
+        + '</div><div class="progress-track"><div class="progress-fill" style="width:' + Math.min(100, Math.max(0, percent)) + '%"></div></div>';
     }
 
-    function renderProfile(data) {
-      const bank = data.bank || {};
-      const balance = Number(bank.totalBalance) || 0;
-      const state = balance > 0 ? 'savings' : (balance < 0 ? 'debt' : 'neutral');
-      const caption = balance > 0 ? 'Silver saved in the bank'
-        : (balance < 0 ? 'Silver you owe the bank' : 'Your bank balance');
-      const headlineAmount = fmt(Math.abs(balance));
-
-      let html = '<h2>' + escapeHtml(data.memberName) + '</h2>';
-
-      html += '<div class="headline ' + state + '">'
-        + '<div class="caption">' + caption + '</div>'
-        + '<div class="amount">' + headlineAmount + '</div>'
-        + (balance < 0 ? '<div class="note">Pay this back by depositing silver to the bank.</div>' : '')
-        + '</div>';
-
-      html += '<div class="cards">'
-        + card('Total Deposits', fmt(bank.depositsTotal))
-        + card('Total Withdrawals', fmt(bank.withdrawalsTotal))
-        + card('Penalties Charged', fmt(bank.penaltiesTotal), bank.penaltiesTotal > 0 ? 'Included in your balance' : '')
-        + card('Transactions', fmtInt(bank.transactionCount), bank.lastTimestamp ? 'Last: ' + formatTimestamp(bank.lastTimestamp) : '')
-        + '</div>';
-
-      const active = data.activePeriod;
-      if (active) {
-        const pct = active.percentComplete;
-        const pctColor = pct >= 100 ? '#8bc34a' : (pct >= 70 ? '#42a5f5' : (pct >= 40 ? '#ff9800' : '#ef5350'));
-        const periodLabel = active.periodName || 'Current period';
-        html += '<h2>Current Period</h2><div class="cards">'
-          + card('Period', escapeHtml(periodLabel), escapeHtml(cccDate(active.startDate) + ' → ' + cccDate(active.endDate)))
-          + card('Points Earned', '<span style="color:' + pctColor + '">' + fmtInt(active.earnedPoints) + '</span>', fmtInt(active.chestCount) + ' chests opened')
-          + card('Your Target', fmtInt(active.target), active.penaltyPoints > 0 ? 'Includes +' + fmtInt(active.penaltyPoints) + ' penalty points' : 'Standard target')
-          + card('Still Needed', '<span style="color:' + pctColor + '">' + fmtInt(active.remaining) + '</span>', pct != null ? pct + '% of target reached' : '')
-          + '</div>';
-
-        if (pct != null) {
-          html += '<div style="height:10px;background:#333;border-radius:5px;overflow:hidden;margin:4px 0 8px 0;">'
-            + '<div style="height:100%;width:' + Math.min(100, Math.max(0, pct)) + '%;background:' + pctColor + ';"></div></div>';
-        }
-
-        const categories = (data.chestBreakdown && data.chestBreakdown.categories) || [];
-        html += '<h2>Points by Chest Category</h2>';
-        if (categories.length === 0) {
-          html += '<p class="note">No chests recorded for this period yet.</p>';
-        } else {
-          const maxPoints = Math.max.apply(null, categories.map(c => Number(c.points) || 0)) || 1;
-          html += '<div class="table-wrap"><table><thead><tr>'
-            + '<th>Category</th><th>Chests</th><th>Points</th><th>Share</th>'
-            + '</tr></thead><tbody>'
-            + categories.map(c => {
-              const points = Number(c.points) || 0;
-              const width = Math.round((points / maxPoints) * 100);
-              const share = active.earnedPoints > 0 ? Math.round((points / active.earnedPoints) * 100) : 0;
-              let rows = '<tr>'
-                + '<td>' + escapeHtml(c.type) + '</td>'
-                + '<td>' + fmtInt(c.chests) + '</td>'
-                + '<td><strong>' + fmtInt(points) + '</strong></td>'
-                + '<td style="min-width:140px;"><div style="display:flex;align-items:center;gap:8px;">'
-                + '<div style="flex:1;height:8px;background:#333;border-radius:4px;overflow:hidden;">'
-                + '<div style="height:100%;width:' + width + '%;background:#ffb300;"></div></div>'
-                + '<span style="font-size:11px;color:#888;width:32px;text-align:right;">' + share + '%</span>'
-                + '</div></td>'
-                + '</tr>';
-              // Epic Squad rows expand into their individual squads, as on the dashboard
-              (c.splits || []).forEach(s => {
-                const sPoints = Number(s.points) || 0;
-                const sShare = points > 0 ? Math.round((sPoints / points) * 100) : 0;
-                rows += '<tr style="background:#1f2021;">'
-                  + '<td style="padding-left:24px;color:#b0b0b0;font-size:12px;">↳ ' + escapeHtml(s.label) + '</td>'
-                  + '<td style="color:#b0b0b0;font-size:12px;">' + fmtInt(s.chests) + '</td>'
-                  + '<td style="color:#b0b0b0;font-size:12px;">' + fmtInt(sPoints) + '</td>'
-                  + '<td style="color:#666;font-size:11px;">' + sShare + '% of category</td>'
-                  + '</tr>';
-              });
-              return rows;
-            }).join('')
-            + '</tbody></table></div>';
-        }
-      }
-
-      if (data.role === 'admin') {
-        const norms = data.normHistory || [];
-        html += '<h2>Norms: Last Two Completed Periods</h2>';
-        if (norms.length === 0) {
-          html += '<p class="note">No completed target-based norm events found.</p>';
-        } else {
-          html += '<div class="table-wrap"><table><thead><tr>'
-            + '<th>Period</th><th>Event</th><th>Date</th><th>Achieved</th><th>Target</th><th>Progress</th><th>Status</th>'
-            + '</tr></thead><tbody>'
-            + norms.map(norm => {
-              const color = norm.completed ? '#8bc34a' : (norm.percent >= 70 ? '#ff9800' : '#ef5350');
-              const status = norm.completed ? 'Completed' : 'Not completed';
-              const category = norm.category ? ' <span style="color:#888;font-size:11px;">(' + escapeHtml(norm.category) + ')</span>' : '';
-              return '<tr>'
-                + '<td>' + escapeHtml(norm.periodName || '-') + '</td>'
-                + '<td>' + escapeHtml(norm.eventName || '-') + category + '</td>'
-                + '<td>' + escapeHtml(cccDate(norm.startDate, '-')) + ' → ' + escapeHtml(cccDate(norm.endDate, '-')) + '</td>'
-                + '<td>' + fmtInt(norm.achieved) + '</td>'
-                + '<td>' + fmtInt(norm.target) + '</td>'
-                + '<td style="color:' + color + ';font-weight:600;">' + norm.percent + '%</td>'
-                + '<td style="color:' + color + ';font-weight:600;">' + status + '</td>'
-                + '</tr>';
-            }).join('')
-            + '</tbody></table></div>';
-        }
-      }
-
-      const penalties = (data.pointTargets || []).filter(p => Number(p.penaltyPoints) > 0);
-      html += '<h2>Point Penalties</h2>';
-      const pointPenaltyHistory = data.pointPenaltyHistory || [];
-      if (pointPenaltyHistory.length > 0) {
-        html += '<div class="table-wrap"><table><thead><tr>'
-          + '<th>Event</th><th>Event Date</th><th>Penalty Points</th><th>Status</th>'
-          + '</tr></thead><tbody>'
-          + pointPenaltyHistory.map(penalty => '<tr>'
-            + '<td>' + escapeHtml(penalty.eventName || '-') + '</td>'
-            + '<td>' + escapeHtml(formatDateOnly(penalty.startDate)) + ' → ' + escapeHtml(formatDateOnly(penalty.endDate)) + '</td>'
-            + '<td style="color:#ef5350;font-weight:600;">+' + fmtInt(penalty.penaltyPoints) + '</td>'
-            + '<td>' + escapeHtml(penalty.penaltyStatus || 'Auto') + '</td>'
-            + '</tr>').join('')
-          + '</tbody></table></div>';
-      }
-      if (penalties.length === 0) {
-        html += pointPenaltyHistory.length === 0 ? '<p class="note">No extra chest points are owed. Nice work!</p>' : '';
+    const pointPenaltyHistory = data.pointPenaltyHistory || [];
+    if (data.role === 'admin') {
+      const norms = data.normHistory || [];
+      html += '<h2>Norms: Last Two Periods</h2>';
+      if (!norms.length) {
+        html += '<div class="note">No completed target-based norm events found.</div>';
       } else {
-        html += '<div class="table-wrap"><table><thead><tr>'
-          + '<th>Period</th><th>Base Target</th><th>Penalty Points</th><th>Total Target</th>'
-          + '</tr></thead><tbody>'
-          + penalties.map(p => '<tr>'
-            + '<td>' + escapeHtml(p.period) + '</td>'
-            + '<td>' + fmtInt(p.basePoints) + '</td>'
-            + '<td style="color:#ef5350;font-weight:600;">+' + fmtInt(p.penaltyPoints) + '</td>'
-            + '<td><strong>' + fmtInt(p.points) + '</strong></td>'
-            + '</tr>').join('')
-          + '</tbody></table></div>';
-      }
-
-      const transactions = data.transactions || [];
-      const penaltyTransactions = transactions.filter(tx => String(tx.transactionType || '').toLowerCase() === 'penalty');
-      if (penaltyTransactions.length > 0) {
-        html += '<h2>Silver Penalties Due</h2><div class="table-wrap"><table><thead><tr><th>Penalty</th><th>Due Date</th><th>Status</th></tr></thead><tbody>'
-          + penaltyTransactions.map(tx => {
-            const dueDate = tx.dueDate || getPenaltyDueDate(tx.timestamp);
-            const overdue = dueDate && cccDate(dueDate) < cccTodayUTC();
-            return '<tr><td>' + fmt(tx.balance) + '</td><td>' + escapeHtml(formatDateOnly(dueDate)) + '</td><td style="color:' + (overdue ? '#ef5350' : '#8bc34a') + ';font-weight:600;">' + (overdue ? 'Overdue' : 'Due') + '</td></tr>';
+        html += '<div class="table-wrap"><table><thead><tr><th>Period</th><th>Event</th><th>Date</th><th>Achieved</th><th>Target</th><th>Progress</th><th>Status</th></tr></thead><tbody>'
+          + norms.map(norm => {
+            const color = norm.completed ? 'positive' : (Number(norm.percent) >= 70 ? '' : 'negative');
+            const status = norm.completed ? 'Completed' : 'Not completed';
+            const category = norm.category ? ' (' + escapeHtml(norm.category) + ')' : '';
+            return '<tr><td>' + escapeHtml(norm.periodName || '-') + '</td><td>' + escapeHtml(norm.eventName || '-') + category + '</td><td>' + escapeHtml(norm.startDate || '-') + ' to ' + escapeHtml(norm.endDate || '-') + '</td><td>' + formatInt(norm.achieved) + '</td><td>' + formatInt(norm.target) + '</td><td class="' + color + '">' + formatInt(norm.percent) + '%</td><td class="' + color + '">' + status + '</td></tr>';
           }).join('')
           + '</tbody></table></div>';
       }
-      html += '<h2>Recent Bank Transactions</h2>';
-      if (transactions.length === 0) {
-        html += '<p class="note">You have no bank transactions yet.</p>';
-      } else {
-        html += '<div class="table-wrap"><table><thead><tr>'
-          + '<th>Date</th><th>Type</th><th>Amount</th><th>Balance Impact</th><th>From / To</th><th>Reference</th><th>Remarks</th>'
-          + '</tr></thead><tbody>'
-          + transactions.map(tx => {
-            const type = String(tx.transactionType || '').toLowerCase();
-            const badgeClass = type === 'penalty' ? 'badge-penalty' : (type === 'withdrawal' ? 'badge-withdrawal' : (type === 'transfer' ? 'badge-transfer' : 'badge-deposit'));
-            const impact = tx.balanceImpact == null ? tx.balance : tx.balanceImpact;
-            const sourceLabel = tx.counterparty ? ((tx.direction === 'received' ? 'From: ' : 'To: ') + tx.counterparty) : '-';
-            return '<tr>'
-              + '<td>' + escapeHtml(formatTimestamp(tx.timestamp)) + '</td>'
-              + '<td><span class="badge ' + badgeClass + '">' + escapeHtml(tx.transactionType || '-') + '</span></td>'
-              + '<td>' + fmt(tx.balance) + '</td>'
-              + '<td style="color:' + (Number(impact) < 0 ? '#ef5350' : '#8bc34a') + ';font-weight:600;">' + (Number(impact) > 0 ? '+' : '') + fmt(impact) + '</td>'
-              + '<td>' + escapeHtml(sourceLabel) + '</td>'
-              + '<td>' + escapeHtml(tx.reference || '-') + '</td>'
-              + '<td>' + escapeHtml(tx.remarks || '-') + '</td>'
-              + '</tr>';
-          }).join('')
-          + '</tbody></table></div>';
-      }
-
-      document.getElementById('profileContent').innerHTML = html;
+    }
+    html += '<h2>Point Penalties</h2>';
+    if (pointPenaltyHistory.length > 0) {
+      html += '<div class="table-wrap"><table><thead><tr><th>Event</th><th>Event Date</th><th>Penalty Points</th><th>Status</th></tr></thead><tbody>'
+        + pointPenaltyHistory.map(penalty => '<tr><td>' + escapeHtml(penalty.eventName || '-') + '</td><td>' + escapeHtml(formatDateOnly(penalty.startDate)) + ' to ' + escapeHtml(formatDateOnly(penalty.endDate)) + '</td><td class="negative">+' + formatInt(penalty.penaltyPoints) + '</td><td>' + escapeHtml(penalty.penaltyStatus || 'Auto') + '</td></tr>').join('')
+        + '</tbody></table></div>';
+    } else {
+      html += '<div class="note">No extra chest points are owed.</div>';
     }
 
-    function card(label, value, sub) {
-      return '<div class="card"><div class="label">' + label + '</div><div class="value">' + value + '</div>'
-        + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+    const categories = (data.chestBreakdown && data.chestBreakdown.categories) || [];
+    html += '<h2>Points by Chest Category</h2>';
+    if (!categories.length) {
+      html += '<div class="note">No chests recorded for this period yet.</div>';
+    } else {
+      html += '<div class="table-wrap"><table><thead><tr><th>Category</th><th>Chests</th><th>Points</th><th>Share</th></tr></thead><tbody>';
+      const totalPoints = Math.max(1, Number(data.chestBreakdown.totalPoints) || 0);
+      categories.forEach(category => {
+        const points = Number(category.points) || 0;
+        const share = Math.round((points / totalPoints) * 100);
+        html += '<tr><td>' + escapeHtml(category.type) + '</td><td>' + formatInt(category.chests) + '</td><td><strong>' + formatInt(points) + '</strong></td><td>' + share + '%</td></tr>';
+        (category.splits || []).forEach(split => {
+          html += '<tr><td style="padding-left:24px;color:var(--text-muted);">' + escapeHtml(split.label) + '</td><td>' + formatInt(split.chests) + '</td><td>' + formatInt(split.points) + '</td><td></td></tr>';
+        });
+      });
+      html += '</tbody></table></div>';
     }
-    function getPenaltyDueDate(timestamp) {
-      const dueDate = new Date(timestamp || Date.now());
-      if (isNaN(dueDate.getTime())) return '';
-      dueDate.setUTCDate(dueDate.getUTCDate() + 14);
-      return dueDate.toISOString().substring(0, 10);
+
+    const transactions = data.transactions || [];
+    const penaltyTransactions = transactions.filter(tx => String(tx.transactionType || '').toLowerCase() === 'penalty');
+    if (penaltyTransactions.length > 0) {
+      html += '<h2>Silver Penalties Due</h2><div class="table-wrap"><table><thead><tr><th>Penalty</th><th>Due Date</th><th>Status</th></tr></thead><tbody>'
+        + penaltyTransactions.map(tx => {
+          const dueDate = tx.dueDate || getPenaltyDueDate(tx.timestamp);
+          const overdue = dueDate && dueDate < new Date().toISOString().substring(0, 10);
+          return '<tr><td>' + formatNumber(tx.balance) + '</td><td>' + escapeHtml(formatDateOnly(dueDate)) + '</td><td class="' + (overdue ? 'negative' : 'positive') + '">' + (overdue ? 'Overdue' : 'Due') + '</td></tr>';
+        }).join('')
+        + '</tbody></table></div>';
     }
-    function formatDateOnly(value) {
-      if (!value) return '-';
-      return cccDate(value); // shared UTC format (ccc-dates.js)
+    html += '<h2>Recent Bank Activity</h2>';
+    if (!transactions.length) {
+      html += '<div class="note">No bank transactions recorded yet.</div>';
+    } else {
+      html += '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance Impact</th><th>From / To</th><th>Reference</th><th>Remarks</th></tr></thead><tbody>'
+        + transactions.map(tx => {
+          const type = String(tx.transactionType || '').toLowerCase();
+          const isDebit = type === 'withdrawal' || type === 'penalty';
+          const impact = tx.balanceImpact == null ? tx.balance : tx.balanceImpact;
+          const sourceLabel = tx.counterparty ? ((tx.direction === 'received' ? 'From: ' : 'To: ') + tx.counterparty) : '-';
+          const impactClass = Number(impact) < 0 ? 'negative' : 'positive';
+          return '<tr><td>' + escapeHtml(formatTimestamp(tx.timestamp)) + '</td><td class="' + (type === 'transfer' ? 'positive' : (isDebit ? 'negative' : 'positive')) + '">' + escapeHtml(type || '-') + '</td><td>' + formatNumber(tx.amount) + '</td><td class="' + impactClass + '">' + (Number(impact) > 0 ? '+' : '') + formatNumber(impact) + '</td><td>' + escapeHtml(sourceLabel) + '</td><td>' + escapeHtml(tx.reference || '-') + '</td><td>' + escapeHtml(tx.remarks || '-') + '</td></tr>';
+        }).join('')
+        + '</tbody></table></div>';
     }
-  </script>
+
+    document.getElementById('profileContent').innerHTML = html;
+  }
+
+  function card(label, value, sub) {
+    return '<div class="card"><div class="label">' + label + '</div><div class="value">' + value + '</div>' + (sub ? '<div class="sub">' + escapeHtml(sub) + '</div>' : '') + '</div>';
+  }
+  function getPenaltyDueDate(timestamp) {
+    const dueDate = new Date(timestamp || Date.now());
+    if (isNaN(dueDate.getTime())) return '';
+    dueDate.setUTCDate(dueDate.getUTCDate() + 14);
+    return dueDate.toISOString().substring(0, 10);
+  }
+  function formatDateOnly(value) {
+    if (!value) return '-';
+    const parsed = new Date(value + 'T00:00:00Z');
+    return isNaN(parsed.getTime()) ? String(value) : parsed.toISOString().substring(0, 10);
+  }
+  function formatNumber(value) { return Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function formatInt(value) { return Number(value || 0).toLocaleString(); }
+  function formatTimestamp(value) {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (isNaN(parsed.getTime())) return String(value);
+    return parsed.toISOString().replace('T', ' ').substring(0, 16) + ' UTC';
+  }
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : str;
+    return div.innerHTML;
+  }
+  function escapeAttr(str) { return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + (type || '');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+</script>
 </body>
 </html>

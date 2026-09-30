@@ -1,26 +1,19 @@
 /**
- * PORTAL ROLE GATING
- * ==================
- * Every page keeps its own login code; this layer adds role awareness on top of it.
+ * Legends portal role gating.
  *
- *   admin  - e-mail listed in ALLOWED_MANAGEMENT_EMAILS, sees everything
- *   member - e-mail linked to a member on the Members sheet, sees the public pages
- *            plus their own profile
- *
- * It wraps the page's updateLoginUI(), injects the "My Profile" tab and blocks
- * management pages for non-admins.
+ * admin  - e-mail listed in ALLOWED_MANAGEMENT_EMAILS, sees management pages
+ * member - e-mail linked to one or more active Members rows, sees public pages and My Profile
  */
 (function () {
-  var ROLE_KEY = 'ccc_portal_role';
-  var MEMBER_KEY = 'ccc_portal_member';
-  var EMAIL_KEY = 'ccc_portal_google_email';
+  var AUTH_KEY = 'leg_auth';
+  var ROLE_KEY = 'leg_portal_role';
+  var MEMBER_KEY = 'leg_portal_member';
 
   var ADMIN_ONLY_PAGES = [
     'events.html',
     'members.html',
     'warnings.html',
     'profiling.html',
-    'resources.html',
     'bank.html'
   ];
 
@@ -34,9 +27,9 @@
     try { return localStorage.getItem(key) || ''; } catch (e) { return ''; }
   }
 
-  window.getPortalRole = function () { return read(ROLE_KEY); };
-  window.getPortalMemberName = function () { return read(MEMBER_KEY); };
-  window.isPortalAdmin = function () { return read(ROLE_KEY) === 'admin'; };
+  function readAuth() {
+    try { return JSON.parse(read(AUTH_KEY) || '{}') || {}; } catch (e) { return {}; }
+  }
 
   function currentPage() {
     var path = window.location.pathname || '';
@@ -44,37 +37,47 @@
     return (file || 'dashboard.html').toLowerCase();
   }
 
+  window.getPortalRole = function () { return read(ROLE_KEY); };
+  window.getPortalMemberName = function () { return read(MEMBER_KEY); };
+  window.isPortalAdmin = function () { return read(ROLE_KEY) === 'admin'; };
+
   function ensureProfileTab() {
-    var tabs = document.getElementById('navTabs') || document.querySelector('.tab-buttons');
-    if (!tabs || document.getElementById('myProfileTabBtn')) return;
+    var nav = document.getElementById('navLinks') || document.querySelector('.nav-links');
+    if (!nav || document.getElementById('myProfileTabBtn')) return;
 
     var link = document.createElement('a');
     link.href = 'myprofile.html';
     link.id = 'myProfileTabBtn';
-    link.className = 'tab-btn' + (currentPage() === 'myprofile.html' ? ' active' : '');
-    link.title = 'My Profile';
+    if (currentPage() === 'myprofile.html') link.className = 'active';
     link.style.display = 'none';
-    link.innerHTML = '<img src="member_profile.png" alt="My Profile" class="tab-icon desktop-only">'
-      + '<span class="tab-label mobile-only">My Profile</span>';
-    tabs.appendChild(link);
+    link.innerHTML = '<img src="member_profile.png" class="nav-icon" alt=""> My Profile';
+    nav.appendChild(link);
+  }
+
+  function protectedLinks() {
+    var selectors = ADMIN_ONLY_PAGES.map(function (href) {
+      return '.nav-links a[href="' + href + '"], #navLinks a[href="' + href + '"]';
+    });
+    return selectors.length ? document.querySelectorAll(selectors.join(',')) : [];
   }
 
   function applyVisibility() {
     var role = read(ROLE_KEY);
+    var hasEmail = !!readAuth().email;
     var isAdmin = role === 'admin';
     var isMember = role === 'member';
+    var rolePending = hasEmail && !role;
 
     ensureProfileTab();
 
-    ADMIN_ONLY_PAGES.forEach(function (href) {
-      document.querySelectorAll('.tab-buttons .tab-btn[href="' + href + '"]').forEach(function (el) {
-        el.style.display = isAdmin ? '' : 'none';
-      });
+    protectedLinks().forEach(function (el) {
+      el.style.display = isAdmin ? '' : 'none';
     });
 
     var profileTab = document.getElementById('myProfileTabBtn');
     if (profileTab) profileTab.style.display = (isAdmin || isMember) ? '' : 'none';
 
+    if (rolePending) return;
     guardPage(isAdmin);
   }
 
@@ -83,15 +86,20 @@
     if (isAdmin || ADMIN_ONLY_PAGES.indexOf(page) === -1) return;
 
     document.body.innerHTML = '<div style="max-width:520px;margin:80px auto;padding:32px;'
-      + 'background:rgba(30,34,40,0.95);border:1px solid #444;border-radius:16px;text-align:center;'
-      + 'font-family:\'Google Sans\',Roboto,Arial,sans-serif;color:#f3f3f3;">'
-      + '<h1 style="color:#ffb300;font-size:22px;margin-bottom:12px;">Restricted page</h1>'
-      + '<p style="color:#b0b0b0;font-size:14px;margin-bottom:20px;">This page is only available to clan officers.</p>'
-      + '<a href="dashboard.html" style="display:inline-block;padding:10px 18px;background:#ffb300;color:#232526;'
-      + 'border-radius:6px;font-weight:600;text-decoration:none;">Back to dashboard</a> '
-      + '<a href="myprofile.html" style="display:inline-block;margin-left:8px;padding:10px 18px;background:#444;'
-      + 'color:#ffb300;border-radius:6px;font-weight:600;text-decoration:none;">My profile</a>'
+      + 'background:rgba(255,255,255,0.95);border:1px solid #55d9f3;border-radius:16px;text-align:center;'
+      + 'font-family:Segoe UI,Arial,sans-serif;color:#0b3d59;box-shadow:0 12px 30px rgba(11,61,89,0.12);">'
+      + '<h1 style="color:#1fc1e6;font-size:22px;margin-bottom:12px;">Restricted page</h1>'
+      + '<p style="color:#076b88;font-size:14px;margin-bottom:20px;">This page is only available to clan superiors.</p>'
+      + '<a href="dashboard.html" style="display:inline-block;padding:10px 18px;background:#1fc1e6;color:#fff;'
+      + 'border-radius:8px;font-weight:700;text-decoration:none;">Back to dashboard</a> '
+      + '<a href="myprofile.html" style="display:inline-block;margin-left:8px;padding:10px 18px;background:#fff49a;'
+      + 'color:#c57a00;border-radius:8px;font-weight:700;text-decoration:none;">My Profile</a>'
       + '</div>';
+  }
+
+  function normalizeRoleResponse(result) {
+    if (result && result.ok && result.data) return result.data;
+    return result || {};
   }
 
   function refreshRole(email) {
@@ -103,10 +111,19 @@
       body: JSON.stringify({ action: 'getPortalRole', email: email })
     })
       .then(function (res) { return res.json(); })
-      .then(function (result) {
+      .then(function (payload) {
+        var result = normalizeRoleResponse(payload);
         if (result && result.success) {
           store(ROLE_KEY, result.role === 'none' ? '' : result.role);
           store(MEMBER_KEY, result.memberName || '');
+          var auth = readAuth();
+          if (auth.email) {
+            auth.role = result.role;
+            auth.memberName = result.memberName || '';
+            auth.memberNames = result.memberNames || [];
+            auth.allowed = result.role === 'admin' || result.role === 'member';
+            try { localStorage.setItem(AUTH_KEY, JSON.stringify(auth)); } catch (e) {}
+          }
         }
       })
       .catch(function () {})
@@ -117,15 +134,21 @@
   }
 
   function syncRole() {
-    var email = read(EMAIL_KEY);
+    var auth = readAuth();
+    var email = auth.email || '';
     if (!email) {
       store(ROLE_KEY, '');
       store(MEMBER_KEY, '');
       applyVisibility();
       return;
     }
+
+    if (auth.role) {
+      store(ROLE_KEY, auth.role === 'none' ? '' : auth.role);
+      store(MEMBER_KEY, auth.memberName || '');
+    }
     applyVisibility();
-    if (!read(ROLE_KEY)) refreshRole(email);
+    refreshRole(email);
   }
 
   function wrapUpdateLoginUI() {
@@ -138,15 +161,16 @@
     };
   }
 
-  // Re-check the role after each successful sign-in so a fresh link is picked up
   function wrapGoogleCallback() {
     var original = window.handleGoogleCallback;
     if (typeof original !== 'function') return;
     window.handleGoogleCallback = function () {
       var outcome = original.apply(this, arguments);
       Promise.resolve(outcome).then(function () {
+        var auth = readAuth();
         store(ROLE_KEY, '');
-        refreshRole(read(EMAIL_KEY));
+        store(MEMBER_KEY, '');
+        refreshRole(auth.email || '');
       }).catch(function () {});
       return outcome;
     };
