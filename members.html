@@ -163,6 +163,17 @@
     .tab-btn-inner { padding: 8px 14px; background: none; border: none; color: var(--text-muted); font-size: 0.85em; font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .tab-btn-inner:hover { color: var(--primary); }
     .tab-btn-inner.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn-inner[hidden] { display: none; }
+    /* the two groups above the tabs */
+    .tab-groups { display: flex; gap: 8px; width: 100%; margin-bottom: 4px; flex-wrap: wrap; }
+    .tab-group {
+      flex: 1; min-width: 200px; padding: 10px 14px; border-radius: 8px; cursor: pointer;
+      background: #fff; border: 1px solid var(--border); color: var(--text); font-size: 0.95em; font-weight: 600; transition: all 0.2s;
+    }
+    .tab-group:hover { border-color: var(--primary); color: var(--primary); }
+    .tab-group.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    /* Member Configuration: the member list is not needed */
+    body.config-group #memberCount, body.config-group #loadingDiv, body.config-group #tableContainer { display: none !important; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
@@ -216,17 +227,22 @@
   <!-- Admin Panel - Tabbed Interface -->
   <div class="admin-panel" id="adminPanel">
     <div class="tabs">
-      <button class="tab-btn-inner active" onclick="switchTab('troopTab', this)">⚔️ Track Troops</button>
-      <button class="tab-btn-inner" onclick="switchTab('heroTab', this)">🦸 Hero Level</button>
-      <button class="tab-btn-inner" onclick="switchTab('carterTab', this)">🏗️ Carter Level</button>
-      <button class="tab-btn-inner" onclick="switchTab('pointTargetsTab', this)">🎯 Point Targets</button>
-      <button class="tab-btn-inner" onclick="switchTab('exemptTab', this)">🛡️ Exemptions</button>
-      <button class="tab-btn-inner" onclick="switchTab('accountsTab', this)">🔐 Login Accounts</button>
-      <button class="tab-btn-inner" onclick="switchTab('addMemberTab', this)">➕ Add Member</button>
-      <button class="tab-btn-inner" onclick="switchTab('removeMemberTab', this)">🚪 Remove Member</button>
-      <button class="tab-btn-inner" onclick="switchTab('chestValuesTab', this)">🏷️ Chest Points</button>
-      <button class="tab-btn-inner" onclick="switchTab('chestNameFixTab', this)">🔧 Fix Chest Names</button>
-      <button class="tab-btn-inner" onclick="switchTab('ocrTab', this)">🔤 OCR Corrections</button>
+      <!-- Two groups, each with its own tabs (switchGroup / switchTab), like on Champions -->
+      <div class="tab-groups">
+        <button class="tab-group active" data-group="admin" onclick="switchGroup('admin')">👥 Member Management</button>
+        <button class="tab-group" data-group="config" onclick="switchGroup('config')">⚙️ Member Configuration</button>
+      </div>
+      <button class="tab-btn-inner active" data-group="admin" data-tab="troopTab" onclick="switchTab('troopTab', this)">⚔️ Track Troops</button>
+      <button class="tab-btn-inner" data-group="admin" data-tab="heroTab" onclick="switchTab('heroTab', this)">🦸 Hero Level</button>
+      <button class="tab-btn-inner" data-group="admin" data-tab="carterTab" onclick="switchTab('carterTab', this)">🏗️ Carter Level</button>
+      <button class="tab-btn-inner" data-group="admin" data-tab="accountsTab" onclick="switchTab('accountsTab', this)">🔐 Login Accounts</button>
+      <button class="tab-btn-inner" data-group="admin" data-tab="addMemberTab" onclick="switchTab('addMemberTab', this)">➕ Add Member</button>
+      <button class="tab-btn-inner" data-group="admin" data-tab="removeMemberTab" onclick="switchTab('removeMemberTab', this)">🚪 Remove Member</button>
+      <button class="tab-btn-inner" data-group="config" data-tab="pointTargetsTab" hidden onclick="switchTab('pointTargetsTab', this)">🎯 Point Targets</button>
+      <button class="tab-btn-inner" data-group="config" data-tab="exemptTab" hidden onclick="switchTab('exemptTab', this)">🛡️ Exemptions</button>
+      <button class="tab-btn-inner" data-group="config" data-tab="chestValuesTab" hidden onclick="switchTab('chestValuesTab', this)">🏷️ Chest Points</button>
+      <button class="tab-btn-inner" data-group="config" data-tab="chestNameFixTab" hidden onclick="switchTab('chestNameFixTab', this)">🔧 Fix Chest Names</button>
+      <button class="tab-btn-inner" data-group="config" data-tab="ocrTab" hidden onclick="switchTab('ocrTab', this)">🔤 OCR Corrections</button>
     </div>
 
     <div id="troopTab" class="tab-panel active">
@@ -755,20 +771,18 @@
   }
   function quickEditTroop(name) {
     document.getElementById('troopMemberSelect').value = name;
-    switchTab('troopTab', document.querySelector('.tab-btn-inner'));
+    switchTab('troopTab');
     loadMemberTroops();
     document.getElementById('troopG').focus();
   }
   function quickEditHero(name) {
     document.getElementById('heroMemberSelect').value = name;
-    const btns = document.querySelectorAll('.tab-btn-inner');
-    switchTab('heroTab', btns[1]);
+    switchTab('heroTab');
     document.getElementById('heroLevelInput').focus();
   }
   function quickEditCarter(name) {
     document.getElementById('carterMemberSelect').value = name;
-    const btns = document.querySelectorAll('.tab-btn-inner');
-    switchTab('carterTab', btns[2]);
+    switchTab('carterTab');
     document.getElementById('carterLevelInput').focus();
   }
 
@@ -778,12 +792,23 @@
     renderTable();
   }
 
-  // TAB SWITCHING
+  // TAB SWITCHING — two groups (Member Management / Member Configuration), each
+  // showing its own tabs; switching group returns to the tab last used there.
+  const lastTabInGroup = { admin: 'troopTab', config: 'pointTargetsTab' };
+  function switchGroup(group) {
+    switchTab(lastTabInGroup[group] || (group === 'config' ? 'pointTargetsTab' : 'troopTab'));
+  }
   function switchTab(tabId, btn) {
+    btn = document.querySelector(`.tab-btn-inner[data-tab="${tabId}"]`) || btn;
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-btn-inner').forEach(b => b.classList.remove('active'));
     document.getElementById(tabId)?.classList.add('active');
     if (btn) btn.classList.add('active');
+    const group = (btn && btn.getAttribute('data-group')) || 'admin';
+    lastTabInGroup[group] = tabId;
+    document.querySelectorAll('.tab-btn-inner[data-group]').forEach(b => { b.hidden = b.getAttribute('data-group') !== group; });
+    document.querySelectorAll('.tab-group').forEach(g => g.classList.toggle('active', g.getAttribute('data-group') === group));
+    document.body.classList.toggle('config-group', group === 'config');
     if (tabId === 'pointTargetsTab') loadPointTargetPeriods();
     if (tabId === 'exemptTab') loadExemptMembers();
     if (tabId === 'accountsTab') loadMemberAccounts();
