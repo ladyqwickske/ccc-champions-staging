@@ -156,12 +156,13 @@
     /* Chest Points Reference Popup */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.3); z-index: 2000; justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.3); z-index: 10050; justify-content: center; align-items: flex-start;
+      padding: 24px 0;
     }
     .modal-overlay.active { display: flex; }
     .modal {
-      background: #ffffff; border-radius: 16px; padding: 24px;
-      max-width: 800px; width: 95%; max-height: 85vh; overflow-y: auto;
+      background: #ffffff; border-radius: 16px; padding: 18px 20px;
+      max-width: 560px; width: 95%; max-height: calc(100vh - 48px); overflow-y: auto;
       box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     }
     .modal h2 { color: var(--primary); margin-bottom: 12px; }
@@ -175,10 +176,28 @@
       border-radius: 8px; color: var(--text); font-size: 0.9em; margin-bottom: 12px;
     }
     .modal input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(31,193,230,0.18); }
-    .chest-ref-table { font-size: 0.85em; }
-    .chest-ref-table th { background: #f8f4ea; font-size: 0.85em; cursor: pointer; user-select: none; }
-    .chest-ref-table th:hover { background: var(--accent-light); }
-    .chest-ref-table td { padding: 6px 8px; }
+    /* Chest points: one line per chest type, click to show its levels */
+    .chest-ref-group { border-bottom: 1px solid var(--border); }
+    .chest-ref-type {
+      display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 6px;
+      background: none; border: none; color: var(--text); font: inherit; font-size: 0.9em;
+      text-align: left; cursor: pointer;
+    }
+    .chest-ref-type:hover { background: var(--bg-card-soft); }
+    .chest-ref-group.single .chest-ref-type { cursor: default; }
+    .chest-ref-group.single .chest-ref-type:hover { background: none; }
+    .chest-ref-type .toggle-icon { display: inline-block; color: var(--primary-strong); transition: transform 0.15s; width: 10px; flex: none; font-size: 0.8em; }
+    .chest-ref-group.expanded .toggle-icon { transform: rotate(90deg); }
+    .chest-ref-type .name { flex: 1; font-weight: 600; color: var(--primary-hover); }
+    .chest-ref-type .summary { font-size: 0.85em; color: var(--text-muted); white-space: nowrap; }
+    .chest-ref-levels { display: none; flex-wrap: wrap; gap: 6px; padding: 2px 6px 10px 24px; }
+    .chest-ref-group.expanded .chest-ref-levels { display: flex; }
+    .chest-ref-level {
+      background: var(--bg-card-soft); border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px;
+      font-size: 0.8em; color: var(--text); white-space: nowrap;
+    }
+    .chest-ref-level b { color: var(--primary-strong); margin-left: 4px; }
+    .chest-ref-empty { padding: 12px 6px; color: var(--text-muted); font-size: 0.9em; }
 
     /* Chest Points Ref Button */
     .ref-btn {
@@ -323,14 +342,7 @@
     <button class="close-btn" onclick="closeChestPointsRef()">&times;</button>
     <h2>📋 Chest Points Reference</h2>
     <input type="text" id="chestRefSearch" placeholder="Search chests..." oninput="filterChestRef()">
-    <div class="table-container">
-      <table class="chest-ref-table">
-        <thead>
-          <tr><th onclick="sortChestRef('type')">Type</th><th onclick="sortChestRef('level')">Level</th><th onclick="sortChestRef('points')">Points</th></tr>
-        </thead>
-        <tbody id="chestRefBody"></tbody>
-      </table>
-    </div>
+    <div id="chestRefBody"></div>
     <div class="loading" id="chestRefLoading" style="display:none"><div class="spinner"></div><br>Loading...</div>
   </div>
 </div>
@@ -889,43 +901,86 @@
     document.getElementById('chestRefModal').classList.remove('active');
   }
 
-  let chestRefSortField = 'type';
-  let chestRefSortAsc = true;
-  function sortChestRef(field) {
-    if (chestRefSortField === field) chestRefSortAsc = !chestRefSortAsc;
-    else { chestRefSortField = field; chestRefSortAsc = true; }
-    const query = document.getElementById('chestRefSearch').value.toLowerCase();
-    let data = chestRefData;
-    if (query) data = data.filter(c => c.type.toLowerCase().includes(query) || String(c.level).toLowerCase().includes(query));
-    data = [...data].sort((a, b) => {
-      let va = a[field], vb = b[field];
-      if (field === 'level' || field === 'points') { va = Number(va) || 0; vb = Number(vb) || 0; return chestRefSortAsc ? va - vb : vb - va; }
-      return chestRefSortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  // Chest types opened by the user (kept while searching / reopening)
+  const expandedChestRefTypes = new Set();
+
+  // Same groups, order and level labels as the chest splits in the player table:
+  // the database sends each entry's split group (group) and split column label
+  // (levelLabel, e.g. "Basilisk" for an Epic Squad); Apps Script answers without
+  // them fall back to the chest type and level.
+  const CHEST_REF_ORDER = ['Epic Crypt', 'Rare Crypt', 'Common Crypt', 'Epic Squad'];
+  const chestRefLevelSort = (a, b) => {
+    const na = parseFloat(String(a).replace(/^level\s+/i, '')), nb = parseFloat(String(b).replace(/^level\s+/i, ''));
+    if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb;
+    if (Number.isFinite(na) && !Number.isFinite(nb)) return -1;
+    if (!Number.isFinite(na) && Number.isFinite(nb)) return 1;
+    return String(a).localeCompare(String(b));
+  };
+  const chestRefLevelText = (lvl) => {
+    const t = String(lvl).replace(/^level\s+/i, '');
+    if (/^\d+$/.test(t)) return 'Lv ' + t;
+    const m = t.match(/^(\d+)\s*[-–]\s*(\d+)$/);
+    return m ? 'Lv ' + m[1] + '–' + m[2] : lvl;
+  };
+
+  // One line per chest type (levels and points range); click it to show every level.
+  // While searching, the matching types open by themselves.
+  function renderChestRef(data, autoExpand) {
+    const body = document.getElementById('chestRefBody');
+    const groups = [];
+    const byType = {};
+    data.forEach(chest => {
+      const name = String(chest.group || chest.type || '').trim() || 'Other';
+      if (!byType[name]) { byType[name] = { type: name, levels: [] }; groups.push(byType[name]); }
+      byType[name].levels.push({ label: String(chest.levelLabel !== undefined ? chest.levelLabel : (chest.level || '')).trim(), points: chest.points });
     });
-    renderChestRef(data);
+    if (!groups.length) { body.innerHTML = '<div class="chest-ref-empty">No chests found.</div>'; return; }
+    groups.sort((a, b) => {
+      const ia = CHEST_REF_ORDER.indexOf(a.type), ib = CHEST_REF_ORDER.indexOf(b.type);
+      const oa = ia >= 0 ? ia : CHEST_REF_ORDER.length, ob = ib >= 0 ? ib : CHEST_REF_ORDER.length;
+      return oa !== ob ? oa - ob : a.type.localeCompare(b.type);
+    });
+    body.innerHTML = groups.map(g => {
+      g.levels.sort((a, b) => chestRefLevelSort(a.label, b.label));
+      const pts = g.levels.map(l => Number(l.points) || 0);
+      const min = Math.min.apply(null, pts), max = Math.max.apply(null, pts);
+      const range = min === max ? String(min) : min + '–' + max;
+      const attr = escapeHtml(g.type).replace(/"/g, '&quot;');
+      if (g.levels.length === 1) {
+        // One level only: nothing to open, the points are on the line itself
+        const only = g.levels[0].label;
+        const extra = only && only.toLowerCase() !== g.type.toLowerCase() ? escapeHtml(chestRefLevelText(only)) + ' · ' : '';
+        return '<div class="chest-ref-group single" data-type="' + attr + '"><div class="chest-ref-type">' +
+          '<span class="toggle-icon"></span><span class="name">' + escapeHtml(g.type) + '</span>' +
+          '<span class="summary">' + extra + range + ' pts</span></div></div>';
+      }
+      const open = autoExpand || expandedChestRefTypes.has(g.type);
+      const chips = g.levels.map(l =>
+        '<span class="chest-ref-level">' + (l.label ? escapeHtml(chestRefLevelText(l.label)) : '—') + '<b>' + l.points + '</b></span>').join('');
+      return '<div class="chest-ref-group' + (open ? ' expanded' : '') + '" data-type="' + attr + '">' +
+        '<button type="button" class="chest-ref-type" onclick="toggleChestRefType(this)">' +
+        '<span class="toggle-icon">▶</span><span class="name">' + escapeHtml(g.type) + '</span>' +
+        '<span class="summary">' + g.levels.length + ' levels · ' + range + ' pts</span></button>' +
+        '<div class="chest-ref-levels">' + chips + '</div></div>';
+    }).join('');
   }
 
-  function renderChestRef(data) {
-    const tbody = document.getElementById('chestRefBody');
-    tbody.innerHTML = '';
-    data.forEach(chest => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${escapeHtml(chest.type)}</td>
-        <td>${escapeHtml(String(chest.level))}</td>
-        <td style="font-weight:600; color: var(--primary)">${chest.points}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+  function toggleChestRefType(btn) {
+    const group = btn.parentElement;
+    const type = group.getAttribute('data-type');
+    group.classList.toggle('expanded');
+    if (group.classList.contains('expanded')) expandedChestRefTypes.add(type); else expandedChestRefTypes.delete(type);
   }
 
   function filterChestRef() {
-    const query = document.getElementById('chestRefSearch').value.toLowerCase();
+    const query = document.getElementById('chestRefSearch').value.toLowerCase().trim();
     const filtered = chestRefData.filter(c =>
-      c.type.toLowerCase().includes(query) ||
-      String(c.level).toLowerCase().includes(query)
+      String(c.group || c.type || '').toLowerCase().includes(query) ||
+      String(c.type || '').toLowerCase().includes(query) ||
+      String(c.level).toLowerCase().includes(query) ||
+      String(c.levelLabel || '').toLowerCase().includes(query)
     );
-    renderChestRef(filtered);
+    renderChestRef(filtered, query.length > 0);
   }
 
   // Close modal on overlay click
