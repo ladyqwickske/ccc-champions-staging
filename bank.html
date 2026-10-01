@@ -690,7 +690,7 @@
         <td>${escapeHtml(tx.recipient || '-')}</td>
         <td>${escapeHtml(tx.reference || '-')}</td>
         <td>${escapeHtml(tx.remarks || '-')}</td>
-        <td>${String(tx.reference || '').indexOf('Event Penalty:') === 0 ? '-' : `<button type="button" class="btn secondary edit-transaction-btn" data-sheet-row="${Number(tx.sheetRow)}">Edit</button>`}</td>
+        <td style="white-space:nowrap;"><button type="button" class="btn secondary edit-transaction-btn" data-sheet-row="${Number(tx.sheetRow)}" title="${isEventPenalty(tx) ? 'Change the amount (0 removes it)' : 'Edit'}">Edit</button> <button type="button" class="btn secondary remove-transaction-btn" data-sheet-row="${Number(tx.sheetRow)}" title="Remove">🗑</button></td>
       </tr>`;
     }).join('');
   }
@@ -722,8 +722,8 @@
   function editTransaction(sheetRow) {
     const tx = allTransactionsData.find(item => Number(item.sheetRow) === Number(sheetRow));
     if (!tx) return;
-    if (String(tx.reference || '').indexOf('Event Penalty:') === 0) {
-      showToast('Event penalty transactions must be changed from the event.', 'error');
+    if (isEventPenalty(tx)) {
+      editEventPenalty(tx);
       return;
     }
     editingSheetRow = tx.sheetRow;
@@ -753,6 +753,54 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Event penalties (Reference "Event Penalty: <event>") are changed through the event
+  // (changeAppliedPenalty), so the event's participation and a later Apply stay in step.
+  const EVENT_PENALTY_PREFIX = 'Event Penalty:';
+  function isEventPenalty(tx) { return String(tx.reference || '').indexOf(EVENT_PENALTY_PREFIX) === 0; }
+  function penaltyEventName(tx) { return String(tx.reference || '').slice(EVENT_PENALTY_PREFIX.length).trim(); }
+
+  function afterChange(msg) {
+    showToast(msg || 'Saved.', 'success');
+    loadTransactions();
+    loadMemberBalances();
+  }
+
+  async function changePenalty(tx, amount, status) {
+    try {
+      const r = await callFunction('changeAppliedPenalty', [penaltyEventName(tx), tx.memberName, amount, status || '']);
+      if (!r || !r.success) throw new Error((r && r.message) || 'The penalty could not be changed.');
+      afterChange(r.message);
+    } catch (err) {
+      showToast(err && err.message ? err.message : String(err), 'error');
+    }
+  }
+
+  function editEventPenalty(tx) {
+    const current = Number(tx.amount || 0);
+    const answer = prompt(`New penalty for ${tx.memberName} (event "${penaltyEventName(tx)}").\nCurrent: ${current.toLocaleString('en-US')}. Enter 0 to remove it.`, String(current));
+    if (answer === null) return;
+    const amount = parseFormattedNumber(answer);
+    if (isNaN(amount) || amount < 0) { showToast('Please enter an amount of 0 or more.', 'error'); return; }
+    if (amount === current) return;
+    changePenalty(tx, amount, amount > 0 ? 'Adjusted' : 'Waived');
+  }
+
+  async function removeTransaction(tx) {
+    const amountText = Number(tx.amount || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+    if (isEventPenalty(tx)) {
+      if (!confirm(`Remove the penalty of ${amountText} for ${tx.memberName} (event "${penaltyEventName(tx)}")?\nIt is marked as waived on the event, so applying the event's penalties again keeps it removed.`)) return;
+      changePenalty(tx, 0, 'Waived');
+      return;
+    }
+    if (!confirm(`Remove this ${tx.transactionType || 'transaction'} of ${amountText} for ${tx.memberName}? This cannot be undone.`)) return;
+    try {
+      const msg = await callFunction('deleteBankTransaction', [{ sheetRow: tx.sheetRow, expected: { memberName: tx.memberName, amount: tx.amount } }]);
+      afterChange(msg);
+    } catch (err) {
+      showToast(err && err.message ? err.message : String(err), 'error');
+    }
+  }
+
   function optionHtml(name) { return `<option value="${escapeAttr(name)}">${escapeHtml(name)}</option>`; }
   function statusLabel(status) { return status === 'active' ? 'Active' : (status === 'former' ? 'Former' : 'External'); }
   function formatNumber(value) { return Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
@@ -779,6 +827,11 @@
   document.addEventListener('click', event => {
     const button = event.target.closest('.edit-transaction-btn');
     if (button) editTransaction(button.dataset.sheetRow);
+    const removeButton = event.target.closest('.remove-transaction-btn');
+    if (removeButton) {
+      const tx = allTransactionsData.find(item => Number(item.sheetRow) === Number(removeButton.dataset.sheetRow));
+      if (tx) removeTransaction(tx);
+    }
   });
 </script>
 </body>

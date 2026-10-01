@@ -1371,13 +1371,16 @@
     return `<td style="min-width:170px;"><span style="font-weight:600;color:${status === 'Exempt' || status === 'Waived' ? 'var(--success)' : 'var(--text-muted)'}">${escapeHtml(status || 'Auto')}</span> <button class="btn secondary" style="padding:3px 7px;font-size:0.78em;" onclick="waivePenalty('${escapeAttr(member)}')">Waive</button> <button class="btn secondary" style="padding:3px 7px;font-size:0.78em;" onclick="resetPenalty('${escapeAttr(member)}')">Reset</button></td>`;
   }
 
+  // Save / Waive / Reset for one member: changeAppliedPenalty changes only that member's
+  // penalty (bank row in place, point penalty) once the event's penalties are applied,
+  // and before that saves it and applies the event, as updateEventPenalty did.
   async function savePenalty(memberName, btn) {
     if (!selectedEvent) return;
     const row = btn.closest('tr');
     const input = row ? row.querySelector('.penalty-input') : null;
     const amount = input ? Number(input.value) || 0 : 0;
     try {
-      const result = await callFunction('updateEventPenalty', [selectedEvent.eventName, memberName, amount, 'Adjusted']);
+      const result = await callFunction('changeAppliedPenalty', [selectedEvent.eventName, memberName, amount, 'Adjusted']);
       showToast(result?.message || 'Penalty updated', result?.success ? 'success' : 'error');
       if (result?.success) reloadParticipationForSelectedEvent();
     } catch (err) { showToast('Error: ' + err.message, 'error'); }
@@ -1386,7 +1389,7 @@
   async function waivePenalty(memberName) {
     if (!selectedEvent) return;
     try {
-      const result = await callFunction('updateEventPenalty', [selectedEvent.eventName, memberName, 0, 'Waived']);
+      const result = await callFunction('changeAppliedPenalty', [selectedEvent.eventName, memberName, 0, 'Waived']);
       showToast(result?.message || 'Penalty waived', result?.success ? 'success' : 'error');
       if (result?.success) reloadParticipationForSelectedEvent();
     } catch (err) { showToast('Error: ' + err.message, 'error'); }
@@ -1395,7 +1398,7 @@
   async function resetPenalty(memberName) {
     if (!selectedEvent) return;
     try {
-      const result = await callFunction('updateEventPenalty', [selectedEvent.eventName, memberName, 0, 'Auto']);
+      const result = await callFunction('changeAppliedPenalty', [selectedEvent.eventName, memberName, 0, 'Auto']);
       showToast(result?.message || 'Penalty reset', result?.success ? 'success' : 'error');
       if (result?.success) reloadParticipationForSelectedEvent();
     } catch (err) { showToast('Error: ' + err.message, 'error'); }

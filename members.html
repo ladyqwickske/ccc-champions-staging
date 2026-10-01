@@ -346,6 +346,12 @@
       <button class="btn" onclick="savePointTargets()">💾 Save Point Targets</button>
       <button class="btn secondary" style="margin-left:8px;" onclick="loadPointTargets()">↻ Reload</button>
       <div id="ptStatus" class="status"></div>
+      <h4 style="margin:16px 0 6px;color:var(--primary);">Point penalties in this period</h4>
+      <p style="font-size:0.8em;color:var(--text-muted);margin:0 0 8px;">Applied point penalties are included in the targets above. Until the fix of October 2026, applying a points penalty counted it twice (and once more with every new Apply or edit of the event). A member marked ⚠️ has a target without the penalty above the period target: either an own target you set, or a leftover of that — then correct the target above.</p>
+      <div class="table-container"><table style="font-size:0.85em;text-align:left;">
+        <thead><tr><th style="text-align:left;padding:6px 8px;">Member</th><th style="text-align:left;padding:6px 8px;">Penalties (event)</th><th style="text-align:right;padding:6px 8px;">Target</th><th style="text-align:right;padding:6px 8px;">Without penalty</th><th></th></tr></thead>
+        <tbody id="ptPenaltyBody"><tr><td colspan="5" style="padding:8px;color:var(--text-muted);">Loading…</td></tr></tbody>
+      </table></div>
     </div>
 
     <div id="addMemberTab" class="tab-panel">
@@ -1110,10 +1116,33 @@
     }
   }
 
+  // Point penalties of the period next to the targets (getPointPenaltyCheck).
+  async function loadPointPenaltyCheck(period) {
+    const body = document.getElementById('ptPenaltyBody');
+    if (!body) return;
+    const fmt = (n) => Number(n || 0).toLocaleString();
+    try {
+      const res = await fetch(window.GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getPointPenaltyCheck', periodSource: period }) });
+      const r = await res.json();
+      if (!r || !r.success) throw new Error((r && (r.message || r.error)) || 'Could not load the point penalties');
+      body.innerHTML = r.rows.length ? r.rows.map(row => {
+        const odd = row.withoutPenalty > r.periodDefault;
+        return `<tr style="border-top:1px solid var(--border);"><td style="padding:6px 8px;">${escapeHtml(row.member)}</td>`
+          + `<td style="padding:6px 8px;">${row.events.map(e => `${fmt(e.points)} (${escapeHtml(e.event)})`).join('<br>')}</td>`
+          + `<td style="padding:6px 8px;text-align:right;">${fmt(row.target)}</td>`
+          + `<td style="padding:6px 8px;text-align:right;${odd ? 'color:#ef6c00;font-weight:600;' : ''}">${fmt(row.withoutPenalty)}</td>`
+          + `<td style="padding:6px 8px;">${odd ? `<span title="Higher than the period target (${fmt(r.periodDefault)})">⚠️</span>` : ''}</td></tr>`;
+      }).join('') : '<tr><td colspan="5" style="padding:8px;color:var(--text-muted);">No point penalties in this period.</td></tr>';
+    } catch (err) {
+      body.innerHTML = `<tr><td colspan="5" style="padding:8px;color:var(--danger);">${escapeHtml(err.message)}</td></tr>`;
+    }
+  }
+
   async function loadPointTargets() {
     const container = document.getElementById('ptTargetsList');
     const period = document.getElementById('ptPeriodSelect').value;
     ptCurrentPeriod = period;
+    loadPointPenaltyCheck(period);
     container.innerHTML = '<div style="text-align:center;padding:12px;color:var(--text-muted)">Loading...</div>';
     try {
       const result = await callFunction('getPointTargets', [period]);
