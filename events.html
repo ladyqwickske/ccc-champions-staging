@@ -438,12 +438,18 @@
         </div>
         <div id="genEventTypes" style="display:flex; flex-wrap:wrap; gap:4px 12px;">
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Active Period" checked> Active Period</label>
-          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients" checked> Ancients</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients Tower" checked> Ancients Tower</label>
-          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients Points" checked> Tin Man Points</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients" checked> Ancients</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ancients Points" checked> Ancients Points</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Doomsday Points" checked> Doomsday Points</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Arachne Points" checked> Arachne Points</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ragnarok" checked> Ragnarok</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Ragnarok Points" checked> Ragnarok Points</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Shadow City Points" checked> Shadow City Points</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Hellforge Points" checked> Hellforge Points</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Armageddon Points" checked> Armageddon Points</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Dark Omens Event" checked> Dark Omens Event</label>
+          <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Restoration of Balance" checked> Restoration of Balance</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Olympus" checked> Olympus</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Hermes' Chests" checked> Hermes' Chests</label>
           <label style="font-size:0.85em; color:var(--text); cursor:pointer;"><input type="checkbox" class="gen-type-cb" value="Olympus Tartarus" checked> Olympus Tartarus</label>
@@ -1544,6 +1550,7 @@
         if (result.created && result.created.length > 0) parts.push('✅ Created ' + result.created.length + ': ' + result.created.join(', '));
         if (result.skipped && result.skipped.length > 0) parts.push('⏭️ Skipped ' + result.skipped.length + ' existing');
         if (result.errors && result.errors.length > 0) parts.push('❌ ' + result.errors.length + ' error(s)');
+        if (result.missingTypes && result.missingTypes.length > 0) parts.push('⚠️ Not generated, create these event types first: ' + result.missingTypes.map(escapeHtml).join(', '));
         status.innerHTML = parts.join('<br>') || 'No events to generate in this range.';
         status.style.color = (result.errors && result.errors.length > 0) ? 'var(--danger)' : 'var(--success)';
         loadEvents();
